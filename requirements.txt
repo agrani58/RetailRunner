@@ -1,0 +1,6 @@
+audio-recorder-streamlit==0.0.10
+openai-whisper==20250625
+pip==24.0
+setuptools==65.5.0
+sounddevice==0.5.2
+speechbrain==1.0.3
