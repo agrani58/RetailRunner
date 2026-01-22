@@ -4,11 +4,11 @@ import './App.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-// Configure axios with better error handling
+// Configure axios
 axios.defaults.baseURL = API_BASE_URL;
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
-// Request interceptor for auth tokens
+// Request interceptor
 axios.interceptors.request.use(config => {
   const token = localStorage.getItem('access_token');
   if (token) {
@@ -17,19 +17,16 @@ axios.interceptors.request.use(config => {
   return config;
 });
 
-// Response interceptor for better error handling
+// Response interceptor
 axios.interceptors.response.use(
   response => response,
   error => {
     if (error.response) {
-      // Server responded with error
       return Promise.reject(error);
     } else if (error.request) {
-      // Request made but no response
       console.error('Network error:', error.request);
       return Promise.reject(new Error('Network error. Please check your connection.'));
     } else {
-      // Something else happened
       return Promise.reject(error);
     }
   }
@@ -41,50 +38,101 @@ const extractErrorMessage = (error) => {
     if (typeof data === 'string') return data;
     if (data.detail) {
       if (typeof data.detail === 'string') return data.detail;
-      if (typeof data.detail === 'object') return JSON.stringify(data.detail);
+      if (typeof data.detail === 'object') {
+        if (Array.isArray(data.detail)) {
+          return data.detail.map(err => err.msg || 'Validation error').join(', ');
+        }
+        return JSON.stringify(data.detail);
+      }
     }
-    if (data.message) {
-      if (typeof data.message === 'string') return data.message;
-    }
-    if (data.error) {
-      if (typeof data.error === 'string') return data.error;
-    }
+    if (data.message) return data.message;
+    if (data.error) return data.error;
   }
   return error.message || 'An error occurred';
 };
 
-// Secure storage management
-const getUserEmail = () => {
+// User management - Store last used email SEPARATELY from form data
+const getLastUsedEmail = () => {
   try {
-    return localStorage.getItem('user_email');
+    return localStorage.getItem('last_used_email');
   } catch (e) {
-    console.error('Error getting user email:', e);
+    console.error('Error getting last used email:', e);
     return null;
   }
 };
 
-const setUserEmail = (email) => {
+const setLastUsedEmail = (email) => {
   try {
-    localStorage.setItem('user_email', email);
+    localStorage.setItem('last_used_email', email);
   } catch (e) {
-    console.error('Error saving user email:', e);
+    console.error('Error saving last used email:', e);
   }
 };
 
-const clearUserEmail = () => {
+const getUserData = () => {
   try {
-    localStorage.removeItem('user_email');
+    const data = localStorage.getItem('user_data');
+    return data ? JSON.parse(data) : null;
+  } catch (e) {
+    console.error('Error getting user data:', e);
+    return null;
+  }
+};
+
+const setUserData = (data) => {
+  try {
+    localStorage.setItem('user_data', JSON.stringify(data));
+  } catch (e) {
+    console.error('Error saving user data:', e);
+  }
+};
+
+const clearUserData = () => {
+  try {
     localStorage.removeItem('user_data');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
   } catch (e) {
     console.error('Error clearing user data:', e);
   }
 };
 
-// Get initials for profile picture (simplified)
+// Get initials for profile picture
 const getInitials = (email) => {
-  if (!email) return 'U';
-  const username = email.split('@')[0];
-  return username.charAt(0).toUpperCase();
+  if (!email) return '?';
+  const parts = email.split('@')[0];
+  const nameParts = parts.split(/[._]/);
+  if (nameParts.length >= 2) {
+    return (nameParts[0][0] + nameParts[1][0]).toUpperCase();
+  }
+  return parts[0].toUpperCase();
+};
+
+// Profile Avatar Component
+const ProfileAvatar = ({ email, size = 32 }) => {
+  const initials = getInitials(email);
+  const color = '#00a651'; // Always green
+  
+  return (
+    <div 
+      className="profile-avatar"
+      style={{
+        width: size,
+        height: size,
+        backgroundColor: color,
+        color: 'white',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: size * 0.4,
+        fontWeight: 'bold',
+        marginRight: '10px'
+      }}
+    >
+      {initials}
+    </div>
+  );
 };
 
 // Voice Icon SVG Component
@@ -98,32 +146,9 @@ const VoiceIcon = () => (
   </svg>
 );
 
-// Mic Icon SVG Component for Recording
-const MicIcon = ({ size = 36, color = "white" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 15C13.6569 15 15 13.6569 15 12V6C15 4.34315 13.6569 3 12 3C10.3431 3 9 4.34315 9 6V12C9 13.6569 10.3431 15 12 15Z" 
-          stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M19 12V13C19 15.7614 16.7614 18 14 18H10C7.23858 18 5 15.7614 5 13V12" 
-          stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 18V22" stroke={color} strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
-
-// Check Icon SVG Component
-const CheckIcon = ({ size = 36, color = "white" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 6L9 17L4 12" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
-// Generate random 6-digit number
-const generateRandomNumber = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
-
 // Voice Sample Component for Signup
-const VoiceSampleSignup = ({ onComplete, onCancel }) => {
-  const [challengeText, setChallengeText] = useState('');
+const VoiceSampleSignup = ({ onComplete, onCancel, email }) => {
+  const [challengeString, setChallengeString] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
@@ -136,8 +161,8 @@ const VoiceSampleSignup = ({ onComplete, onCancel }) => {
   const audioStreamRef = useRef(null);
 
   useEffect(() => {
-    // Generate random 6-digit number on component mount
-    setChallengeText(generateRandomNumber());
+    const randomNumber = Math.floor(100000 + Math.random() * 900000).toString();
+    setChallengeString(randomNumber);
   }, []);
 
   const startRecording = async () => {
@@ -200,18 +225,16 @@ const VoiceSampleSignup = ({ onComplete, onCancel }) => {
     setError('');
 
     try {
-      // Store voice sample locally during signup
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64data = reader.result.split(',')[1];
         localStorage.setItem('signup_voice_sample', base64data);
-        localStorage.setItem('signup_challenge_text', challengeText);
-        localStorage.setItem('signup_voice_recorded', 'true');
+        localStorage.setItem('signup_challenge_string', challengeString);
         
         onComplete({
           success: true,
           message: 'Voice sample recorded successfully',
-          challenge_text: challengeText
+          challenge_string: challengeString
         });
       };
       reader.readAsDataURL(audioBlob);
@@ -226,8 +249,8 @@ const VoiceSampleSignup = ({ onComplete, onCancel }) => {
   const reRecord = () => {
     setAudioBlob(null);
     setRecordingTime(0);
-    // Generate new random number for re-recording
-    setChallengeText(generateRandomNumber());
+    const randomNumber = Math.floor(100000 + Math.random() * 900000).toString();
+    setChallengeString(randomNumber);
   };
 
   return (
@@ -237,13 +260,9 @@ const VoiceSampleSignup = ({ onComplete, onCancel }) => {
         
         {error && <div className="error-message">{error}</div>}
         
-        {/* Random Number Challenge Display */}
         <div className="challenge-display">
-          <div className="challenge-number">{challengeText}</div>
+          <div className="challenge-number">{challengeString}</div>
           <p className="instruction">Speak this number clearly</p>
-          <p className="instruction" style={{ fontSize: '12px', color: '#666' }}>
-            This will be used for voice authentication
-          </p>
         </div>
 
         <div className="recording-section">
@@ -261,12 +280,12 @@ const VoiceSampleSignup = ({ onComplete, onCancel }) => {
                   </>
                 ) : audioBlob ? (
                   <>
-                    <CheckIcon size={36} color="white" />
+                    <div style={{ fontSize: '24px' }}>✓</div>
                     <span>Recorded</span>
                   </>
                 ) : (
                   <>
-                    <MicIcon size={36} color="white" />
+                    <div style={{ fontSize: '24px' }}>🎤</div>
                     <span>Record</span>
                   </>
                 )}
@@ -274,7 +293,6 @@ const VoiceSampleSignup = ({ onComplete, onCancel }) => {
             </button>
             {isRecording && (
               <div className="recording-indicator">
-                <div className="pulse-ring"></div>
                 <div className="timer">{recordingTime}s</div>
               </div>
             )}
@@ -311,9 +329,9 @@ const VoiceSampleSignup = ({ onComplete, onCancel }) => {
   );
 };
 
-// Voice Enrollment Component (after account creation)
+// Voice Enrollment Component
 const VoiceEnrollment = ({ onComplete, onCancel, email }) => {
-  const [challengeText, setChallengeText] = useState('');
+  const [challengeString, setChallengeString] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
@@ -326,8 +344,8 @@ const VoiceEnrollment = ({ onComplete, onCancel, email }) => {
   const audioStreamRef = useRef(null);
 
   useEffect(() => {
-    // Generate random 6-digit number
-    setChallengeText(generateRandomNumber());
+    const randomNumber = Math.floor(100000 + Math.random() * 900000).toString();
+    setChallengeString(randomNumber);
   }, []);
 
   const startRecording = async () => {
@@ -392,7 +410,7 @@ const VoiceEnrollment = ({ onComplete, onCancel, email }) => {
     try {
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
-      formData.append('challenge_text', challengeText);
+      formData.append('challenge_string', challengeString);
 
       const response = await axios.post('/voice/enroll/verify', formData, {
         headers: {
@@ -402,6 +420,8 @@ const VoiceEnrollment = ({ onComplete, onCancel, email }) => {
 
       if (response.data.success || response.data.voice_enabled) {
         onComplete(response.data);
+      } else {
+        setError('Enrollment failed');
       }
       
     } catch (err) {
@@ -414,8 +434,8 @@ const VoiceEnrollment = ({ onComplete, onCancel, email }) => {
   const reRecord = () => {
     setAudioBlob(null);
     setRecordingTime(0);
-    // Generate new random number
-    setChallengeText(generateRandomNumber());
+    const randomNumber = Math.floor(100000 + Math.random() * 900000).toString();
+    setChallengeString(randomNumber);
   };
 
   return (
@@ -425,9 +445,8 @@ const VoiceEnrollment = ({ onComplete, onCancel, email }) => {
         
         {error && <div className="error-message">{error}</div>}
         
-        {/* Random Number Challenge Display */}
         <div className="challenge-display">
-          <div className="challenge-number">{challengeText}</div>
+          <div className="challenge-number">{challengeString}</div>
           <p className="instruction">Speak this number clearly</p>
         </div>
 
@@ -446,12 +465,12 @@ const VoiceEnrollment = ({ onComplete, onCancel, email }) => {
                   </>
                 ) : audioBlob ? (
                   <>
-                    <CheckIcon size={36} color="white" />
+                    <div style={{ fontSize: '24px' }}>✓</div>
                     <span>Recorded</span>
                   </>
                 ) : (
                   <>
-                    <MicIcon size={36} color="white" />
+                    <div style={{ fontSize: '24px' }}>🎤</div>
                     <span>Record</span>
                   </>
                 )}
@@ -459,7 +478,6 @@ const VoiceEnrollment = ({ onComplete, onCancel, email }) => {
             </button>
             {isRecording && (
               <div className="recording-indicator">
-                <div className="pulse-ring"></div>
                 <div className="timer">{recordingTime}s</div>
               </div>
             )}
@@ -487,7 +505,7 @@ const VoiceEnrollment = ({ onComplete, onCancel, email }) => {
               onClick={onCancel} 
               className="skip-button"
             >
-              Skip for now
+              Cancel
             </button>
           </div>
         </div>
@@ -496,32 +514,32 @@ const VoiceEnrollment = ({ onComplete, onCancel, email }) => {
   );
 };
 
-// Voice Login Component - Updated with random number challenge
-const VoiceLogin = ({ onSuccess, onCancel, userEmail }) => {
-  const [email, setEmail] = useState(userEmail || '');
-  const [challengeText, setChallengeText] = useState('');
+// Voice Login Component
+const VoiceLogin = ({ onSuccess, onBack, onEnable, onPasswordLogin }) => {
+  const [email, setEmail] = useState(getLastUsedEmail() || '');
+  const [challengeString, setChallengeString] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [step, setStep] = useState(userEmail ? 2 : 1);
+  const [step, setStep] = useState(1);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
   const audioStreamRef = useRef(null);
 
-  // Auto-request challenge if email is available
   useEffect(() => {
-    if (userEmail && step === 2) {
-      requestChallenge();
+    if (email) {
+      checkVoiceEnabled();
     }
-  }, [userEmail, step]);
+  }, [email]);
 
-  const requestChallenge = async () => {
+  const checkVoiceEnabled = async () => {
     if (!email) {
-      setError('Email is required');
+      setError('No email found');
       return;
     }
 
@@ -533,10 +551,23 @@ const VoiceLogin = ({ onSuccess, onCancel, userEmail }) => {
         email: email.trim()
       });
 
-      setChallengeText(response.data.challenge_text);
-      setStep(2);
+      if (response.data.challenge_string) {
+        setChallengeString(response.data.challenge_string);
+        setVoiceEnabled(true);
+        setStep(2);
+      } else {
+        setVoiceEnabled(false);
+        setStep(3);
+      }
     } catch (err) {
-      setError(extractErrorMessage(err));
+      if (err.response && err.response.status === 400 && 
+          err.response.data.detail && 
+          err.response.data.detail.includes('Voice authentication not enabled')) {
+        setVoiceEnabled(false);
+        setStep(3);
+      } else {
+        setError(extractErrorMessage(err));
+      }
     } finally {
       setLoading(false);
     }
@@ -598,6 +629,11 @@ const VoiceLogin = ({ onSuccess, onCancel, userEmail }) => {
       return;
     }
 
+    if (!challengeString) {
+      setError('No challenge received');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -605,7 +641,7 @@ const VoiceLogin = ({ onSuccess, onCancel, userEmail }) => {
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
       formData.append('email', email);
-      formData.append('challenge_text', challengeText);
+      formData.append('challenge_string', challengeString);
 
       const response = await axios.post('/voice/login/verify', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -614,13 +650,13 @@ const VoiceLogin = ({ onSuccess, onCancel, userEmail }) => {
       if (response.data.success) {
         localStorage.setItem('access_token', response.data.access_token);
         localStorage.setItem('refresh_token', response.data.refresh_token);
-        localStorage.setItem('user_data', JSON.stringify({
+        setUserData({
           user_id: response.data.user_id,
           email: response.data.email,
           voice_enabled: true
-        }));
+        });
         
-        setUserEmail(response.data.email);
+        setLastUsedEmail(response.data.email);
         onSuccess(response.data);
       }
       
@@ -636,6 +672,60 @@ const VoiceLogin = ({ onSuccess, onCancel, userEmail }) => {
     setRecordingTime(0);
   };
 
+  const handleEnableVoice = () => {
+    onEnable(email);
+  };
+
+  const handlePasswordLogin = () => {
+    onPasswordLogin(email);
+  };
+
+  if (step === 3) {
+    return (
+      <div className="container">
+        <div className="card">
+          <h2 className="title">Voice Login Not Enabled</h2>
+          
+          <div className="user-profile-header" style={{ marginBottom: '30px' }}>
+            <div className="profile-display">
+              <ProfileAvatar email={email} size={48} />
+              <div className="profile-info">
+                <div className="profile-email">{email}</div>
+                <div className="profile-status">Voice authentication is not enabled for this account</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="button-group">
+            <button 
+              onClick={handleEnableVoice} 
+              className="primary-button"
+            >
+              Enable Voice Authentication
+            </button>
+            
+            <button 
+              onClick={handlePasswordLogin} 
+              className="secondary-button"
+            >
+              Login with Password Instead
+            </button>
+            
+            <div className="account-link-section">
+              <span className="account-link-text">Want to use a different account? </span>
+              <button 
+                onClick={onBack}
+                className="account-link-button"
+              >
+                Go Back
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container">
       <div className="card">
@@ -643,41 +733,27 @@ const VoiceLogin = ({ onSuccess, onCancel, userEmail }) => {
         
         {error && <div className="error-message">{error}</div>}
         
-        {step === 1 ? (
-          <div>
-            <div className="form">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input"
-                disabled={loading}
-                autoComplete="username email"
-              />
-            </div>
-            <div className="button-group">
-              <button 
-                onClick={requestChallenge} 
-                className="primary-button"
-                disabled={loading || !email}
-              >
-                {loading ? 'Loading...' : 'Continue'}
-              </button>
-              <button onClick={onCancel} className="skip-button">
-                Cancel
-              </button>
+        {email && (
+          <div className="user-profile-header">
+            <div className="profile-display">
+              <ProfileAvatar email={email} size={48} />
+              <div className="profile-info">
+                <div className="profile-email">{email}</div>
+                <div className="profile-status">Ready for voice verification</div>
+              </div>
             </div>
           </div>
-        ) : (
+        )}
+        
+        {loading && !challengeString ? (
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <p>Checking voice authentication status...</p>
+          </div>
+        ) : challengeString ? (
           <div>
-            {/* Random Number Challenge Display for Login */}
             <div className="challenge-display">
-              <div className="challenge-number">{challengeText}</div>
+              <div className="challenge-number">{challengeString}</div>
               <p className="instruction">Speak this number clearly</p>
-              <p className="instruction" style={{ fontSize: '12px', color: '#666' }}>
-                Logging in as: {email}
-              </p>
             </div>
 
             <div className="recording-section">
@@ -695,12 +771,12 @@ const VoiceLogin = ({ onSuccess, onCancel, userEmail }) => {
                       </>
                     ) : audioBlob ? (
                       <>
-                        <CheckIcon size={36} color="white" />
+                        <div style={{ fontSize: '24px' }}>✓</div>
                         <span>Recorded</span>
                       </>
                     ) : (
                       <>
-                        <MicIcon size={36} color="white" />
+                        <div style={{ fontSize: '24px' }}>🎤</div>
                         <span>Record</span>
                       </>
                     )}
@@ -708,7 +784,6 @@ const VoiceLogin = ({ onSuccess, onCancel, userEmail }) => {
                 </button>
                 {isRecording && (
                   <div className="recording-indicator">
-                    <div className="pulse-ring"></div>
                     <div className="timer">{recordingTime}s</div>
                   </div>
                 )}
@@ -732,11 +807,22 @@ const VoiceLogin = ({ onSuccess, onCancel, userEmail }) => {
                     Re-record
                   </button>
                 )}
-                <button onClick={() => setStep(1)} className="skip-button">
-                  Use Different Email
-                </button>
+                
+                <div className="account-link-section">
+                  <span className="account-link-text">Not {email}? </span>
+                  <button 
+                    onClick={onBack}
+                    className="account-link-button"
+                  >
+                    Use different account
+                  </button>
+                </div>
               </div>
             </div>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <p>Loading voice authentication...</p>
           </div>
         )}
       </div>
@@ -752,8 +838,9 @@ const App = () => {
   const [showVoiceEnrollment, setShowVoiceEnrollment] = useState(false);
   const [showVoiceLogin, setShowVoiceLogin] = useState(false);
   
+  // Initialize with empty forms, last used email is stored separately
   const [loginData, setLoginData] = useState({ 
-    email: getUserEmail() || '', 
+    email: '', 
     password: '', 
     rememberMe: true 
   });
@@ -767,34 +854,60 @@ const App = () => {
   const [loginError, setLoginError] = useState('');
   const [signupError, setSignupError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
-  const [storedEmail, setStoredEmail] = useState(getUserEmail());
+  const [userInfo, setUserInfo] = useState(getUserData());
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
-    const userData = localStorage.getItem('user_data');
+    const userData = getUserData();
     if (token && userData) {
-      try {
-        const user = JSON.parse(userData);
-        setIsLoggedIn(true);
-        setUserInfo(user);
-        setStoredEmail(user.email);
-        setUserEmail(user.email);
-      } catch {
-        localStorage.clear();
-        clearUserEmail();
-      }
-    }
-    
-    // Check for stored email on load
-    const email = getUserEmail();
-    if (email) {
-      setStoredEmail(email);
+      setIsLoggedIn(true);
+      setUserInfo(userData);
+      // Don't auto-fill login form when logged in
     }
   }, []);
 
+  // Clear form data when switching between login/signup
+  useEffect(() => {
+    if (showSignup) {
+      // Only prefill signup email if coming from login with email
+      if (loginData.email && loginData.email !== getLastUsedEmail()) {
+        setSignupData(prev => ({ ...prev, email: loginData.email }));
+      } else {
+        setSignupData({ 
+          email: '', 
+          password: '', 
+          confirmPassword: '',
+          enableVoice: false
+        });
+      }
+    } else {
+      // When switching to login, only prefill with last used email
+      const lastEmail = getLastUsedEmail() || '';
+      setLoginData(prev => ({ 
+        ...prev, 
+        email: lastEmail,
+        password: '' // Always clear password
+      }));
+    }
+  }, [showSignup, loginData.email]);
+
   const handleSignup = async (e) => {
     e.preventDefault();
+    
+    if (!signupData.email.trim()) {
+      setSignupError('Email is required');
+      return;
+    }
+    
+    if (!signupData.password) {
+      setSignupError('Password is required');
+      return;
+    }
+    
+    if (signupData.password.length < 6) {
+      setSignupError('Password must be at least 6 characters');
+      return;
+    }
     
     if (signupData.password !== signupData.confirmPassword) {
       setSignupError('Passwords do not match');
@@ -805,85 +918,34 @@ const App = () => {
     setSignupError('');
 
     try {
-      // Create account with better error handling
-      const signupResponse = await axios.post('/signup', {
+      await axios.post('/signup', {
         email: signupData.email.trim(),
         password: signupData.password
       });
 
-      // Login to get token
-      const loginResponse = await axios.post('/login', {
-        email: signupData.email.trim(),
-        password: signupData.password
+      // Save the email as last used (for voice login)
+      setLastUsedEmail(signupData.email);
+      
+      // Clear ALL form data after successful signup
+      setSignupData({ 
+        email: '', 
+        password: '', 
+        confirmPassword: '',
+        enableVoice: false
       });
-
-      // Store tokens
-      localStorage.setItem('access_token', loginResponse.data.access_token);
-      localStorage.setItem('refresh_token', loginResponse.data.refresh_token);
-      localStorage.setItem('user_data', JSON.stringify({
-        user_id: loginResponse.data.user_id,
-        email: signupData.email,
-        voice_enabled: false
-      }));
-
-      setUserEmail(signupData.email);
       
-      // Set user info
-      const newUserInfo = {
-        user_id: loginResponse.data.user_id,
-        email: signupData.email,
-        voice_enabled: false
-      };
+      setLoginData({
+        email: signupData.email, // Prefill login email for convenience
+        password: '',
+        rememberMe: true
+      });
       
-      setUserInfo(newUserInfo);
-      setIsLoggedIn(true);
-      setStoredEmail(signupData.email);
-      
-      // Check if voice sample was recorded during signup
-      const voiceSample = localStorage.getItem('signup_voice_sample');
-      const challengeText = localStorage.getItem('signup_challenge_text');
-      
-      if (voiceSample && challengeText) {
-        // Enroll the recorded voice sample
-        try {
-          const formData = new FormData();
-          
-          // Convert base64 to blob
-          const byteCharacters = atob(voiceSample);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const audioBlob = new Blob([byteArray], { type: 'audio/webm' });
-          
-          formData.append('audio', audioBlob, 'recording.webm');
-          formData.append('challenge_text', challengeText);
-
-          const enrollResponse = await axios.post('/voice/enroll/verify', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            }
-          });
-
-          if (enrollResponse.data.success) {
-            setUserInfo(prev => ({ ...prev, voice_enabled: true }));
-            // Clear temporary voice data
-            localStorage.removeItem('signup_voice_sample');
-            localStorage.removeItem('signup_challenge_text');
-            localStorage.removeItem('signup_voice_recorded');
-          }
-        } catch (enrollErr) {
-          console.error('Voice enrollment failed:', enrollErr);
-          // Continue without voice enrollment
-        }
-      }
-      
+      // Switch to login page
       setShowSignup(false);
+      setSignupError('');
       
     } catch (err) {
-      const errorMsg = extractErrorMessage(err);
-      setSignupError(errorMsg || 'Failed to create account. Please try again.');
+      setSignupError(extractErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -891,6 +953,17 @@ const App = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    
+    if (!loginData.email.trim()) {
+      setLoginError('Email is required');
+      return;
+    }
+    
+    if (!loginData.password) {
+      setLoginError('Password is required');
+      return;
+    }
+    
     setLoading(true);
     setLoginError('');
     
@@ -902,20 +975,27 @@ const App = () => {
       
       localStorage.setItem('access_token', response.data.access_token);
       localStorage.setItem('refresh_token', response.data.refresh_token);
-      localStorage.setItem('user_data', JSON.stringify({
+      setUserData({
         user_id: response.data.user_id,
         email: response.data.email,
         voice_enabled: response.data.voice_enabled
-      }));
+      });
       
-      setUserEmail(response.data.email);
-      setStoredEmail(response.data.email);
+      // Save email as last used (for voice login)
+      setLastUsedEmail(response.data.email);
       
       setIsLoggedIn(true);
       setUserInfo({
         user_id: response.data.user_id,
         email: response.data.email,
         voice_enabled: response.data.voice_enabled
+      });
+      
+      // Clear login form after successful login
+      setLoginData({
+        email: '', // Clear form
+        password: '',
+        rememberMe: true
       });
       
     } catch (err) {
@@ -926,8 +1006,7 @@ const App = () => {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
-    clearUserEmail();
+    clearUserData();
     setIsLoggedIn(false);
     setUserInfo(null);
     setShowVoiceSample(false);
@@ -935,13 +1014,20 @@ const App = () => {
     setShowVoiceLogin(false);
     setLoginError('');
     setSignupError('');
-    setStoredEmail('');
+    // Don't clear last used email - keep it for voice login convenience
     setLoginData({ email: '', password: '', rememberMe: true });
   };
 
   const handleVoiceEnrollmentComplete = (data) => {
     setShowVoiceEnrollment(false);
-    setUserInfo(prev => ({ ...prev, voice_enabled: true }));
+    if (userInfo) {
+      setUserInfo({ ...userInfo, voice_enabled: true });
+    }
+    
+    const currentUserData = getUserData();
+    if (currentUserData) {
+      setUserData({ ...currentUserData, voice_enabled: true });
+    }
   };
 
   const handleVoiceLoginSuccess = (data) => {
@@ -951,8 +1037,7 @@ const App = () => {
       email: data.email,
       voice_enabled: true
     });
-    setStoredEmail(data.email);
-    setUserEmail(data.email);
+    setLastUsedEmail(data.email);
     setShowVoiceLogin(false);
   };
 
@@ -962,21 +1047,61 @@ const App = () => {
   };
 
   const handleVoiceLoginClick = () => {
-    // Use stored email if available, otherwise use login form email
-    const emailToUse = storedEmail || loginData.email;
-    
-    if (!emailToUse) {
-      setLoginError('Please enter your email first');
+    const lastEmail = getLastUsedEmail();
+    if (!lastEmail) {
+      setLoginError('No account found. Please sign up or login first.');
       return;
     }
     
-    setUserEmail(emailToUse);
-    setStoredEmail(emailToUse);
     setShowVoiceLogin(true);
   };
 
   const handleVoiceSampleClick = () => {
     setShowVoiceSample(true);
+  };
+
+  const handleEnableVoiceForAccount = (email) => {
+    // Set login data and redirect to password login
+    setLoginData({ 
+      email: email, 
+      password: '', // Don't prefill password
+      rememberMe: true 
+    });
+    setShowVoiceLogin(false);
+    setShowSignup(false);
+    setLoginError('Please login with password first to enable voice authentication');
+  };
+
+  const handlePasswordLoginForAccount = (email) => {
+    setLoginData({ 
+      email: email, 
+      password: '', // Don't prefill password
+      rememberMe: true 
+    });
+    setShowVoiceLogin(false);
+    setShowSignup(false);
+  };
+
+  const toggleSignup = () => {
+    setShowSignup(!showSignup);
+    // Clear errors when switching
+    setLoginError('');
+    setSignupError('');
+    
+    if (!showSignup) {
+      // When going to signup from login, prefill with login email if available
+      if (loginData.email) {
+        setSignupData(prev => ({ ...prev, email: loginData.email }));
+      }
+    } else {
+      // When going back to login from signup, prefill with last used email
+      const lastEmail = getLastUsedEmail() || '';
+      setLoginData(prev => ({ 
+        ...prev, 
+        email: lastEmail,
+        password: '' // Always clear password
+      }));
+    }
   };
 
   if (showVoiceSample) {
@@ -990,15 +1115,16 @@ const App = () => {
     return <VoiceEnrollment 
       onComplete={handleVoiceEnrollmentComplete} 
       onCancel={() => setShowVoiceEnrollment(false)}
-      email={userInfo?.email}
+      email={userInfo?.email || getLastUsedEmail() || ''}
     />;
   }
 
   if (showVoiceLogin) {
     return <VoiceLogin 
       onSuccess={handleVoiceLoginSuccess} 
-      onCancel={() => setShowVoiceLogin(false)}
-      userEmail={storedEmail}
+      onBack={() => setShowVoiceLogin(false)}
+      onEnable={handleEnableVoiceForAccount}
+      onPasswordLogin={handlePasswordLoginForAccount}
     />;
   }
 
@@ -1009,13 +1135,19 @@ const App = () => {
           <h2 className="title">Welcome!</h2>
           
           <div className="user-info">
-            <p><strong>Email:</strong> {userInfo.email}</p>
-            <p>
-              <strong>Voice Auth:</strong> 
-              <span className={userInfo.voice_enabled ? 'enabled' : 'disabled'}>
-                {userInfo.voice_enabled ? 'ENABLED' : 'DISABLED'}
-              </span>
-            </p>
+            <div className="profile-display" style={{ marginBottom: '15px' }}>
+              <ProfileAvatar email={userInfo.email} size={60} />
+              <div className="profile-info">
+                <div className="profile-email" style={{ fontSize: '18px', fontWeight: '600' }}>
+                  {userInfo.email}
+                </div>
+                <div className="profile-status">
+                  <span className={userInfo.voice_enabled ? 'enabled' : 'disabled'}>
+                    Voice Auth: {userInfo.voice_enabled ? 'ENABLED' : 'DISABLED'}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div className="button-group">
@@ -1028,10 +1160,7 @@ const App = () => {
               </button>
             ) : (
               <button 
-                onClick={() => {
-                  setStoredEmail(userInfo.email);
-                  setShowVoiceLogin(true);
-                }} 
+                onClick={handleVoiceLoginClick} 
                 className="secondary-button"
               >
                 Test Voice Login
@@ -1058,9 +1187,12 @@ const App = () => {
             <input 
               className="input" 
               type="email" 
-              placeholder="Email" 
+              placeholder="Email (e.g., user@example.com)" 
               value={signupData.email} 
-              onChange={e => setSignupData({...signupData, email: e.target.value})} 
+              onChange={e => {
+                setSignupData({...signupData, email: e.target.value});
+                setSignupError('');
+              }} 
               required 
               autoComplete="username email"
             />
@@ -1091,12 +1223,8 @@ const App = () => {
                 {loading ? 'Creating...' : 'Create Account'}
               </button>
               
-              {/* Separator Line */}
-              <div className="button-separator">
-               
-              </div>
+              <div className="button-separator"></div>
               
-              {/* Centered Voice Enable Option */}
               <div className="voice-login-wrapper">
                 <div 
                   className={`voice-login-option ${signupData.enableVoice ? 'selected' : ''}`}
@@ -1111,18 +1239,14 @@ const App = () => {
                 </div>
               </div>
               
-              {/* Account Link */}
               <div className="account-link-section">
-                <span className="account-link-text">Have an account? </span>
+                <span className="account-link-text">Already have an account? </span>
                 <button 
                   type="button"
-                  onClick={() => {
-                    setShowSignup(false);
-                    setSignupError('');
-                  }}
+                  onClick={toggleSignup}
                   className="account-link-button"
                 >
-                  Login
+                  Go Back to Login
                 </button>
               </div>
             </div>
@@ -1142,11 +1266,12 @@ const App = () => {
           <input 
             className="input" 
             type="email" 
-            placeholder="Email" 
+            placeholder="Email (e.g., user@example.com)" 
             value={loginData.email} 
             onChange={e => {
               setLoginData({...loginData, email: e.target.value});
-              setUserEmail(e.target.value);
+              setLoginError('');
+              // Don't save as last used while typing
             }} 
             required 
             autoComplete="username email"
@@ -1172,7 +1297,7 @@ const App = () => {
                 onChange={e => {
                   setLoginData({...loginData, rememberMe: e.target.checked});
                   if (e.target.checked && loginData.email) {
-                    setUserEmail(loginData.email);
+                    setLastUsedEmail(loginData.email);
                   }
                 }} 
               />
@@ -1185,12 +1310,8 @@ const App = () => {
               {loading ? 'Logging in...' : 'Login'}
             </button>
             
-            {/* Separator Line */}
-            <div className="button-separator">
-              
-            </div>
+            <div className="button-separator"></div>
             
-            {/* Centered Voice Login Option */}
             <div className="voice-login-wrapper">
               <div 
                 className="voice-login-option"
@@ -1205,15 +1326,11 @@ const App = () => {
               </div>
             </div>
             
-            {/* Account Link */}
             <div className="account-link-section">
               <span className="account-link-text">Don't have an account? </span>
               <button 
                 type="button"
-                onClick={() => {
-                  setShowSignup(true);
-                  setLoginError('');
-                }}
+                onClick={toggleSignup}
                 className="account-link-button"
               >
                 Create!
