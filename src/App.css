@@ -1,0 +1,613 @@
+:root {
+  --primary-green: #00a651;
+  --error-red: #ff3333;
+  --light-gray: #f5f5f5;
+  --medium-gray: #ddd;
+  --white: #ffffff;
+  --shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--light-gray);
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 30px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--shadow);
+}
+
+.title {
+  color: var(--primary-green);
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 24px;
+}
+
+.form {
+  margin-bottom: 20px;
+}
+
+.input {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 15px;
+  border: 2px solid var(--medium-gray);
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary-green);
+}
+
+.error-message {
+  color: var(--error-red);
+  text-align: center;
+  margin: 10px 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.checkbox {
+  accent-color: var(--primary-green);
+  width: 16px;
+  height: 16px;
+  margin: 0 0 0 4px;
+}
+
+/* Button Group with Separator */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.button-separator {
+  position: relative;
+  text-align: center;
+}
+
+.button-separator::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #eee;
+}
+
+.button-separator span {
+  position: relative;
+  background: var(--white);
+  padding: 0 15px;
+  color: #666;
+  font-size: 14px;
+  z-index: 2;
+}
+
+/* Centered Voice Login Option */
+.voice-login-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.voice-login-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  width: auto;
+  justify-content: center;
+}
+
+.voice-login-option:hover {
+  background: rgba(0, 166, 81, 0.05);
+}
+
+.voice-login-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.voice-login-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.voice-login-text {
+  font-size: 16px;
+  color: var(--primary-green);
+  font-weight: 500;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.voice-login-text::after {
+  content: "→";
+  font-size: 18px;
+  margin-left: 5px;
+  transition: transform 0.2s ease;
+}
+
+.voice-login-option:hover .voice-login-text::after {
+  transform: translateX(3px);
+}
+
+/* For Signup - Voice Enable Option */
+.voice-enable-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 15px;
+  margin: 15px 0;
+  background: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.voice-enable-option:hover {
+  background: #f0f0f0;
+  border-color: var(--primary-green);
+}
+
+.voice-enable-option.selected {
+  background: #e8f5e9;
+  border-color: var(--primary-green);
+  border-width: 2px;
+}
+
+.voice-enable-option.selected .voice-login-icon {
+  background: #007a3d;
+}
+
+.voice-enable-option.selected .voice-login-text {
+  color: #007a3d;
+}
+
+/* Signup Voice Section */
+.signup-voice-section {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.signup-voice-label {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+/* Buttons */
+.primary-button,
+.secondary-button,
+.submit-button,
+.re-record-button,
+.cancel-button,
+.logout-button,
+.skip-button {
+  width: 100%;
+  padding: 16px;
+  border-radius: 6px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.primary-button {
+  background: var(--primary-green);
+  color: var(--white);
+}
+
+.primary-button:hover {
+  background: #007a3d;
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--primary-green);
+}
+
+.secondary-button {
+  background: var(--white);
+  color: var(--primary-green);
+  border: 2px solid var(--primary-green);
+}
+
+.secondary-button:hover {
+  background: rgba(0, 166, 81, 0.05);
+}
+
+.submit-button {
+  background: var(--primary-green);
+  color: var(--white);
+}
+
+.submit-button:hover {
+  background: #007a3d;
+}
+
+.re-record-button {
+  background: #666;
+  color: var(--white);
+  margin-top: 10px;
+}
+
+.re-record-button:hover {
+  background: #555;
+}
+
+.cancel-button {
+  background: var(--white);
+  color: #666;
+  border: 2px solid #666;
+}
+
+.cancel-button:hover {
+  background: #f5f5f5;
+}
+
+/* Skip Button - Styled as text link */
+.skip-button {
+  background: transparent;
+  color: #666;
+  border: none;
+  padding: 12px;
+  font-weight: 400;
+  text-decoration: underline;
+}
+
+.skip-button:hover {
+  color: #333;
+  background: transparent;
+  text-decoration: none;
+}
+
+.logout-button {
+  background: #ff6b00;
+  color: var(--white);
+}
+
+.logout-button:hover {
+  background: #e55a00;
+}
+
+/* Challenge Display */
+.challenge-display {
+  text-align: center;
+  margin: 20px 0;
+  padding: 20px;
+  background: var(--white);
+  border-radius: 10px;
+  border: 2px solid #e8f5e8;
+}
+
+.challenge-number {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--primary-green);
+  letter-spacing: 8px;
+  font-family: 'Courier New', monospace;
+  margin: 10px 0;
+}
+
+.instruction {
+  color: #666;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Recording Section */
+.recording-section {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.record-button-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.record-button {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: var(--primary-green);
+  border: none;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.record-button:hover {
+  background: #007a3d;
+  transform: scale(1.05);
+}
+
+.record-button.recording {
+  background: var(--error-red);
+}
+
+.record-button.recording:hover {
+  background: #cc0000;
+}
+
+.button-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Remove emoji icons */
+.mic-icon,
+.check-icon {
+  display: none;
+}
+
+.recording-dot {
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.recording-indicator {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pulse-ring {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border: 2px solid var(--error-red);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.timer {
+  position: absolute;
+  top: 160px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--error-red);
+  font-family: 'Courier New', monospace;
+}
+
+/* User Info */
+.user-info {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.user-info p {
+  margin: 10px 0;
+  font-size: 15px;
+}
+
+.user-info .enabled {
+  color: var(--primary-green);
+  margin-left: 10px;
+  font-weight: 600;
+}
+
+.user-info .disabled {
+  color: #ff6b00;
+  margin-left: 10px;
+  font-weight: 600;
+}
+
+/* Profile Styles */
+.user-profile-header {
+  margin: 0 0 20px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+}
+
+.profile-display {
+  display: flex;
+  align-items: center;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-email {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.profile-status {
+  font-size: 13px;
+  color: #666;
+}
+
+.profile-avatar {
+  flex-shrink: 0;
+}
+
+
+/* Account Link Section */
+.account-link-section {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.account-link-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.account-link-button {
+  background: none;
+  border: none;
+  color: var(--primary-green);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 5px;
+  text-decoration: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.account-link-button:hover {
+  color: #007a3d;
+  text-decoration: underline;
+}
+
+/* Remove old secondary button styles for account links */
+.button-group .secondary-button {
+  display: none;
+}
+
+/* Security: Prevent form data from being visible in devtools */
+input[type="password"] {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: normal;
+}
+
+/* Security: Prevent autofill styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #333 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+@media (max-width: 480px) {
+  .card { padding: 20px; }
+  .title { font-size: 20px; }
+  .challenge-number { 
+    font-size: 36px; 
+    letter-spacing: 6px;
+  }
+  .record-button { 
+    width: 120px; 
+    height: 120px; 
+  }
+  .timer { top: 140px; }
+  .voice-login-icon {
+    width: 36px;
+    height: 36px;
+  }
+  .voice-login-text {
+    font-size: 15px;
+  }
+  .button-separator span {
+    font-size: 12px;
+    padding: 0 0px;
+  }
+}
