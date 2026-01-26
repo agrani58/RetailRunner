@@ -1,4 +1,4 @@
-# backend/auth/routes.py (updated signup endpoint to handle real users)
+# backend\auth\routes.py
 from fastapi import APIRouter, HTTPException, Depends, Body
 from fastapi.security import HTTPBearer
 import hashlib
@@ -28,6 +28,7 @@ from voice.models import VoiceEmbeddingModel
 from voice.processor import AudioProcessor
 from voice.speech_verifier import speech_verifier
 
+# Define router FIRST
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 security = HTTPBearer()
 embedding_model = VoiceEmbeddingModel()
@@ -42,109 +43,139 @@ class SignupWithVoiceRequest(BaseModel):
 
 @router.post("/signup")
 def signup(user_data: SignupWithVoiceRequest = Body(...)):
-    """Create new user with optional voice sample and strict speech verification"""
+    """Create new user with STRICT speech verification BEFORE enabling voice"""
     print(f"SIGNUP: Attempting to create user with email: {user_data.email}")
     
-    # Create user first
-    user = create_user(user_data.email, user_data.password)
-    if not user:
-        raise HTTPException(status_code=400, detail="Email already exists")
+    # Validate request
+    if user_data.voice_sample and not user_data.challenge_text:
+        raise HTTPException(
+            status_code=400, 
+            detail="Challenge text is required when providing voice sample"
+        )
     
-    print(f"SIGNUP: User created successfully: {user}")
+    if user_data.challenge_text and not user_data.voice_sample:
+        raise HTTPException(
+            status_code=400, 
+            detail="Voice sample is required with challenge text"
+        )
     
-    result = {
-        "message": "Account created successfully",
-        "email": user['email'],
-        "user_id": user['id'],
-        "voice_enabled": False,
-        "speech_verified": False
-    }
-    
-    # If voice sample provided, process it with strict verification
-    if user_data.voice_sample and user_data.challenge_text:
-        print(f"SIGNUP: Processing voice sample for user_id: {user['id']}")
-        print(f"SIGNUP: Challenge text: {user_data.challenge_text}")
+    try:
+        # Create user first
+        user = create_user(user_data.email, user_data.password)
+        if not user:
+            print(f"SIGNUP: User already exists: {user_data.email}")
+            raise HTTPException(status_code=400, detail="Email already exists")
         
-        try:
-            # Decode base64 audio
-            audio_bytes = base64.b64decode(user_data.voice_sample)
-            print(f"SIGNUP: Audio bytes decoded, length: {len(audio_bytes)}")
-            
-            # Validate recording and get audio path
-            valid, message, audio_path = processor.validate_recording(audio_bytes)
-            if not valid:
-                result["voice_message"] = f"Audio validation failed: {message}"
-                result["speech_verified"] = False
-                return result
+        print(f"SIGNUP: User created successfully: {user}")
+        
+        result = {
+            "message": "Account created successfully",
+            "email": user['email'],
+            "user_id": user['id'],
+            "voice_enabled": False,
+            "speech_verified": False,
+            "voice_message": None
+        }
+        
+        # If voice sample provided, process it with STRICT verification
+        if user_data.voice_sample and user_data.challenge_text:
+            print(f"SIGNUP: Processing voice sample for user_id: {user['id']}")
+            print(f"SIGNUP: Challenge text: {user_data.challenge_text}")
             
             try:
-                # STEP 1: Strict speech verification using shared speech_verifier
-                print(f"SIGNUP: Starting speech verification...")
-                is_correct_speech, spoken_text, speech_message = speech_verifier.verify_challenge_speech(
-                    audio_path, user_data.challenge_text
-                )
+                # Decode base64 audio
+                audio_bytes = base64.b64decode(user_data.voice_sample)
+                print(f"SIGNUP: Audio bytes decoded, length: {len(audio_bytes)}")
                 
-                print(f"SIGNUP DEBUG: Is correct: {is_correct_speech}")
-                print(f"SIGNUP DEBUG: Spoken text: '{spoken_text}'")
-                print(f"SIGNUP DEBUG: Message: {speech_message}")
-                
-                if not is_correct_speech:
-                    result["voice_message"] = f"Speech verification failed: {speech_message}"
-                    result["speech_verified"] = False
-                    return result
-                
-                print(f"SIGNUP: Speech verification PASSED!")
-                
-                # STEP 2: Create embedding
-                print(f"SIGNUP: Creating voice embedding...")
-                embedding = embedding_model.create_embedding(audio_path)
-                
-                if embedding:
-                    print(f"SIGNUP: Embedding created, length: {len(embedding)}")
+                # Validate recording and get audio path
+                valid, message, audio_path = processor.validate_recording(audio_bytes)
+                if not valid:
+                    raise HTTPException(
+                        status_code=400, 
                     
-                    # Save voice profile
-                    print(f"SIGNUP: Saving voice profile...")
-                    if save_voice_profile(user['id'], embedding):
-                        print(f"SIGNUP: Voice profile saved successfully")
+                    )
+                
+                try:
+                    # STEP 1: STRICT speech verification using shared speech_verifier
+                    print(f"SIGNUP: Starting STRICT speech verification...")
+                    is_correct_speech, spoken_text, speech_message = speech_verifier.verify_challenge_speech(
+                        audio_path, user_data.challenge_text
+                    )
+                    
+                    print(f"SIGNUP DEBUG: Is correct: {is_correct_speech}")
+                    print(f"SIGNUP DEBUG: Spoken text: '{spoken_text}'")
+                    print(f"SIGNUP DEBUG: Message: {speech_message}")
+                    
+                    if not is_correct_speech:
+                        # Create user but voice is NOT enabled
+                        result["voice_message"] = f"Speech verification failed: {speech_message}"
+                        result["speech_verified"] = False
+                        result["voice_enabled"] = False
+                        print(f"SIGNUP: Speech verification FAILED - voice NOT enabled")
+                        return result
+                    
+                    print(f"SIGNUP: Speech verification PASSED!")
+                    
+                    # STEP 2: Create embedding (only if speech is correct)
+                    print(f"SIGNUP: Creating voice embedding...")
+                    embedding = embedding_model.create_embedding(audio_path)
+                    
+                    if embedding:
+                        print(f"SIGNUP: Embedding created, length: {len(embedding)}")
                         
-                        # Enable voice auth
-                        print(f"SIGNUP: Enabling voice auth...")
-                        enabled_user = enable_voice_auth(user['id'])
-                        if enabled_user:
-                            print(f"SIGNUP: Voice auth enabled successfully")
-                            result["voice_enabled"] = True
-                            result["voice_message"] = "Voice authentication enabled successfully"
-                            result["speech_verified"] = True
-                            result["spoken_text"] = spoken_text
+                        # Save voice profile
+                        print(f"SIGNUP: Saving voice profile...")
+                        if save_voice_profile(user['id'], embedding):
+                            print(f"SIGNUP: Voice profile saved successfully")
+                            
+                            # Enable voice auth
+                            print(f"SIGNUP: Enabling voice auth...")
+                            enabled_user = enable_voice_auth(user['id'])
+                            if enabled_user:
+                                print(f"SIGNUP: Voice auth enabled successfully")
+                                result["voice_enabled"] = True
+                                result["speech_verified"] = True
+                                result["voice_message"] = "Voice authentication enabled successfully"
+                            else:
+                                print(f"SIGNUP: Failed to enable voice auth")
+                                result["voice_message"] = "Voice profile saved but failed to enable voice authentication"
+                                result["speech_verified"] = True
                         else:
-                            print(f"SIGNUP: Failed to enable voice auth")
-                            result["voice_message"] = "Voice profile saved but failed to enable voice authentication"
+                            print(f"SIGNUP: Failed to save voice profile")
+                            result["voice_message"] = "Failed to save voice profile"
                             result["speech_verified"] = True
                     else:
-                        print(f"SIGNUP: Failed to save voice profile")
-                        result["voice_message"] = "Failed to save voice profile"
-                        result["speech_verified"] = True  # Speech was correct
-                else:
-                    print(f"SIGNUP: Failed to create voice embedding")
-                    result["voice_message"] = "Failed to create voice embedding"
-                    result["speech_verified"] = True  # Speech was correct
+                        print(f"SIGNUP: Failed to create voice embedding")
+                        result["voice_message"] = "Failed to create voice embedding"
+                        result["speech_verified"] = True
+                        
+                finally:
+                    # Clean up temp file
+                    if audio_path and os.path.exists(audio_path):
+                        processor.cleanup(audio_path)
                     
-            finally:
-                # Clean up temp file
-                if audio_path and os.path.exists(audio_path):
-                    processor.cleanup(audio_path)
-                
-        except Exception as e:
-            print(f"SIGNUP ERROR: {e}")
-            import traceback
-            traceback.print_exc()
-            result["voice_message"] = f"Failed to process voice sample: {str(e)}"
-            result["speech_verified"] = False
-    else:
-        result["voice_message"] = "No voice sample provided"
-    
-    print(f"SIGNUP: Final result: {result}")
-    return result
+            except HTTPException as http_exc:
+                raise http_exc
+            except Exception as e:
+                print(f"SIGNUP ERROR: {e}")
+                import traceback
+                traceback.print_exc()
+                result["voice_message"] = f"Failed to process voice sample: {str(e)}"
+        else:
+            result["voice_message"] = "No voice sample provided"
+        
+        print(f"SIGNUP: Final result: {result}")
+        return result
+        
+    except HTTPException as http_exc:
+        # Re-raise HTTP exceptions
+        raise http_exc
+    except Exception as e:
+        print(f"SIGNUP UNEXPECTED ERROR: {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Internal server error: {str(e)}"
+        )
 
 @router.post("/login", response_model=auth_schemas.TokenResponse)
 def login(login_data: auth_schemas.LoginRequest):

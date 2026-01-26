@@ -1,4 +1,4 @@
-# backend/voice/routes.py (complete fixed version)
+# \backend\voice\routes.py
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form, Body, Header
 import base64
 import os
@@ -30,6 +30,7 @@ from database.operations import (
 from auth.auth_utils import create_access_token, create_refresh_token
 from database.operations import create_refresh_token as db_create_refresh_token
 
+# Define router FIRST
 router = APIRouter(prefix="/voice", tags=["Voice Authentication"])
 processor = AudioProcessor()
 embedding_model = VoiceEmbeddingModel()
@@ -42,7 +43,6 @@ class VoiceLoginRequest(BaseModel):
     audio_data: str
     challenge_text: str
 
-# Add missing endpoints that were referenced
 @router.get("/enroll/challenge")
 def enroll_challenge(current_user: dict = Depends(get_current_user)):
     """Get challenge for voice enrollment"""
@@ -135,7 +135,7 @@ async def verify_enrollment(
         if audio_path and os.path.exists(audio_path):
             processor.cleanup(audio_path)
 
-@router.post("/login/challenge")
+@router.get("/login/challenge")  # CHANGED from POST to GET
 def login_challenge(email: str):
     """Get challenge for voice login"""
     # Clean email
@@ -287,6 +287,7 @@ def update_profile_challenge(current_user: dict = Depends(get_current_user)):
     if not current_user.get('voice_enabled', False):
         raise HTTPException(status_code=400, detail="Voice authentication not enabled. Enable it first.")
     
+    # Generate new challenge
     challenge_text = security_manager.generate_challenge()
     challenge = create_challenge(current_user['id'], challenge_text)
     
@@ -384,3 +385,55 @@ def get_stats(current_user: dict = Depends(get_current_user)):
         "voice_enabled": current_user.get('voice_enabled', False),
         "security_status": security_status
     }
+
+@router.post("/verify/challenge-speech")
+async def verify_challenge_speech(
+    audio: UploadFile = File(...),
+    challenge_text: str = Form(...),
+    email: Optional[str] = Form(None)  # Optional for signup
+):
+    """
+    Verify that audio contains the exact challenge text.
+    Used for real-time validation during signup.
+    """
+    audio_bytes = await audio.read()
+    valid, message, audio_path = processor.validate_recording(audio_bytes)
+    
+    if not valid:
+        raise HTTPException(status_code=400, detail=message)
+    
+    try:
+        # Step 1: Verify speech matches challenge EXACTLY
+        is_correct_speech, spoken_text, speech_message = speech_verifier.verify_challenge_speech(
+            audio_path, challenge_text
+        )
+        
+        if not is_correct_speech:
+            raise HTTPException(status_code=400, detail=speech_message)
+        
+        # Step 2: Validate audio quality
+        is_quality_ok, quality_message = audio_validator.validate(audio_path)
+        if not is_quality_ok:
+            raise HTTPException(status_code=400, detail=quality_message)
+        
+        # Step 3: Create embedding for quality check (but don't save it yet)
+        embedding = embedding_model.create_embedding(audio_path)
+        
+        if not embedding:
+            raise HTTPException(status_code=500, detail="Failed to create voice embedding")
+        
+        # Return success with embedding for potential later use
+        return {
+            "success": True,
+            "message": "Speech verification successful",
+            "spoken_text": spoken_text,
+            "embedding_created": True
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error in challenge speech verification: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+    finally:
+        if audio_path and os.path.exists(audio_path):
+            processor.cleanup(audio_path)

@@ -18,7 +18,10 @@ def create_user(email: str, password: str):
     cur = conn.cursor()
     
     try:
+        # Normalize email to lowercase
+        email = email.strip().lower()
         print(f"DEBUG: Checking if user exists: {email}")
+        
         cur.execute("SELECT id FROM users WHERE email = %s", (email,))
         if cur.fetchone():
             print(f"DEBUG: User already exists: {email}")
@@ -38,6 +41,28 @@ def create_user(email: str, password: str):
     except Exception as e:
         print(f"ERROR creating user: {e}")
         conn.rollback()
+        return None
+    finally:
+        cur.close()
+        conn.close()
+
+# Update get_user_by_email function
+def get_user_by_email(email: str):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+        # Normalize email to lowercase
+        email = email.strip().lower()
+        cur.execute("""
+            SELECT id, email, password_hash, voice_enabled, created_at
+            FROM users WHERE email = %s
+        """, (email,))
+        
+        user = cur.fetchone()
+        return dict(user) if user else None
+    except Exception as e:
+        print(f"ERROR getting user by email: {e}")
         return None
     finally:
         cur.close()
@@ -250,11 +275,32 @@ def create_challenge(user_id: int, challenge_text: str):
         cur.execute("DELETE FROM voice_challenges WHERE expires_at < NOW()")
         
         expires_at = datetime.now() + timedelta(minutes=5)
+        
+        # Check if user already has an unused challenge
         cur.execute("""
-            INSERT INTO voice_challenges (user_id, challenge_text, expires_at)
-            VALUES (%s, %s, %s)
-            RETURNING id, challenge_text, expires_at
-        """, (user_id, challenge_text, expires_at))
+            SELECT id FROM voice_challenges 
+            WHERE user_id = %s AND used = FALSE AND expires_at > NOW()
+        """, (user_id,))
+        
+        existing_challenge = cur.fetchone()
+        
+        if existing_challenge:
+            # Update existing challenge
+            print(f"DEBUG: Updating existing challenge for user_id: {user_id}")
+            cur.execute("""
+                UPDATE voice_challenges 
+                SET challenge_text = %s, expires_at = %s, used = FALSE
+                WHERE id = %s
+                RETURNING id, challenge_text, expires_at
+            """, (challenge_text, expires_at, existing_challenge['id']))
+        else:
+            # Insert new challenge
+            print(f"DEBUG: Creating new challenge for user_id: {user_id}")
+            cur.execute("""
+                INSERT INTO voice_challenges (user_id, challenge_text, expires_at)
+                VALUES (%s, %s, %s)
+                RETURNING id, challenge_text, expires_at
+            """, (user_id, challenge_text, expires_at))
         
         challenge = cur.fetchone()
         conn.commit()
@@ -266,25 +312,43 @@ def create_challenge(user_id: int, challenge_text: str):
     finally:
         cur.close()
         conn.close()
-
+        
 def validate_challenge(user_id: int, challenge_text: str):
     conn = get_db_connection()
     cur = conn.cursor()
     
     try:
+        # First, clean all expired challenges for this user
         cur.execute("""
-            UPDATE voice_challenges 
-            SET used = TRUE
+            DELETE FROM voice_challenges 
+            WHERE user_id = %s AND expires_at < NOW()
+        """, (user_id,))
+        
+        # Now try to validate the current challenge
+        cur.execute("""
+            SELECT id FROM voice_challenges 
             WHERE user_id = %s 
             AND challenge_text = %s 
             AND used = FALSE 
             AND expires_at > NOW()
-            RETURNING id
+            LIMIT 1
         """, (user_id, challenge_text))
         
         challenge = cur.fetchone()
-        conn.commit()
-        return bool(challenge)
+        
+        if challenge:
+            # Mark challenge as used
+            cur.execute("""
+                UPDATE voice_challenges 
+                SET used = TRUE 
+                WHERE id = %s
+            """, (challenge['id'],))
+            conn.commit()
+            return True
+        else:
+            conn.commit()
+            return False
+            
     except Exception as e:
         print(f"ERROR validating challenge: {e}")
         conn.rollback()
