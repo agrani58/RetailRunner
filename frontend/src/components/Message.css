@@ -1,0 +1,146 @@
+.message {
+  display: flex;
+  gap: 12px;
+  padding: 20px;
+}
+
+.bot-message {
+  background: rgba(64, 65, 79, 0.5);
+  border-radius: 8px;
+}
+
+.user-message {
+  border-radius: 8px;
+}
+
+.avatar {
+  flex-shrink: 0;
+}
+
+.avatar-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.bot-avatar {
+  background: rgba(16, 163, 127, 0.2);
+  color: #10a37f;
+}
+
+.user-avatar {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.sender {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.timestamp {
+  color: #8e8ea0;
+  font-size: 12px;
+}
+
+.text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #ececf1;
+}
+
+.paragraph {
+  margin-bottom: 8px;
+}
+
+.paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.bold {
+  font-weight: 600;
+}
+
+.list {
+  margin-left: 20px;
+  margin-bottom: 8px;
+}
+
+.list-item {
+  margin-bottom: 4px;
+}
+
+.product-highlights {
+  background: #40414f;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  border: 1px solid #565869;
+}
+
+.highlights-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.highlights-icon {
+  color: #10a37f;
+  font-size: 14px;
+}
+
+.highlights-title {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.highlights-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  font-size: 12px;
+}
+
+@media (min-width: 640px) {
+  .highlights-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.highlight-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.star-icon {
+  color: #fbbf24;
+  flex-shrink: 0;
+}
+
+.dollar-icon {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.cart-emoji {
+  font-size: 14px;
+  flex-shrink: 0;
+}

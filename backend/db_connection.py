@@ -1,4 +1,4 @@
-# db_connection.py - Fixed to match your eCommerce API format
+# db_connection.py 
 import requests
 import os
 from typing import List, Dict, Any
@@ -13,12 +13,10 @@ class EcommerceAPI:
         print(f"🔗 Connecting to eCommerce API at: {self.base_url}")
     
     def get_all_products(self) -> List[Dict[str, Any]]:
-        """Fetch all products from eCommerce API - FIXED VERSION"""
         try:
-            print(f"📡 Fetching products from {self.base_url}/api/products")
+            print(f" Fetching products from {self.base_url}/api/products")
             response = requests.get(f"{self.base_url}/api/products", timeout=10)
             
-            # Debug: Print response status and first few lines
             print(f"   Status Code: {response.status_code}")
             print(f"   Content Type: {response.headers.get('content-type')}")
             
@@ -27,7 +25,6 @@ class EcommerceAPI:
                 print(f"   Response text: {response.text[:200]}...")
                 return self._get_sample_products()
             
-            # Try to parse JSON
             try:
                 products_data = response.json()
                 print(f"   ✅ Successfully parsed JSON, got {len(products_data)} products")
@@ -35,15 +32,9 @@ class EcommerceAPI:
                 print(f"   ❌ Failed to parse JSON: {e}")
                 print(f"   Response text: {response.text[:500]}")
                 return self._get_sample_products()
-            
-            # Debug: Print first product to see structure
-            if products_data:
-                print(f"   📦 First product sample: {json.dumps(products_data[0], indent=2)[:300]}...")
-            
-            # Transform to consistent format - FIXED for your API
+
             transformed_products = []
             for product in products_data:
-                # Your API returns "image" not "image_url", and "reviews" not "review_count"
                 transformed_products.append({
                     "id": product.get("id"),
                     "name": product.get("name", ""),
@@ -51,14 +42,12 @@ class EcommerceAPI:
                     "rating": float(product.get("rating", 0)),
                     "category": product.get("category", ""),
                     "stock": product.get("stock", 0),
-                    # FIX: Use "image" field instead of "image_url"
                     "image_url": product.get("image") or product.get("image_url", ""),
                     "description": product.get("description", ""),
-                    # FIX: Get reviews count
                     "review_count": product.get("reviews") or product.get("review_count", 0)
                 })
             
-            print(f"   ✅ Transformed {len(transformed_products)} products")
+            print(f"   Transformed {len(transformed_products)} products")
             return transformed_products
             
         except requests.exceptions.RequestException as e:

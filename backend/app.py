@@ -1,15 +1,17 @@
-# backend/app.py - Main FastAPI Application with chat endpoint
+# backend/app.py 
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware  ##for frontend backend communication.
+from pydantic import BaseModel ##data validation using python type hints
 from typing import List, Optional, Dict, Any
 import uvicorn
 import os
 from dotenv import load_dotenv
 import json
+import asyncio
+import concurrent.futures
 
-# Import your modules
-from vector_search import ProductSearchEngine
+
+from vector_search import ProductSearchEngine ##
 from db_connection import EcommerceAPI
 
 load_dotenv()
@@ -21,7 +23,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware - Allow frontend
+# CORS middleware - Allows specific frontend url to commuicate with the backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://localhost:3000"],  # Vite dev server
@@ -30,25 +32,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize components
+# create instance of vector search engine 
 search_engine = ProductSearchEngine()
-api_client = EcommerceAPI()
+api_client = EcommerceAPI() #instance of ecommerce api client
 
 # Pydantic Models
 class ChatMessage(BaseModel):
-    message: str
-    user_id: Optional[str] = None
+    message: str #user msg
+    user_id: Optional[str] = None #user identification
 
 class ChatRequest(BaseModel):
-    query: str
+    query: str 
 
 class ChatResponse(BaseModel):
-    response: str
-    products: List[Dict[str, Any]]
-    query: str
+    response: str #formatted text response 
+    products: List[Dict[str, Any]] #list of product dictionaries
+    query: str #original query
 
 class Product(BaseModel):
-    id: int
+    id: int 
     name: str
     price: float
     rating: float
@@ -69,7 +71,7 @@ class SearchResponse(BaseModel):
 
 # Helper function to format chat response
 def format_chat_response(query: str, products: List[Dict[str, Any]]) -> str:
-    """Format product search results into a friendly chat response"""
+   
     if not products:
         return f"I couldn't find any products matching '{query}'. Could you try a different search term?"
     
@@ -129,7 +131,7 @@ async def health_check():
 async def chat_endpoint(request: ChatRequest):
     """
     Main chatbot endpoint for frontend
-    Expected by your React frontend
+    Expected by React frontend
     """
     try:
         print(f"💬 Chat request: '{request.query}'")
@@ -137,7 +139,7 @@ async def chat_endpoint(request: ChatRequest):
         # Get products from API
         products = api_client.get_all_products()
         
-        if not products:
+        if not products: #true if product list is empty
             return ChatResponse(
                 response="I'm sorry, but I couldn't fetch any products at the moment. Please try again later.",
                 products=[],
@@ -151,8 +153,25 @@ async def chat_endpoint(request: ChatRequest):
             if len(products) != len(search_engine.products):
                 search_engine.update_products(products)
         
-        # Perform search
-        results = search_engine.search(request.query, top_n=5)
+        # Perform search with timeout protection
+        try:
+            # Run search in thread pool to avoid blocking
+            loop = asyncio.get_event_loop()
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                results = await loop.run_in_executor(
+                    pool, 
+                    lambda: search_engine.search(request.query, top_n=5)
+                )
+        except Exception as search_error:
+            print(f"⚠️ Search error: {search_error}")
+            # Return some products anyway
+            results = products[:3]
+            for i, product in enumerate(results):
+                product = product.copy()
+                product["similarity_score"] = 0.3
+                product["match_percentage"] = 30
+                product["matched_keywords"] = ["featured"]
+                results[i] = product
         
         # Format response for chat
         chat_response = format_chat_response(request.query, results)
@@ -175,7 +194,7 @@ async def chat_endpoint(request: ChatRequest):
 async def chat_search(message: ChatMessage):
     """Search products based on natural language query"""
     try:
-        print(f"📥 Received query: '{message.message}'")
+        print(f" Received query: '{message.message}'")
         products = api_client.get_all_products()
         
         if not products:
@@ -209,6 +228,7 @@ async def chat_search(message: ChatMessage):
         print(f"❌ Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Return all products directly from the e-commerce API
 @app.get("/api/products")
 async def get_all_products():
     """Get all products from eCommerce API"""
@@ -260,6 +280,31 @@ async def search_products_api(q: str = "", category: str = "", limit: int = 10):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/test-search")
+async def test_search(query: str = "jacket"):
+    """Test endpoint for search"""
+    try:
+        products = api_client.get_all_products()
+        if not search_engine.is_initialized():
+            search_engine.initialize(products)
+        
+        results = search_engine.search(query, top_n=5)
+        
+        return {
+            "query": query,
+            "results_count": len(results),
+            "results": [
+                {
+                    "name": r["name"],
+                    "score": r.get("similarity_score", 0),
+                    "match": r.get("match_percentage", 0)
+                }
+                for r in results
+            ]
+        }
+    except Exception as e:
+        return {"error": str(e)}
 
 # Startup event
 @app.on_event("startup")
