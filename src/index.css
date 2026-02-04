@@ -1,0 +1,172 @@
+/* index.css */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Light theme */
+  --bg: #f7f7f7;
+  --bg-soft: #efefef;
+  --sidebar-bg: #f7f7f7;
+  
+  --accent: #aaae7f;
+  --text: #433633;
+  --text-muted: #8f857d;
+  --border: #decbb7;
+  
+  --user-bubble: #143109;
+  --assistant-bubble: #d0d6b3;
+  --icon: #1f2937;
+}
+
+[data-theme="dark"] {
+  /* Dark theme */
+  --bg: #1e1b18;
+  --bg-soft: #26231f;
+  --sidebar-bg: #1a1714;
+  
+  --text: #f7f0e8;
+  --text-muted: #b8afa6;
+  --border: #332f2b;
+  
+  --accent: #d99a5b;
+  --user-bubble: #d99a5b;
+  --assistant-bubble: #26231f;
+  --icon: #e5e7eb;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+#root {
+  height: 100%;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.app::before,
+.app::after {
+  position: fixed;
+  inset: 0;
+}
+
+
+/* Light theme gradient background */
+.app[data-theme="light"] {
+  background: linear-gradient(
+    135deg,
+    #f7f7f7 0%,
+    #efefef 25%,
+    #e8e8e8 50%,
+    #f0f0f0 75%,
+    #f7f7f7 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+/* Dark theme gradient background */
+.app[data-theme="dark"] {
+  background: linear-gradient(
+    135deg,
+    #1e1b18 0%,
+    #26221d 25%,
+    #2a261f 50%,
+    #221f1a 75%,
+    #1e1b18 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+/* Subtle animation for gradient */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Add noise texture overlay */
+.app::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(170, 174, 127, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(208, 214, 179, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(244, 179, 107, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.app[data-theme="dark"]::before {
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(217, 154, 91, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(154, 160, 107, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(51, 47, 43, 0.1) 0%, transparent 60%);
+}
+
+/* Add subtle grain texture */
+.app::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Chat area - transparent to show gradient */
+.chat-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+}
+
+.chat-container {
+  width: 100%;
+  max-width: 960px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 24px;
+  position: relative;
+  z-index: 3;
+}
+

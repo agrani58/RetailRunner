@@ -1,0 +1,27 @@
+/* ====================================== */
+/* Ambient Gradient Orb Background        */
+/* ====================================== */
+
+.bg-orbs {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      480px 480px at 15% 10%,
+      var(--orb-1),
+      transparent 60%
+    ),
+    radial-gradient(
+      560px 560px at 85% 20%,
+      var(--orb-2),
+      transparent 65%
+    ),
+    radial-gradient(
+      640px 640px at 50% 85%,
+      var(--orb-3),
+      transparent 70%
+    );
+}

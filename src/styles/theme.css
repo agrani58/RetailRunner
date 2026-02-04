@@ -1,0 +1,17 @@
+:root {
+  --bg-soft: rgba(255, 255, 255, 0.75);
+  --bg-input: rgba(255, 255, 255, 0.85);
+  --border: rgba(0, 0, 0, 0.08);
+  --text-primary: #2a2a2a;
+  --text-muted: #8a8a8a;
+  --accent: #a9ad77;
+}
+
+[data-theme="dark"] {
+  --bg-soft: rgba(28, 28, 28, 0.75);
+  --bg-input: rgba(32, 32, 32, 0.85);
+  --border: rgba(255, 255, 255, 0.08);
+  --text-primary: #eaeaea;
+  --text-muted: #9ca3af;
+  --accent: #9fa86b;
+}
