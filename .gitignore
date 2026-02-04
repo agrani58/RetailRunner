@@ -1,37 +1,22 @@
-# ========================
-# Dependencies
-# ========================
-node_modules/
-
-# ========================
-# Environment variables
-# ========================
+# ENV
 .env
-.env.local
-.env.*.local
 
-# ========================
-# Build output
-# ========================
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+backend/venv/
+
+# Node
+node_modules/
 dist/
-build/
 
-# ========================
 # Logs
-# ========================
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+*.log
 
-# ========================
-# OS / Editor
-# ========================
+# OS
 .DS_Store
-Thumbs.db
-.vscode/
-.idea/
-
-# ========================
-# Vite cache
-# ========================
-.vite/

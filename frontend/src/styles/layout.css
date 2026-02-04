@@ -1,0 +1,64 @@
+/* layout.css - Keep minimal styles */
+
+.gradient-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gradient-circle {
+  position: absolute;
+  will-change: transform;
+}
+
+.chat-area {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+}
+
+.chat-container {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  z-index: 20;
+}
+
+/* Media Queries */
+@media (max-width: 1200px) {
+  .chat-container {
+    max-width: 820px;
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 900px) {
+  .chat-container {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .chat-container {
+    padding: 0 12px;
+  }
+}
+
+/* Ensure proper stacking in app */
+.app {
+  display: flex;
+  min-height: 100vh;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
