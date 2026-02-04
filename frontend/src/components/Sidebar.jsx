@@ -1,103 +1,52 @@
-import React from 'react'
-import { FiMessageSquare, FiTrash2, FiClock, FiCheckCircle } from 'react-icons/fi'
-import { AiOutlineRobot } from 'react-icons/ai'
-import './Sidebar.css'
+// components/Sidebar.jsx
+import React, { useState } from "react";
+import "../styles/Sidebar.css";
 
-const Sidebar = ({ isOpen, onClose, activeView, setActiveView }) => {
-  if (!isOpen) return null
-
-  const clearChat = () => {
-    if (window.confirm('Are you sure you want to clear the chat?')) {
-      localStorage.removeItem('chatMessages')
-      window.location.reload()
-    }
-  }
+export default function Sidebar({ toggleTheme }) {
+  const [showUser, setShowUser] = useState(false);
 
   return (
-    <div className="sidebar">
-      <div className="sidebar-header">
-        <div className="logo-container">
-          <AiOutlineRobot className="logo-icon" />
-          <span className="logo-text">AI Shopping Assistant</span>
+    <>
+      <aside className="sidebar">
+        <div className="sidebar-top">
+          <button className="sidebar-icon" aria-label="Home">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="4" />
+            </svg>
+          </button>
+
+          <button className="sidebar-icon" aria-label="Cart">
+            <svg viewBox="0 0 24 24">
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.6 13.4a2 2 0 0 0 2 1.6h9.4a2 2 0 0 0 2-1.6L23 6H6" />
+            </svg>
+          </button>
         </div>
-      </div>
 
-      <div className="sidebar-content">
-        <nav className="nav-menu">
-          <div className="nav-section">
-            <p className="nav-label">CHAT</p>
-            <button 
-              className={`nav-item ${activeView === 'chat' ? 'active' : ''}`}
-              onClick={() => setActiveView('chat')}
-            >
-              <FiMessageSquare className="nav-icon" />
-              <span>New Chat</span>
-            </button>
-            
-            <button 
-              className="nav-item"
-              onClick={clearChat}
-            >
-              <FiTrash2 className="nav-icon" />
-              <span>Clear Chat</span>
-            </button>
+        <div className="sidebar-bottom">
+          <button
+            className="sidebar-icon"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+            </svg>
+          </button>
 
-            <button 
-              className={`nav-item ${activeView === 'history' ? 'active' : ''}`}
-              onClick={() => setActiveView('history')}
-            >
-              <FiClock className="nav-icon" />
-              <span>Chat History</span>
-            </button>
-          </div>
-
-          <div className="nav-section">
-            <p className="nav-label">CAPABILITIES</p>
-            <div className="capabilities-list">
-              <div className="capability-item">
-                <FiCheckCircle className="capability-icon" style={{color: '#10a37f'}} />
-                <span className="capability-text">User & Bot messages distinct</span>
-              </div>
-              <div className="capability-item">
-                <FiCheckCircle className="capability-icon" style={{color: '#f59e0b'}} />
-                <span className="capability-text">Messages persist per session</span>
-              </div>
-              <div className="capability-item">
-                <FiCheckCircle className="capability-icon" style={{color: '#3b82f6'}} />
-                <span className="capability-text">Handles greetings & small talk</span>
-              </div>
-              <div className="capability-item">
-                <FiCheckCircle className="capability-icon" style={{color: '#8b5cf6'}} />
-                <span className="capability-text">Detects shopping intent</span>
-              </div>
-              <div className="capability-item">
-                <FiCheckCircle className="capability-icon" style={{color: '#10b981'}} />
-                <span className="capability-text">Responds within 2 seconds</span>
-              </div>
-              <div className="capability-item">
-                <FiCheckCircle className="capability-icon" style={{color: '#f97316'}} />
-                <span className="capability-text">Chat history reloads correctly</span>
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        <div className="sidebar-footer">
-          <div className="status-info">
-            <div className="status-indicator online"></div>
-            <div className="status-text">
-              <p className="status-title">System Status</p>
-              <p className="status-subtitle">All systems operational</p>
-            </div>
-          </div>
-          <div className="session-info">
-            <p>Session: <span className="session-id">Guest-{Math.random().toString(36).substr(2, 6)}</span></p>
-            <p className="session-time">Started: {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-          </div>
+          <button
+            className="sidebar-icon"
+            aria-label="User"
+            onClick={() => setShowUser(v => !v)}
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </button>
         </div>
-      </div>
-    </div>
-  )
+      </aside>
+    </>
+  );
 }
-
-export default Sidebar
