@@ -25,20 +25,20 @@ export default function useChat() {
 
       const assistantMessage = {
         role: "assistant",
-        text: data.response || "Here’s what I found.",
+        text: data.response || "Here's what I found.",
+        intent_badge: data.intent_badge,  // Fixed: using intent_badge from response
         timestamp: new Date().toISOString(),
       };
 
       setMessages((prev) => {
         const updated = [...prev, assistantMessage];
 
-        // ✅ SHOW PRODUCTS ONLY IF INTENT = PRODUCT
+        // Show products only if intent is product
         if (
           data.query_type === "product" &&
           Array.isArray(data.products) &&
           data.products.length > 0
         ) {
-          // 🔎 FILTER LOW CONFIDENCE
           const relevantProducts = data.products.filter(
             (p) => (p.match_percentage ?? 0) >= 50
           );
@@ -58,14 +58,16 @@ export default function useChat() {
 
     } catch (err) {
       console.error("Error sending message:", err);
-
+      setError(err.message);
+      
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
           text: "Sorry, something went wrong. Please try again.",
-          timestamp: new Date().toISOString(),
           isError: true,
+          timestamp: new Date().toISOString(),
+          intent_badge: null,
         },
       ]);
     } finally {

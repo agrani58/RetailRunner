@@ -1,4 +1,3 @@
-// frontend/src/components/Message.jsx
 import React from "react";
 import "../styles/Message.css";
 
@@ -8,8 +7,8 @@ export default function Message({ role, text, intentBadge }) {
       <div className="bubble">
         {text}
 
-        {intentBadge && (
-          <div className={`intent-badge ${intentBadge.level}`}>
+        {role === "assistant" && intentBadge && (
+          <div className={`intent_badge ${intentBadge.level}`}>
             {intentBadge.intent.toUpperCase()} · {intentBadge.confidence}%
           </div>
         )}
