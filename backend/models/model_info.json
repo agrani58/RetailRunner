@@ -1,0 +1,7 @@
+{
+  "classes": [
+    "chitchat",
+    "product_search"
+  ],
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2"
+}

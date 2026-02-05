@@ -11,60 +11,67 @@ export default function useChat() {
 
     setError(null);
 
-    // Add user message
     const userMessage = {
       role: "user",
-      text: text,
-      timestamp: new Date().toISOString()
+      text,
+      timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
     try {
-      // Call real API
       const data = await sendMessageToAPI(text);
-      
-      // Add assistant response
+
       const assistantMessage = {
         role: "assistant",
-        text: data.response || `Here are some results for "${text}"`,
-        timestamp: new Date().toISOString()
+        text: data.response || "Here’s what I found.",
+        timestamp: new Date().toISOString(),
       };
 
-      // Add products if they exist
-      const newMessages = [...messages, userMessage, assistantMessage];
-      
-      if (data.products && data.products.length > 0) {
-        const productsMessage = {
-          role: "products",
-          products: data.products,
-          timestamp: new Date().toISOString(),
-          count: data.products.length
-        };
-        newMessages.push(productsMessage);
-      }
+      setMessages((prev) => {
+        const updated = [...prev, assistantMessage];
 
-      setMessages(newMessages);
+        // ✅ SHOW PRODUCTS ONLY IF INTENT = PRODUCT
+        if (
+          data.query_type === "product" &&
+          Array.isArray(data.products) &&
+          data.products.length > 0
+        ) {
+          // 🔎 FILTER LOW CONFIDENCE
+          const relevantProducts = data.products.filter(
+            (p) => (p.match_percentage ?? 0) >= 50
+          );
+
+          if (relevantProducts.length > 0) {
+            updated.push({
+              role: "products",
+              products: relevantProducts,
+              timestamp: new Date().toISOString(),
+              count: relevantProducts.length,
+            });
+          }
+        }
+
+        return updated;
+      });
 
     } catch (err) {
       console.error("Error sending message:", err);
-      setError(err.message);
-      
-      // Add error message
-      const errorMessage = {
-        role: "assistant",
-        text: "Sorry, I encountered an error. Please try again.",
-        timestamp: new Date().toISOString(),
-        isError: true
-      };
-      
-      setMessages((prev) => [...prev, errorMessage]);
-      
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          text: "Sorry, something went wrong. Please try again.",
+          timestamp: new Date().toISOString(),
+          isError: true,
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
-  }, [messages]);
+  }, []);
 
   const clearChat = useCallback(() => {
     setMessages([]);
@@ -77,6 +84,6 @@ export default function useChat() {
     isLoading,
     error,
     clearChat,
-    isEmpty: messages.length === 0 && !isLoading
+    isEmpty: messages.length === 0 && !isLoading,
   };
 }

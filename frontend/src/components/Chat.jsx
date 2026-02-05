@@ -1,3 +1,5 @@
+// frontend/src/components/Chat.jsx
+
 import React, { useState, useEffect, useRef } from "react";
 import Message from "./Message";
 import ProductCard from "./ProductCard";
@@ -33,7 +35,7 @@ export default function Chat({ messages, onSend }) {
             );
           }
 
-          return <Message key={i} role={msg.role} text={msg.text} />;
+          return <Message key={i} role={msg.role} text={msg.text} intentBadge={msg.intent_badge} />;
         })}
         <div ref={bottomRef} />
       </div>
