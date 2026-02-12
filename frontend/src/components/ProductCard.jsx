@@ -1,91 +1,93 @@
-// frontend/src/components/ProductCard.jsx
 import React, { useState } from "react";
 import "../styles/ProductCard.css";
 
-export default function ProductCard({ product }) {
+const ProductCard = ({ product }) => {
   const [imageError, setImageError] = useState(false);
+  
+  if (!product) return null;
 
-  const imageUrl =
-    product.image_url ||
-    product.image ||
-    "";
-
-  const confidencePercentage = Math.round(product.match_percentage || 0);
-
-  const theme = document.documentElement.dataset.theme || "light";
-
-  const getConfidenceColor = () => {
-    if (confidencePercentage >= 90) {
-      return theme === "dark" ? "#10b981" : "#059669";
-    }
-    if (confidencePercentage >= 75) {
-      return theme === "dark" ? "#f59e0b" : "#d97706";
-    }
-    return theme === "dark" ? "#ef4444" : "#dc2626";
+  // Get the best possible image URL from product data
+  const getImageUrl = () => {
+    // Try multiple possible image fields in order
+    const possibleUrls = [
+      product.image_url,
+      product.image,
+      product.img,
+      product.thumbnail,
+      product.photo
+    ].filter(url => url && typeof url === "string" && url.trim() !== "");
+    
+    // Return first valid URL
+    return possibleUrls.length > 0 ? possibleUrls[0] : null;
   };
 
-  const getConfidenceLabel = () => {
-    if (confidencePercentage >= 90) return "Excellent Match";
-    if (confidencePercentage >= 75) return "Good Match";
-    return "Low Match";
-  };
-
-  const handleImageClick = () => {
-    if (imageUrl) {
-      window.open(imageUrl, "_blank");
-    }
-  };
+  const imageUrl = getImageUrl();
 
   return (
     <div className="product-card-simple">
-      <div
-        className="product-image-container-simple"
-        onClick={handleImageClick}
-        style={{ cursor: imageUrl ? "pointer" : "default" }}
-      >
-        <img
-          src={
-            imageError || !imageUrl
-              ? `https://placehold.co/300x300/1e1b18/f7f0e8?text=${encodeURIComponent(
-                  product.name.substring(0, 20)
-                )}`
-              : imageUrl
-          }
-          alt={product.name}
-          className="product-image-simple"
-          onError={() => setImageError(true)}
-          loading="lazy"
-        />
-
-        <div
-          className="confidence-badge-simple"
-          style={{
-            backgroundColor: getConfidenceColor(),
-            color: "#fff",
-            border:
-              theme === "dark"
-                ? "2px solid rgba(255,255,255,0.1)"
-                : "2px solid rgba(0,0,0,0.1)",
-          }}
-        >
-          <div className="confidence-percent-simple">
-            {confidencePercentage}%
+      {/* IMAGE CONTAINER */}
+      <div className="product-image-container-simple">
+        {imageUrl ? (
+          <>
+            <img
+              src={imageUrl}
+              alt={product.name || "Product image"}
+              className={`product-image-simple ${imageError ? 'image-error' : ''}`}
+              loading="lazy"
+              onError={() => {
+                console.error(`Failed to load image: ${imageUrl}`);
+                setImageError(true);
+              }}
+              onLoad={() => {
+                console.log(`Successfully loaded image: ${imageUrl}`);
+                setImageError(false);
+              }}
+            />
+            
+            {/* STORE BADGE ONLY - NO MATCH PERCENTAGE */}
+            <div className="store-badge-simple">
+              {product.store || "Store"}
+            </div>
+          </>
+        ) : (
+          <div className="no-image-placeholder">
+            <div className="no-image-icon">🖼️</div>
+            <div className="no-image-text">No Image</div>
+            <div className="no-image-store">{product.store || "Store"}</div>
           </div>
-          <div className="confidence-label-simple">
-            {getConfidenceLabel()}
+        )}
+      </div>
+
+      {/* PRODUCT INFO */}
+      <div className="product-info-simple">
+        <h3 className="product-name-simple">
+          {product.name || "Unnamed Product"}
+        </h3>
+        
+        <div className="product-category-simple">
+          {product.category || "Uncategorized"}
+        </div>
+        
+        <div className="product-description-simple">
+          {product.description ? 
+            (product.description.length > 80 ? 
+              `${product.description.substring(0, 80)}...` : 
+              product.description) : 
+            "No description available"}
+        </div>
+
+        <div className="product-footer-simple">
+          <div className="product-price-simple">
+            ${product.price ? Number(product.price).toFixed(2) : "0.00"}
+          </div>
+          
+          <div className="product-rating-simple">
+            ⭐ {product.rating || "0.0"} ({product.reviews || 0})
           </div>
         </div>
       </div>
-
-      <div className="product-name-simple">
-        {product.name.length > 50
-          ? product.name.slice(0, 50) + "…"
-          : product.name}
-      </div>
-
-      <div className="product-price-simple">
-        ${Number(product.price).toFixed(2)}
-      </div>
     </div>
   );
-}
+};
+
+export default ProductCard;

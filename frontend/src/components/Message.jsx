@@ -8,7 +8,7 @@ export default function Message({ role, text, intentBadge }) {
         {text}
 
         {role === "assistant" && intentBadge && (
-          <div className={`intent_badge ${intentBadge.level}`}>
+          <div className={`intent-badge ${intentBadge.level}`}>
             {intentBadge.intent.toUpperCase()} · {intentBadge.confidence}%
           </div>
         )}

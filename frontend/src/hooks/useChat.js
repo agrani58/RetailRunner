@@ -1,91 +1,62 @@
-import { useState, useCallback } from "react";
+// useChat.js - Updated to properly handle intent data
+
+import { useState } from "react";
 import { sendMessageToAPI } from "../api/chat";
 
 export default function useChat() {
   const [messages, setMessages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const sendMessage = useCallback(async (text) => {
-    if (!text.trim()) return;
-
-    setError(null);
-
-    const userMessage = {
-      role: "user",
-      text,
-      timestamp: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
+  const sendMessage = async (text) => {
+    // 1️⃣ user message
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", text }
+    ]);
 
     try {
+      // 2️⃣ API call
       const data = await sendMessageToAPI(text);
 
-      const assistantMessage = {
-        role: "assistant",
-        text: data.response || "Here's what I found.",
-        intent_badge: data.intent_badge,  // Fixed: using intent_badge from response
-        timestamp: new Date().toISOString(),
-      };
-
-      setMessages((prev) => {
-        const updated = [...prev, assistantMessage];
-
-        // Show products only if intent is product
-        if (
-          data.query_type === "product" &&
-          Array.isArray(data.products) &&
-          data.products.length > 0
-        ) {
-          const relevantProducts = data.products.filter(
-            (p) => (p.match_percentage ?? 0) >= 50
-          );
-
-          if (relevantProducts.length > 0) {
-            updated.push({
-              role: "products",
-              products: relevantProducts,
-              timestamp: new Date().toISOString(),
-              count: relevantProducts.length,
-            });
-          }
-        }
-
-        return updated;
-      });
-
-    } catch (err) {
-      console.error("Error sending message:", err);
-      setError(err.message);
-      
+      // 3️⃣ assistant message with intent
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          text: "Sorry, something went wrong. Please try again.",
-          isError: true,
-          timestamp: new Date().toISOString(),
-          intent_badge: null,
+          text: data.response,
+          intent_badge: {
+            intent: data.intent_label,
+            confidence: Math.round(data.intent_confidence * 100),
+            level: data.intent_confidence > 0.7 ? "high" : 
+                   data.intent_confidence > 0.5 ? "medium" : "low",
+          },
         },
+        ...(data.products && data.products.length > 0 ? [
+          {
+            role: "products",
+            products: data.products,
+          }
+        ] : []),
       ]);
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          text: "Sorry, I encountered an error. Please try again.",
+          intent_badge: {
+            intent: "error",
+            confidence: 0,
+            level: "low",
+          },
+        }
+      ]);
     }
-  }, []);
-
-  const clearChat = useCallback(() => {
-    setMessages([]);
-    setError(null);
-  }, []);
+  };
 
   return {
     messages,
     sendMessage,
-    isLoading,
-    error,
-    clearChat,
-    isEmpty: messages.length === 0 && !isLoading,
+    isEmpty: messages.length === 0,
   };
 }

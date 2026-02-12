@@ -14,7 +14,7 @@ export default function Layout() {
     <div className="app" data-theme={theme}>
       <div className="gradient-background">
         {Array.from({ length: 5 }).map((_, i) => {
-          const size = [600, 500, 400, 450, 350][i];
+          const size = [600, 500, 400, 450, 650][i];
           const positions = [
             { top: "-200px", right: "-150px" },
             { bottom: "-150px", left: "-100px" },
@@ -28,12 +28,12 @@ export default function Layout() {
             2: "rgba(38, 35, 31, 0.25)",
             3: "rgba(154, 160, 107, 0.25)",
             4: "rgba(51, 47, 43, 0.25)",
-          } : {
-            1: "rgba(170, 174, 127, 0.15)",
-            2: "rgba(208, 214, 179, 0.15)",
-            3: "rgba(244, 179, 107, 0.15)",
-            4: "rgba(232, 213, 181, 0.15)",
-          };
+            } : {
+              1: "rgba(170, 174, 127, 0.45)",
+              2: "rgba(208, 214, 179, 0.50)",
+              3: "rgba(244, 179, 107, 0.40)",
+              4: "rgba(200, 185, 150, 0.40)",
+            };
           
           const color = gradientColors[(i % 4) + 1];
           

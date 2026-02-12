@@ -1,223 +1,85 @@
-import pickle
-import random
-import re
-import logging
-from typing import Dict, List, Tuple
-from rapidfuzz import fuzz
-from intent_model import IntentClassifier
-from preprocessing import TextPreprocessor
-import inflect
-from collections import Counter
+import os
 import spacy
+import logging
+from typing import Dict, Any, List
 
-# Load spaCy model for better NLP
-try:
-    nlp = spacy.load("en_core_web_sm")
-except:
-    import subprocess
-    import sys
-    subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_sm"])
-    nlp = spacy.load("en_core_web_sm")
+logger = logging.getLogger(__name__)
 
-p = inflect.engine()
 
 class MLNERModel:
-    def __init__(self, classifier_path, preprocessor_path, device="cpu"):
-        self.classifier = IntentClassifier.load(classifier_path, device=device)
+    def __init__(self, model_path: str):
+        """Load spaCy NER model from the given path."""
+        model_path = os.path.abspath(model_path)
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"❌ spaCy model not found: {model_path}")
 
-        with open(preprocessor_path, "rb") as f:
-            self.preprocessor: TextPreprocessor = pickle.load(f)
+        logger.info(f"🔹 Loading spaCy NER model from: {model_path}")
+        try:
+            self.nlp = spacy.load(model_path)
+            logger.info(f"✅ spaCy model loaded: {self.nlp.lang}, pipes: {self.nlp.pipe_names}")
+        except Exception:
+            logger.warning("⚠️ Could not load full model, falling back to blank 'en'")
+            self.nlp = spacy.blank("en")
 
-        self.chitchat_responses = [
-            "🙂 Hey! Let me know what you're shopping for.",
-            "👋 Hi there! What product are you looking for?",
-            "🛍️ Just tell me what you want to buy.",
-            "😉 Shopping today? I've got you covered."
-        ]
-        
-        # Common non-product words to filter
-        self.non_product_words = {
-            "i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", 
-            "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", 
-            "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves",
-            "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are",
-            "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does",
-            "did", "doing", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until",
-            "while", "of", "at", "by", "for", "with", "about", "against", "between", "into",
-            "through", "during", "before", "after", "above", "below", "to", "from", "up", "down",
-            "in", "out", "on", "off", "over", "under", "again", "further", "then", "once",
-            "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few",
-            "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same",
-            "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now",
-            "want", "need", "like", "looking", "search", "find", "show", "see", "buy", "get",
-            "give", "make", "know", "take", "come", "look", "use", "think", "go", "see", "well",
-            "also", "good", "new", "first", "last", "long", "great", "little", "old", "right",
-            "big", "high", "different", "small", "large", "next", "early", "young", "important",
-            "few", "public", "bad", "same", "able", "available", "popular", "basic", "sure",
-            "easy", "clear", "recent", "certain", "major", "personal", "current", "national",
-            "free", "open", "whole", "white", "black", "red", "green", "blue", "yellow", "brown",
-            "gray", "please", "thank", "thanks", "hello", "hi", "hey", "okay", "yes", "no",
-            "maybe", "ok", "well", "really", "very", "quite", "too", "just", "still", "already",
-            "today", "now", "tomorrow", "yesterday", "always", "never", "sometimes", "usually",
-            "often", "soon", "later", "almost", "enough", "even", "much", "many", "more", "most",
-            "less", "least", "only", "just", "about", "around", "over", "under", "above", "below",
-            "between", "among", "through", "across", "into", "onto", "toward", "from", "to",
-            "in", "on", "at", "by", "with", "without", "for", "of", "about", "against", "during",
-            "before", "after", "since", "until", "while", "because", "although", "though",
-            "unless", "whether", "while", "where", "when", "why", "how", "what", "which", "who",
-            "whom", "whose"
-        }
+    def extract(self, text: str) -> Dict[str, Any]:
+        """Extract product entities – now also extracts bigram product terms."""
+        if not text or not isinstance(text, str) or len(text.strip()) == 0:
+            return {"products": []}
 
-    # ================ 100% INTENT MODEL USAGE ================
-    def classify_query_type(self, query: str) -> Tuple[str, float, int]:
-        """
-        Classify query type using ONLY the ML classifier - 100% usage
-        No entity-based overrides, no confidence adjustments
-        """
-        normalized = self.preprocessor.normalize(query)
-        
-        # Get classifier prediction - USE IT 100%
-        result = self.classifier.predict(normalized)
-        
-        # Return exactly what the model says - NO MODIFICATIONS
-        return (
-            "product" if result["label"] == 1 else "chitchat",
-            result["confidence"],  # Use model's confidence
-            result["label"]        # Use model's label
-        )
+        doc = self.nlp(text)
+        products = []
 
-    # ---------------- IMPROVED NER WITH POS TAGGING ----------------
-    def extract_entities(self, query: str) -> Dict[str, List[str]]:
-        """Extract product entities using spaCy POS tagging"""
-        # Clean and lowercase
-        query = query.lower().strip()
-        
-        # Skip very short queries
-        if len(query) < 3:
-            return {"product": [], "brand": []}
-        
-        # Use spaCy for better NLP processing
-        doc = nlp(query)
-        
-        # Extract nouns, proper nouns, and adjectives (likely product-related)
-        product_terms = []
-        
-        for token in doc:
-            # Skip pronouns, determiners, aux verbs, particles, etc.
-            if token.pos_ in ["PRON", "DET", "AUX", "PART", "ADP", "CCONJ", "SCONJ", "INTJ"]:
-                continue
-                
-            # Skip common non-product words
-            if token.text in self.non_product_words:
-                continue
-                
-            # Skip short words (less than 3 chars for nouns)
-            if len(token.text) < 3 and token.pos_ != "ADJ":
-                continue
-                
-            # Skip stopwords that spaCy identifies
-            if token.is_stop and token.pos_ != "NOUN":
-                continue
-                
-            # Convert nouns to singular
-            if token.pos_ in ["NOUN", "PROPN"]:
-                # Skip ambiguous nouns that are often verbs
-                if token.text in ["watch", "show", "run", "play", "call"]:
-                    continue
-                    
-                singular = p.singular_noun(token.text)
-                if singular:
-                    product_terms.append(singular)
-                else:
-                    product_terms.append(token.text)
-            elif token.pos_ in ["ADJ", "NUM"]:
-                # Keep adjectives and numbers
-                product_terms.append(token.text)
-        
-        # Also extract noun chunks (multi-word products)
-        noun_chunks = []
-        for chunk in doc.noun_chunks:
-            chunk_text = chunk.text.lower()
-            # Filter out chunks that are mostly stopwords
-            words = chunk_text.split()
-            meaningful_words = [w for w in words if w not in self.non_product_words and len(w) >= 2]
-            if meaningful_words:
-                # Check if chunk starts with a product word
-                if meaningful_words[0] in product_terms:
-                    noun_chunks.append(" ".join(meaningful_words))
-        
-        # Combine and deduplicate
-        all_terms = list(set(product_terms + noun_chunks))
-        
-        # Filter: remove terms that are too generic
-        final_terms = []
-        for term in all_terms:
-            # Skip single letters
-            if len(term) <= 1:
-                continue
-            # Skip terms that are just numbers
-            if term.isdigit():
-                continue
-            # Skip terms that are mostly non-alphabetic
-            if sum(1 for c in term if c.isalpha()) < 2:
-                continue
-            # Skip terms that are too common
-            if term in ["something", "anything", "everything", "nothing"]:
-                continue
-            final_terms.append(term)
-        
-        return {
-            "product": final_terms,
-            "brand": []
-        }
+        # 1️⃣ Try trained NER first
+        if "ner" in self.nlp.pipe_names:
+            for ent in doc.ents:
+                if ent.label_ in ("PRODUCT", "PRODUCT_TYPE", "PRODUCT_NAME"):
+                    products.append({
+                        "text": ent.text,
+                        "label": ent.label_,
+                        "start": ent.start_char,
+                        "end": ent.end_char,
+                        "confidence": 0.95
+                    })
 
-    # ---------------- IMPROVED SEARCH PARAMS ----------------
-    def generate_search_params(self, entities: Dict) -> Dict:
-        if not entities["product"]:
-            return {}
-        
-        # Clean up product terms: remove very short terms
-        clean_terms = [term for term in entities["product"] if len(term) >= 3]
-        
-        if not clean_terms:
-            return {}
-        
-        # Use the most significant term (longest) as main search
-        main_term = max(clean_terms, key=len)
-        
-        return {
-            "q": main_term,
-            "limit": 20
-        }
+        # 2️⃣ Fallback: extract NOUN + NOUN bigrams (e.g. "lip balm", "face wash")
+        if not products:
+            # Collect noun chunks (more accurate than simple bigrams)
+            for chunk in doc.noun_chunks:
+                text = chunk.text.lower().strip()
+                # Keep only if it looks like a product term (2-3 words)
+                if 2 <= len(text.split()) <= 3 and not any(w in self.nlp.Defaults.stop_words for w in text.split()[:2]):
+                    products.append({
+                        "text": chunk.text,
+                        "label": "PRODUCT_TYPE",
+                        "start": chunk.start_char,
+                        "end": chunk.end_char,
+                        "confidence": 0.7
+                    })
 
-    # ---------------- CONFIDENCE ----------------
-    def calculate_confidence_score(self, product, terms, query):
-        if not terms:
-            return 50.0
-            
-        product_name = product["name"].lower()
-        query_lower = query.lower()
-        
-        scores = []
-        
-        # Check exact match
-        for term in terms:
-            if term in product_name:
-                scores.append(100)
-            elif term in query_lower:
-                # Term from query matches something
-                scores.append(80)
-            else:
-                # Fuzzy match
-                scores.append(fuzz.token_sort_ratio(product_name, term))
-        
-        # Bonus for category match
-        category = product.get("category", "").lower()
-        if category and any(term in category for term in terms):
-            scores.append(90)
-        
-        return max(scores) if scores else 50.0
+            # 3️⃣ Still nothing? Simple bigram scan
+            if not products:
+                tokens = [t for t in doc if not t.is_punct and not t.is_space]
+                for i in range(len(tokens) - 1):
+                    if tokens[i].pos_ == "NOUN" and tokens[i+1].pos_ == "NOUN":
+                        bigram = f"{tokens[i]} {tokens[i+1]}"
+                        products.append({
+                            "text": bigram,
+                            "label": "PRODUCT_TYPE",
+                            "start": tokens[i].idx,
+                            "end": tokens[i+1].idx + len(tokens[i+1].text),
+                            "confidence": 0.6
+                        })
+                        break  # take first bigram only
 
-    # ---------------- CHITCHAT ----------------
-    def get_chitchat_response(self) -> str:
-        return random.choice(self.chitchat_responses)
+        # 4️⃣ Clean entities (remove trailing punctuation, lowercase)
+        cleaned = []
+        seen = set()
+        for ent in products:
+            clean = ent["text"].strip().rstrip("?!,.;:").lower()
+            if clean and clean not in seen:
+                seen.add(clean)
+                ent["text"] = clean
+                cleaned.append(ent)
+
+        logger.info(f"🧠 NER extracted {len(cleaned)} product entities: {[e['text'] for e in cleaned]}")
+        return {"products": cleaned}
