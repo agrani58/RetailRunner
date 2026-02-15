@@ -1,5 +1,4 @@
 import os
-# Disable all tqdm progress bars globally (silence sentence‑transformers)
 os.environ["TQDM_DISABLE"] = "1"
 
 import random
@@ -31,7 +30,7 @@ logging.basicConfig(
 logger = logging.getLogger("main")
 
 # -------------------------------------------------
-# Global application state (will be populated in lifespan)
+# Global application state
 # -------------------------------------------------
 app_state = {
     "products_data": [],
@@ -42,7 +41,7 @@ app_state = {
 }
 
 # -------------------------------------------------
-# Lifespan: startup & shutdown events
+# Lifespan
 # -------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -73,14 +72,13 @@ async def lifespan(app: FastAPI):
     search_engine = SearchEngine(products_data)
     app_state["search_engine"] = search_engine
 
-    # ✅ Pass the FULL product list to QueryProcessor for dynamic spelling correction
     if ner_model:
         query_processor = QueryProcessor(ner_model, products_data)
         app_state["query_processor"] = query_processor
     else:
         app_state["query_processor"] = None
 
-    # Start background refresh task
+    # Background refresh
     if config.ECOMMERCE_API_URLS and config.ECOMMERCE_API_URLS != [""]:
         import asyncio
         refresh_task = asyncio.create_task(
@@ -152,19 +150,17 @@ def get_intent(query: str) -> dict:
             label = result["intent"]
             conf = result["confidence"]
 
-            # 🔥 OVERRIDE: if model says chitchat but query clearly wants product
+            # Override if needed
             if label == "chitchat" and conf > 0.6:
                 product_triggers = [
                     "face wash", "facewash", "lip balm", "lipbalm",
                     "laptop", "jacket", "shoe", "shoes", "cream", "serum",
                     "hair oil", "sunscreen", "spf", "watch", "phone",
-                    "kurti", "kurta", "kurtha", "ethnic", "sweater",
-                    "tshirt", "shirt", "boot", "boots", "sneaker",
-                    "gaming laptop", "gaming", "iphone", "samsung",
-                    "ssd", "spf", "day cream", "night cream"
+                    "kurti", "kurta", "ethnic", "sweater", "tshirt", "shirt",
+                    "boot", "boots", "sneaker", "gaming", "iphone", "samsung"
                 ]
                 if any(trigger in query.lower() for trigger in product_triggers):
-                    logger.info(f"⚠️ Overriding chitchat → product_search (trigger: {query})")
+                    logger.info(f"⚠️ Overriding chitchat → product_search")
                     label = "product_search"
                     conf = 0.6
 
@@ -176,14 +172,11 @@ def get_intent(query: str) -> dict:
     q = query.lower()
     if any(greet in q for greet in ["hi", "hello", "hey", "greetings"]):
         return {"label": "chitchat", "confidence": 0.9}
-    if any(shop in q for shop in ["show", "find", "buy", "need", "want"]):
-        return {"label": "product_search", "confidence": 0.8}
-    return {"label": "product_search", "confidence": 0.6}
+    return {"label": "product_search", "confidence": 0.8}
 
 
 def format_products(products: list) -> List[ProductResponse]:
-    """Convert product dicts to Pydantic model, with deduplication."""
-    # 🧹 Final deduplication by product name + price
+    """Convert product dicts to Pydantic model, converting price from cents to dollars."""
     seen = set()
     unique_products = []
     for p in products:
@@ -193,12 +186,23 @@ def format_products(products: list) -> List[ProductResponse]:
             unique_products.append(p)
 
     formatted = []
-    for p in unique_products[:8]:
+    for p in unique_products[:8]:  # still cap at 8 as safety
+        # Convert price from cents to dollars for display
+        price_cents = p.get("price", 0)
+        # Handle both integer cents and float dollars
+        if price_cents > 1000:  # Likely already in cents (e.g., 8999)
+            price_dollars = price_cents / 100
+        else:
+            price_dollars = price_cents  # Already in dollars
+        
+        # Format to 2 decimal places
+        price_dollars = round(price_dollars, 2)
+        
         formatted.append(ProductResponse(
             id=str(p.get("id", "")),
             name=p.get("name", "Unknown"),
             category=p.get("category", "Uncategorized"),
-            price=float(p.get("price", 0)),
+            price=price_dollars,
             rating=float(p.get("rating")) if p.get("rating") else None,
             description=p.get("description", ""),
             image_url=p.get("image_url") or p.get("image"),
@@ -241,34 +245,39 @@ async def chat(request: ChatRequest):
                 query=query,
             )
 
-        # Process query (NER, brand, spelling correction, exact match)
+        # Process query
         qp = app_state.get("query_processor")
         if qp:
             analysis = qp.process(query)
-            # Use spelling‑corrected version if available, otherwise normalized
             search_query = analysis.get("corrected") or analysis.get("normalized") or query
             product_entities = analysis["product_entities"]
             brand = analysis["brand"]
             exact_name = analysis["exact_product_match"]
+            constraints = analysis.get("constraints", {})
         else:
             search_query = query
             product_entities = []
             brand = None
             exact_name = None
+            constraints = {}
 
-        logger.info(f"🔍 Search query: '{search_query}', Entities: {product_entities}, Brand: {brand}, Exact: {exact_name}")
+        logger.info(f"🔍 Search query: '{search_query}', Entities: {product_entities}, "
+                   f"Brand: {brand}, Exact: {exact_name}, Constraints: {constraints}")
 
-        # Search
         search_engine = app_state.get("search_engine")
         if not search_engine:
             raise HTTPException(status_code=503, detail="Search engine not ready")
+
+        # 🔥 NEW: If the query asks for sorting by rating (maximum/minimum), show only top 3
+        top_k = 3 if 'rating_sort' in constraints else 10
 
         results = search_engine.search(
             query=search_query,
             product_entities=product_entities,
             brand=brand,
             exact_name=exact_name,
-            top_k=10,
+            constraints=constraints,
+            top_k=top_k,
         )
 
         formatted = format_products(results)
@@ -304,27 +313,25 @@ def health():
 @app.get("/")
 def root():
     return {
-        "message": "Conversational Commerce API – Fully Dynamic Edition",
+        "message": "Conversational Commerce API",
         "catalog_source": "APIs" if config.ECOMMERCE_API_URLS else "static file",
         "refresh_interval_sec": config.REFRESH_INTERVAL,
         "spelling_correction": True,
         "intent_override": True,
+        "attribute_based_filtering": True,
     }
 
 
 @app.post("/admin/refresh")
 async def admin_refresh():
-    """Force an immediate catalog refresh (for manual use)."""
     logger.info("🔄 Manual refresh triggered")
     try:
         new_products = await load_products(force_refresh=True)
         app_state["products_data"] = new_products
 
-        # Re‑initialise search engine
         from search_engine import SearchEngine
         app_state["search_engine"] = SearchEngine(new_products)
 
-        # Re‑initialise query processor with new product list
         if app_state.get("ner_model"):
             app_state["query_processor"] = QueryProcessor(
                 app_state["ner_model"],
