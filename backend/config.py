@@ -14,11 +14,11 @@ class Config:
     INTENT_MODEL_PATH = os.getenv("INTENT_MODEL_PATH", "models/intent/intent_classifier.pth")
     INTENT_MODEL_DIR = os.getenv("INTENT_MODEL_DIR", "models/intent")
     NER_MODEL_PATH = os.getenv("NER_MODEL_PATH", "models/spacy_product_ner")
-    PRODUCTS_FILE = os.getenv("PRODUCTS_FILE", "data/products.json")          # fallback static file
+    PRICE_RATING_MODEL_PATH = os.getenv("PRICE_RATING_MODEL_PATH", "models/price_rating_model")
+    PRODUCTS_FILE = os.getenv("PRODUCTS_FILE", "data/products.json")
 
     # ---------- Dynamic catalog settings ----------
     ECOMMERCE_API_URLS = os.getenv("ECOMMERCE_API_URLS", "").split(",")
-    # Remove empty strings if any
     ECOMMERCE_API_URLS = [url.strip() for url in ECOMMERCE_API_URLS if url.strip()]
     REFRESH_INTERVAL = int(os.getenv("REFRESH_INTERVAL", "2500"))
     PRODUCTS_CACHE_FILE = os.getenv("PRODUCTS_CACHE_FILE", "data/products_cache.json")
@@ -45,6 +45,7 @@ class Config:
         for name, path in [
             ("Intent Model", cls.INTENT_MODEL_PATH),
             ("NER Model", cls.NER_MODEL_PATH),
+            ("Price Rating Model", cls.PRICE_RATING_MODEL_PATH),
             ("Products File", cls.PRODUCTS_FILE),
             ("Products Cache", cls.PRODUCTS_CACHE_FILE),
         ]:
@@ -76,6 +77,10 @@ class Config:
             "ner_model": {
                 "path": cls.NER_MODEL_PATH,
                 "exists": os.path.exists(cls.NER_MODEL_PATH),
+            },
+            "price_rating_model": {
+                "path": cls.PRICE_RATING_MODEL_PATH,
+                "exists": os.path.exists(cls.PRICE_RATING_MODEL_PATH),
             },
             "catalog": {
                 "api_urls": cls.ECOMMERCE_API_URLS,

@@ -5,349 +5,355 @@ tqdm.disable = True
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 import logging
-import re
 import torch
 from typing import List, Dict, Any, Optional
 from sentence_transformers import SentenceTransformer, CrossEncoder, util
 from rapidfuzz import fuzz, process
 
+from text_normalizer import TextNormalizer
+
 logger = logging.getLogger(__name__)
 
 
 class SearchEngine:
-    def __init__(self, products: List[Dict[str, Any]], 
+    def __init__(self, products: List[Dict[str, Any]],
                  bi_encoder_name: str = "all-MiniLM-L6-v2",
                  cross_encoder_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"):
         self.products = products
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.normalizer = TextNormalizer()
 
-        # Bi‑encoder for first‑stage retrieval
         self.bi_encoder = SentenceTransformer(bi_encoder_name, device=self.device)
-
-        # Cross‑encoder for final re‑ranking
         self.cross_encoder = CrossEncoder(cross_encoder_name, device=self.device)
 
-        # Cache for category matching
-        self.category_match_cache = {}
+        self._build_product_indices()
 
-        # Build category index and product lookup by category
-        self._build_category_index()
-        
-        # Create category-based product groups for faster filtering
-        self.products_by_category = {}
-        self.products_by_type = {}
-        
-        for p in products:
-            # Group by category
-            cat = p.get("category", "").lower().strip()
-            if cat:
-                if cat not in self.products_by_category:
-                    self.products_by_category[cat] = []
-                self.products_by_category[cat].append(p)
-            
-            # Group by product type
-            ptype = p.get("product_type", "").lower().strip()
-            if ptype:
-                if ptype not in self.products_by_type:
-                    self.products_by_type[ptype] = []
-                self.products_by_type[ptype].append(p)
-
-        # Product texts and embeddings
-        self.product_texts = []
-        self.name_lookup = {}
-        
-        for p in products:
-            text = self._build_product_text(p)
-            self.product_texts.append(text)
-            name = p.get("name", "").lower()
-            if name:
-                self.name_lookup[name] = p
-
-        logger.info(f"🔧 Encoding {len(self.product_texts)} products with bi‑encoder...")
+        logger.info(f"🔧 Encoding {len(self.products)} products...")
         self.product_embeddings = self.bi_encoder.encode(
             self.product_texts,
             convert_to_tensor=True,
             show_progress_bar=False
         )
-        logger.info(f"✅ SearchEngine ready, device: {self.device}")
+        logger.info(f"✅ SearchEngine ready")
 
-    def _build_category_index(self):
-        categories = set()
+    def _build_product_indices(self):
+        self.product_by_id = {}
+        self.product_by_name = {}
+        self.product_by_category = {}
+        self.product_by_brand = {}
+        self.product_texts = []          # used for encoding (with normalization)
+        self.original_names = []          # for fuzzy matching
+        self.category_price_ranges = {}
+
         for p in self.products:
-            cat = p.get("category", "").strip()
+            # Ensure price is float and in dollars
+            price = p.get("price", 0)
+            if isinstance(price, str):
+                price = float(price.replace(',', ''))
+            if price > 1000 and price < 1000000:  # cents -> dollars
+                price = round(price / 100.0, 2)
+            p["price"] = float(price)
+
+            pid = p.get("id")
+            if pid:
+                self.product_by_id[pid] = p
+
+            name = p.get("name", "").lower().strip()
+            if name:
+                self.product_by_name[name] = p
+                self.original_names.append(name)
+
+            cat = p.get("category", "").lower().strip()
             if cat:
-                categories.add(cat.lower())
-        self.category_names = list(categories)
-        if self.category_names:
-            self.category_embeddings = self.bi_encoder.encode(
-                self.category_names,
-                convert_to_tensor=True,
-                show_progress_bar=False
-            )
-            logger.info(f"📚 Indexed {len(self.category_names)} unique categories")
-        else:
-            self.category_embeddings = None
+                if cat not in self.product_by_category:
+                    self.product_by_category[cat] = []
+                self.product_by_category[cat].append(p)
 
-    def _match_category(self, text: str, threshold: float = 0.7) -> Optional[str]:
-        """Find the closest matching category for a text (entity or query)."""
-        if not self.category_names:
-            return None
-            
-        # Check cache first
-        cached = self.category_match_cache.get(text)
-        if cached:
-            cat, score = cached
-            return cat if score >= threshold else None
+                # Track price range
+                price_val = p.get("price", 0)
+                if cat not in self.category_price_ranges:
+                    self.category_price_ranges[cat] = {"min": price_val, "max": price_val}
+                else:
+                    self.category_price_ranges[cat]["min"] = min(self.category_price_ranges[cat]["min"], price_val)
+                    self.category_price_ranges[cat]["max"] = max(self.category_price_ranges[cat]["max"], price_val)
 
-        # Try exact match first
-        text_lower = text.lower()
-        for cat in self.category_names:
-            if text_lower == cat or text_lower in cat or cat in text_lower:
-                self.category_match_cache[text] = (cat, 1.0)
-                return cat
+            brand = p.get("brand", "").lower().strip()
+            if brand:
+                if brand not in self.product_by_brand:
+                    self.product_by_brand[brand] = []
+                self.product_by_brand[brand].append(p)
 
-        # Try semantic match
-        text_emb = self.bi_encoder.encode(
-            text,
-            convert_to_tensor=True,
-            show_progress_bar=False
-        )
-        scores = util.cos_sim(text_emb, self.category_embeddings)[0]
-        best_score, best_idx = scores.max(dim=0)
-        best_score = best_score.item()
-        
-        if best_score >= threshold:
-            best_cat = self.category_names[best_idx.item()]
-            self.category_match_cache[text] = (best_cat, best_score)
-            return best_cat
-            
-        return None
+            # Build rich text for embedding: include normalized version
+            text = self._build_product_text(p)
+            self.product_texts.append(text)
+
+        logger.info(f"📂 Available categories: {sorted(self.product_by_category.keys())}")
+        logger.info(f"📂 Sample products per category: { {k: len(v) for k, v in list(self.product_by_category.items())[:5]} }")
 
     def _build_product_text(self, product: Dict[str, Any]) -> str:
-        parts = [
-            product.get("name", ""),
-            product.get("category", ""),
-            product.get("product_type", ""),
-            product.get("description", ""),
-            product.get("brand", ""),
-        ]
-        return " ".join([p for p in parts if p]).lower()
+        """Combine product fields and also add a normalized version."""
+        raw_name = product.get("name", "")
+        raw_category = product.get("category", "")
+        raw_brand = product.get("brand", "")
+        raw_desc = product.get("description", "")
+        raw_parts = [raw_name, raw_category, raw_brand, raw_desc]
 
-    def _product_matches_entities(self, product: Dict, entities: List[str]) -> bool:
-        """Check if product matches any of the entity terms."""
-        if not entities:
-            return True
-            
-        name = product.get("name", "").lower()
-        cat = product.get("category", "").lower()
-        ptype = product.get("product_type", "").lower()
-        description = product.get("description", "").lower()
-        
-        searchable_text = f"{name} {cat} {ptype} {description}"
-        
-        for entity in entities:
-            entity_lower = entity.lower()
-            # Direct match
-            if entity_lower in searchable_text:
-                return True
-            # Word-by-word match for multi-word entities
-            if len(entity_lower.split()) > 1:
-                if all(word in searchable_text for word in entity_lower.split()):
-                    return True
-                    
-        return False
+        # Normalize a copy for better semantic matching
+        norm_parts = [self.normalizer.normalize(part, for_semantic=True) for part in raw_parts if part]
+        # Keep both raw and normalized to catch variations
+        combined = " ".join(raw_parts) + " " + " ".join(norm_parts)
+        return combined.lower()
 
-    def _filter_candidates(self, products: List[Dict], entities: List[str], brand: Optional[str]) -> List[Dict]:
-        """Filter products by entities and brand."""
-        if not entities and not brand:
+    def _fuzzy_match_product(self, query: str, threshold: int = 60) -> Optional[Dict]:
+        """Fuzzy match query against product names (using normalized query)."""
+        if not query:
+            return None
+        # Normalize query for matching as well
+        norm_query = self.normalizer.normalize(query, for_semantic=True)
+        if norm_query in self.product_by_name:
+            return self.product_by_name[norm_query]
+        match = process.extractOne(
+            norm_query,
+            self.original_names,           # match against original names (they are lowercased)
+            scorer=fuzz.partial_token_sort_ratio,
+            score_cutoff=threshold
+        )
+        if match:
+            matched_name, score, _ = match
+            logger.info(f"🎯 Fuzzy match: '{query}' -> '{matched_name}' ({score})")
+            return self.product_by_name[matched_name]
+        return None
+
+    def _get_category_products(self, category: str) -> List[Dict]:
+        if not category:
+            return []
+        cat_lower = category.lower().strip()
+        logger.info(f"🔎 Looking for category '{cat_lower}' in product_by_category keys: {list(self.product_by_category.keys())}")
+        if cat_lower in self.product_by_category:
+            logger.info(f"✅ Exact category match: {len(self.product_by_category[cat_lower])} products")
+            return self.product_by_category[cat_lower]
+        # Partial match
+        for cat_name, products in self.product_by_category.items():
+            if cat_lower in cat_name or cat_name in cat_lower:
+                logger.info(f"🔍 Partial category match: '{cat_lower}' -> '{cat_name}' ({len(products)} products)")
+                return products
+        # Fallback scan across all products (category field)
+        matched = []
+        for p in self.products:
+            p_cat = p.get("category", "").lower().strip()
+            if cat_lower in p_cat or p_cat in cat_lower:
+                matched.append(p)
+        if matched:
+            logger.info(f"🔍 Fallback category scan found {len(matched)} products")
+            return matched
+        # Still nothing – try scanning product names
+        name_matched = []
+        for p in self.products:
+            p_name = p.get("name", "").lower()
+            if cat_lower in p_name:
+                name_matched.append(p)
+        if name_matched:
+            logger.info(f"🔍 Name-based fallback found {len(name_matched)} products for category '{category}'")
+            return name_matched
+        logger.warning(f"⚠️ No products found for category '{category}'")
+        return []
+
+    def _apply_constraints(self, products: List[Dict], constraints: Dict[str, Any]) -> List[Dict]:
+        if not constraints:
+            logger.info("📊 No constraints to apply")
             return products
+        filtered = products.copy()
+        orig_count = len(filtered)
 
-        filtered = []
-        for p in products:
-            # Entity check
-            if entities and not self._product_matches_entities(p, entities):
-                continue
+        logger.info(f"📊 Applying constraints: {constraints} on {orig_count} products")
 
-            # Brand check
-            if brand:
-                brand_lower = brand.lower()
-                name = p.get("name", "").lower()
-                brand_field = p.get("brand", "").lower()
-                if not (brand_lower in name or brand_lower == brand_field):
-                    continue
+        if "price_min" in constraints:
+            min_price = float(constraints["price_min"])
+            before = len(filtered)
+            filtered = [p for p in filtered if p.get("price", 0) >= min_price - 1e-9]
+            logger.info(f"📊 Price >= ${min_price:.2f}: {len(filtered)}/{before}")
+        if "price_max" in constraints:
+            max_price = float(constraints["price_max"])
+            before = len(filtered)
+            filtered = [p for p in filtered if p.get("price", 0) <= max_price + 1e-9]
+            logger.info(f"📊 Price <= ${max_price:.2f}: {len(filtered)}/{before}")
 
-            filtered.append(p)
+        if "rating_min" in constraints:
+            min_rating = float(constraints["rating_min"])
+            before = len(filtered)
+            # Products with rating None are considered as 0 (won't pass positive min)
+            filtered = [p for p in filtered if p.get("rating", 0) is not None and p.get("rating", 0) >= min_rating - 1e-9]
+            logger.info(f"📊 Rating >= {min_rating}: {len(filtered)}/{before}")
+        if "rating_max" in constraints:
+            max_rating = float(constraints["rating_max"])
+            before = len(filtered)
+            filtered = [p for p in filtered if p.get("rating", 5) is not None and p.get("rating", 5) <= max_rating + 1e-9]
+            logger.info(f"📊 Rating <= {max_rating}: {len(filtered)}/{before}")
 
+        logger.info(f"📊 After constraints: {len(filtered)}/{orig_count}")
         return filtered
 
-    # ------------------------------------------------------------------
-    # 🎯 IMPROVED CONSTRAINT APPLICATION
-    # ------------------------------------------------------------------
-    def _apply_constraints(self, products: List[Dict], constraints: Dict[str, Any]) -> List[Dict]:
-        """
-        Apply rating and price filters, then sort appropriately.
-        """
-        if not constraints:
+    def _apply_subcategory_filter(self, products: List[Dict], subcategory_keywords: List[str]) -> List[Dict]:
+        if not subcategory_keywords:
             return products
+        filtered = []
+        for p in products:
+            text = self._build_product_text(p)
+            if any(kw in text for kw in subcategory_keywords):
+                filtered.append(p)
+        logger.info(f"🎮 Subcategory filter ({subcategory_keywords}): {len(filtered)}/{len(products)}")
+        return filtered
 
-        # Step 1: Rating filters
-        rating_filtered = products
-        if "rating_min" in constraints:
-            min_rating = constraints["rating_min"]
-            rating_filtered = [p for p in rating_filtered if p.get("rating") is not None and p["rating"] >= min_rating]
-        if "rating_max" in constraints:
-            max_rating = constraints["rating_max"]
-            rating_filtered = [p for p in rating_filtered if p.get("rating") is not None and p["rating"] <= max_rating]
-
-        if not rating_filtered:
-            return []
-
-        # Step 2: Price filters (applied to rating_filtered)
-        price_filtered = rating_filtered
-        if "price_min" in constraints:
-            min_price = constraints["price_min"]
-            price_filtered = [p for p in price_filtered if p.get("price", 0) >= min_price]
-        if "price_max" in constraints:
-            max_price = constraints["price_max"]
-            price_filtered = [p for p in price_filtered if p.get("price", 0) <= max_price]
-
-        # Decide which list to use: if price filters removed everything, fall back to rating_filtered
-        if price_filtered:
-            candidates = price_filtered
+    def _apply_sorting(self, products: List[Dict], constraints: Dict[str, Any]) -> List[Dict]:
+        if not products:
+            return products
+        sorted_products = products.copy()
+        if "price_sort" in constraints:
+            if constraints["price_sort"] == "asc":
+                sorted_products.sort(key=lambda x: x.get("price", float('inf')))
+                logger.info("📊 Sorted by price: low to high")
+            else:
+                sorted_products.sort(key=lambda x: x.get("price", 0), reverse=True)
+                logger.info("📊 Sorted by price: high to low")
+        elif "rating_sort" in constraints:
+            if constraints["rating_sort"] == "desc":
+                sorted_products.sort(key=lambda x: x.get("rating", 0) or -1, reverse=True)
+                logger.info("📊 Sorted by rating: high to low")
+            else:  # asc
+                sorted_products.sort(key=lambda x: x.get("rating", 0) or 0)
+                logger.info("📊 Sorted by rating: low to high")
         else:
-            logger.warning(f"⚠️ Price filters removed all {len(rating_filtered)} rating‑qualified products, using rating‑filtered only")
-            candidates = rating_filtered
+            # Default relevance
+            if any(p.get("relevance_score") for p in sorted_products):
+                sorted_products.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
+        return sorted_products
 
-        # Step 3: Sorting
-        if candidates:
-            # Default rating sort descending if any rating constraint present and no explicit rating_sort
-            if ("rating_min" in constraints or "rating_max" in constraints) and "rating_sort" not in constraints:
-                candidates.sort(key=lambda x: x.get("rating") if x.get("rating") is not None else -1, reverse=True)
-            elif "rating_sort" in constraints:
-                if constraints["rating_sort"] == "desc":
-                    candidates.sort(key=lambda x: x.get("rating") if x.get("rating") is not None else -1, reverse=True)
-                elif constraints["rating_sort"] == "asc":
-                    candidates.sort(key=lambda x: x.get("rating") if x.get("rating") is not None else float('inf'))
-
-            # Price sorting (secondary)
-            if "price_sort" in constraints:
-                if constraints["price_sort"] == "asc":
-                    candidates.sort(key=lambda x: x.get("price", float('inf')))
-                elif constraints["price_sort"] == "desc":
-                    candidates.sort(key=lambda x: x.get("price", 0), reverse=True)
-
-        return candidates
-
-    # ------------------------------------------------------------------
-    # 🔍 MAIN SEARCH
-    # ------------------------------------------------------------------
     def search(
         self,
         query: str,
         product_entities: List[str] = None,
         brand: Optional[str] = None,
-        exact_name: Optional[str] = None,
         constraints: Optional[Dict[str, Any]] = None,
+        search_category: Optional[str] = None,
+        subcategory_keywords: Optional[List[str]] = None,
         top_k: int = 10,
-        rerank_top_k: int = 50,
     ) -> List[Dict[str, Any]]:
 
-        # 1. Exact match shortcut
-        if exact_name:
-            for p in self.products:
-                if p.get("name", "").lower() == exact_name.lower():
-                    p["relevance_score"] = 1.0
-                    if constraints:
-                        p_list = self._apply_constraints([p], constraints)
-                        if p_list:
-                            return p_list
-                    return [p]
+        logger.info(f"🔍 Search started: query='{query}', category='{search_category}', subcategory_keywords={subcategory_keywords}, constraints={constraints}")
 
-        # 2. Try to narrow down candidates using category matching based on entities
-        candidates = self.products
-        used_category = None
-        
-        if product_entities:
-            for entity in product_entities:
-                # Try to match to a category
-                matched_cat = self._match_category(entity)
-                if matched_cat and matched_cat in self.products_by_category:
-                    candidates = self.products_by_category[matched_cat]
-                    used_category = matched_cat
-                    logger.info(f"📂 Filtered to category '{matched_cat}' based on entity '{entity}'")
-                    break
-                
-                # Try to match to product type
-                if entity in self.products_by_type:
-                    candidates = self.products_by_type[entity]
-                    logger.info(f"📂 Filtered to product type '{entity}'")
-                    break
-        
-        # 3. Apply entity and brand filtering
-        if product_entities or brand:
-            filtered = self._filter_candidates(candidates, product_entities, brand)
-            if filtered:
-                candidates = filtered
-            elif candidates != self.products:
-                # If filtering removed everything but we had category filtering, fall back to category
-                logger.warning(f"⚠️ Entity filtering removed all candidates, using category '{used_category}' unfiltered")
-                # candidates already = category products
-            else:
-                # No category filter and no entities matched any product -> try to match the query to a category
-                logger.info("⚠️ No candidates after filtering - trying to match query to a category")
-                query_category = self._match_category(query)
-                if query_category and query_category in self.products_by_category:
-                    candidates = self.products_by_category[query_category]
-                    used_category = query_category
-                    logger.info(f"📂 Fallback to category '{query_category}' based on query")
-                else:
-                    # If still no candidates, use semantic fallback
-                    logger.info("⚠️ No candidates after filtering - performing semantic fallback with corrected query")
-                    query_emb = self.bi_encoder.encode(query, convert_to_tensor=True, show_progress_bar=False)
-                    scores = util.cos_sim(query_emb, self.product_embeddings)[0]
-                    top_indices = scores.topk(min(50, len(scores))).indices
-                    candidates = [self.products[idx] for idx in top_indices]
+        # ------------------------------------------------------------
+        # 1. Exact product match – but do NOT return immediately.
+        #    We'll collect it as a high‑relevance candidate and continue.
+        # ------------------------------------------------------------
+        exact_match = self._fuzzy_match_product(query)
+        exact_candidates = []
+        if exact_match:
+            logger.info(f"✅ Fuzzy match found: {exact_match.get('name')}")
+            exact_match["relevance_score"] = 1.0
+            exact_candidates = [exact_match]
 
-        # 4. If we have too many candidates, use bi-encoder for initial ranking
-        if len(candidates) > 200:
-            candidate_texts = [self._build_product_text(p) for p in candidates]
-            query_emb = self.bi_encoder.encode(query, convert_to_tensor=True, show_progress_bar=False)
-            candidate_embs = self.bi_encoder.encode(candidate_texts, convert_to_tensor=True, show_progress_bar=False)
-            similarities = util.cos_sim(query_emb, candidate_embs)[0]
-            top_indices = similarities.topk(min(100, len(similarities))).indices
-            candidates = [candidates[int(idx)] for idx in top_indices]
-
-        # 5. Cross-encoder re-ranking (if we have candidates)
-        if candidates:
-            rerank_count = min(rerank_top_k, len(candidates))
-            pairs = [(query, self._build_product_text(p)) for p in candidates[:rerank_count]]
-            cross_scores = self.cross_encoder.predict(pairs, show_progress_bar=False)
-
-            for prod, score in zip(candidates[:rerank_count], cross_scores):
-                prod["relevance_score"] = round(float(score), 3)
-
-            # Sort by cross-encoder score
-            reranked = sorted(candidates[:rerank_count], key=lambda x: x["relevance_score"], reverse=True)
+        # ------------------------------------------------------------
+        # 2. Get initial candidates based on category (if provided)
+        # ------------------------------------------------------------
+        if search_category:
+            candidates = self._get_category_products(search_category)
+            logger.info(f"📂 Category '{search_category}': {len(candidates)} initial candidates")
+            if not candidates:
+                logger.info("⚠️ No products in specified category, falling back to all products.")
+                candidates = self.products.copy()
         else:
-            logger.warning("⚠️ No candidates for re-ranking")
-            return []
+            candidates = self.products.copy()
+            logger.info(f"📂 No category specified, using all products: {len(candidates)}")
 
-        # 6. Apply constraints (filtering and sorting)
+        # ------------------------------------------------------------
+        # 3. Add exact match product(s) to candidates (deduplicate later)
+        # ------------------------------------------------------------
+        if exact_candidates:
+            # Add them, but we'll deduplicate after merging
+            candidates.extend(exact_candidates)
+
+        # ------------------------------------------------------------
+        # 4. Filter by brand
+        # ------------------------------------------------------------
+        if brand:
+            brand_lower = brand.lower()
+            brand_filtered = []
+            for p in candidates:
+                p_brand = p.get("brand", "").lower()
+                p_name = p.get("name", "").lower()
+                if brand_lower in p_brand or brand_lower in p_name:
+                    brand_filtered.append(p)
+            if brand_filtered:
+                candidates = brand_filtered
+                logger.info(f"🏷️ After brand '{brand}': {len(candidates)} products")
+            else:
+                logger.info(f"🏷️ No products for brand '{brand}', continuing without brand filter")
+
+        # ------------------------------------------------------------
+        # 5. Apply subcategory filter
+        # ------------------------------------------------------------
+        if subcategory_keywords:
+            candidates = self._apply_subcategory_filter(candidates, subcategory_keywords)
+            if not candidates:
+                logger.info("⚠️ No products after subcategory filter")
+                return []
+
+        # ------------------------------------------------------------
+        # 6. Apply price and rating constraints
+        # ------------------------------------------------------------
         if constraints:
-            reranked = self._apply_constraints(reranked, constraints)
+            candidates = self._apply_constraints(candidates, constraints)
+            if not candidates:
+                logger.info("⚠️ No products match constraints")
+                return []
 
-        # 7. Deduplicate
-        results = self._deduplicate(reranked)
+        # ------------------------------------------------------------
+        # 7. Semantic ranking (only if we have multiple candidates)
+        # ------------------------------------------------------------
+        if len(candidates) > 1:
+            candidate_texts = [self._build_product_text(p) for p in candidates]
+            logger.info(f"🔎 Semantic ranking on {len(candidates)} candidates")
 
-        return results[:top_k] if results else []
+            # Bi-encoder similarity
+            query_emb = self.bi_encoder.encode(query, convert_to_tensor=True)
+            candidate_embs = self.bi_encoder.encode(candidate_texts, convert_to_tensor=True)
+            similarities = util.cos_sim(query_emb, candidate_embs)[0]
+            for i, p in enumerate(candidates):
+                p["relevance_score"] = float(similarities[i])
 
-    @staticmethod
-    def _deduplicate(products: List[Dict]) -> List[Dict]:
+            # Sort and take top 50 for cross-encoder
+            candidates.sort(key=lambda x: x["relevance_score"], reverse=True)
+            candidates = candidates[:min(50, len(candidates))]
+
+            if len(candidates) > 5:
+                pairs = [(query, self._build_product_text(p)) for p in candidates]
+                scores = self.cross_encoder.predict(pairs, show_progress_bar=False)
+                for p, score in zip(candidates, scores):
+                    p["relevance_score"] = float(score)
+                candidates.sort(key=lambda x: x["relevance_score"], reverse=True)
+        else:
+            # Only one candidate – give it a high score if not already set
+            if candidates and "relevance_score" not in candidates[0]:
+                candidates[0]["relevance_score"] = 1.0
+
+        # ------------------------------------------------------------
+        # 8. Apply sorting (overrides relevance if requested)
+        # ------------------------------------------------------------
+        candidates = self._apply_sorting(candidates, constraints or {})
+
+        # ------------------------------------------------------------
+        # 9. Deduplicate (by name + price)
+        # ------------------------------------------------------------
         seen = set()
-        unique = []
-        for p in products:
+        results = []
+        for p in candidates:
             key = (p.get("name", ""), p.get("price", 0))
             if key not in seen:
                 seen.add(key)
-                unique.append(p)
-        return unique
+                results.append(p)
+
+        logger.info(f"✅ Final {len(results)} results")
+        # Log first few product names for verification
+        for i, p in enumerate(results[:3]):
+            logger.info(f"   Result {i+1}: {p.get('name')} (${p.get('price')}, rating {p.get('rating')})")
+        return results[:top_k]

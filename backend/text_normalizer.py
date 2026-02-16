@@ -1,56 +1,52 @@
 import re
-import logging
-from typing import Set
-
+import inflect
 import spacy
 from spacy.lang.en.stop_words import STOP_WORDS
 
-logger = logging.getLogger(__name__)
-
-# Global spaCy model – disable parser/ner for speed
-try:
-    nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
-    logger.info("✅ spaCy loaded for lemmatisation + stopwords")
-except OSError:
-    logger.error("❌ spaCy model 'en_core_web_sm' not found. Run: python -m spacy download en_core_web_sm")
-    raise
-
-
 class TextNormalizer:
     """
-    Minimal, fast normaliser using spaCy.
-    - Lowercasing
-    - Lemmatisation (nouns, verbs, adjectives)
-    - Stopword removal
-    No manual phrase corrections – we rely on fuzzy fallback.
+    Normalizes text for search:
+    - lowercases
+    - removes punctuation
+    - removes stopwords (optional, for semantic search)
+    - lemmatizes using spaCy
+    - converts plural to singular (extra safety)
     """
-
     def __init__(self):
-        self.stopwords = STOP_WORDS
+        try:
+            # Load small English model – disable parser/ner for speed
+            self.nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
+        except OSError:
+            raise RuntimeError(
+                "spaCy model 'en_core_web_sm' not found. "
+                "Run: python -m spacy download en_core_web_sm"
+            )
+        self.inflect_engine = inflect.engine()
 
-    def normalize(self, text: str) -> str:
-        """Lemmatize, lowercase, remove stopwords and short tokens."""
-        if not text:
+    def normalize(self, text: str, for_semantic: bool = True) -> str:
+        """
+        for_semantic=True: remove stopwords (for search queries)
+        for_semantic=False: keep stopwords (for constraint extraction)
+        """
+        if not isinstance(text, str) or not text.strip():
             return ""
-        doc = nlp(text.lower())
-        tokens = [
-            token.lemma_
-            for token in doc
-            if token.text not in self.stopwords
-            and token.pos_ in ("NOUN", "VERB", "ADJ", "PROPN")
-            and len(token.text) > 2
-        ]
+        doc = self.nlp(text.lower())
+        tokens = []
+        for token in doc:
+            if token.is_punct or token.is_space:
+                continue
+            if for_semantic and token.is_stop:
+                continue
+            # Lemmatize (spaCy lemmatizer handles plural→singular well)
+            lemma = token.lemma_
+            # Additional safety: use inflect to singularize if needed
+            singular = self.inflect_engine.singular_noun(lemma)
+            tokens.append(singular if singular else lemma)
         return " ".join(tokens)
 
-    def lemmatize(self, text: str) -> str:
-        """Lemmatize without removing stopwords (used for product fields)."""
-        if not text:
-            return ""
-        doc = nlp(text.lower())
-        return " ".join([token.lemma_ for token in doc])
-
-    def remove_stopwords(self, text: str) -> str:
-        doc = nlp(text.lower())
-        return " ".join([token.text for token in doc if token.text not in self.stopwords])
-
-nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
+    def singularize(self, word: str) -> str:
+        """Convert a single word to singular form."""
+        if not word:
+            return word
+        singular = self.inflect_engine.singular_noun(word.lower())
+        return singular if singular else word.lower()

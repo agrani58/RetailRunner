@@ -20,32 +20,38 @@ from text_normalizer import TextNormalizer
 from query_processor import QueryProcessor
 from search_engine import SearchEngine
 
-# -------------------------------------------------
-# Logging
-# -------------------------------------------------
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
 logger = logging.getLogger("main")
 
-# -------------------------------------------------
-# Global application state
-# -------------------------------------------------
 app_state = {
     "products_data": [],
     "search_engine": None,
     "intent_model": None,
     "ner_model": None,
     "query_processor": None,
+    "normalizer": TextNormalizer(),
 }
 
-# -------------------------------------------------
-# Lifespan
-# -------------------------------------------------
+# Product-related keywords that should force product_search
+PRODUCT_KEYWORDS = [
+    "laptop", "laptops", "phone", "phones", "smartphone", "smartphones",
+    "headphone", "headphones", "earbud", "earbuds", "headset",
+    "tablet", "tablets", "ipad", "camera", "cameras",
+    "watch", "watches", "smartwatch", "smartwatches",
+    "shoe", "shoes", "sneaker", "sneakers", "boot", "boots",
+    "tv", "television", "monitor", "mouse", "keyboard",
+    "gaming", "console", "playstation", "xbox", "nintendo",
+    "price", "cost", "under", "over", "above", "below",
+    "cheapest", "expensive", "budget", "affordable",
+    "rating", "rated", "reviews", "stars", "best", "top",
+    "jeans", "jacket", "shirt", "dress", "kurta", "saree",
+    "jeenz",  # misspelling
+    "sweater", "sweaters",  # added
+    "all products", "everything",  # added to force product search
+]
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # --- STARTUP ---
+    # Startup
     logger.info("🔄 Loading products...")
     products_data = await load_products(force_refresh=False)
     app_state["products_data"] = products_data
@@ -54,10 +60,6 @@ async def lifespan(app: FastAPI):
     logger.info("🧠 Loading intent model...")
     intent_model = get_intent_model()
     app_state["intent_model"] = intent_model
-    if intent_model:
-        logger.info("✅ Intent model ready")
-    else:
-        logger.warning("⚠️ Intent model not available – using rule‑based fallback.")
 
     logger.info("🔍 Loading NER model...")
     try:
@@ -66,36 +68,28 @@ async def lifespan(app: FastAPI):
         logger.info("✅ NER model ready")
     except Exception as e:
         logger.error(f"❌ NER model failed: {e}")
-        ner_model = None
+        raise  # No fallback – require NER model
 
     logger.info("🔧 Initialising search engine...")
     search_engine = SearchEngine(products_data)
     app_state["search_engine"] = search_engine
 
-    if ner_model:
-        query_processor = QueryProcessor(ner_model, products_data)
-        app_state["query_processor"] = query_processor
-    else:
-        app_state["query_processor"] = None
+    query_processor = QueryProcessor(ner_model, products_data)
+    app_state["query_processor"] = query_processor
 
-    # Background refresh
     if config.ECOMMERCE_API_URLS and config.ECOMMERCE_API_URLS != [""]:
         import asyncio
         refresh_task = asyncio.create_task(
             refresh_catalog_periodically(app_state, config.REFRESH_INTERVAL)
         )
-        logger.info(f"⏰ Background catalog refresh scheduled every {config.REFRESH_INTERVAL}s")
+        logger.info(f"⏰ Background refresh every {config.REFRESH_INTERVAL}s")
         yield
         refresh_task.cancel()
     else:
-        logger.info("⏹️ No API URLs configured – background refresh disabled.")
         yield
-    # --- SHUTDOWN ---
+
     logger.info("🛑 Shutting down.")
 
-# -------------------------------------------------
-# FastAPI app
-# -------------------------------------------------
 app = FastAPI(title="Conversational Commerce API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
@@ -104,9 +98,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -------------------------------------------------
-# Pydantic models
-# -------------------------------------------------
 class ChatRequest(BaseModel):
     query: str
 
@@ -129,54 +120,37 @@ class ChatResponse(BaseModel):
     products: List[ProductResponse]
     query: str
 
-# -------------------------------------------------
-# Chitchat responses
-# -------------------------------------------------
 CHITCHAT_RESPONSES = [
     "Hi there! How can I help you find the perfect product today?",
     "Hello! I'm here to assist with your shopping needs. What are you looking for?",
     "Hey! Ready to explore some amazing products? Just tell me what you're interested in.",
 ]
 
-# -------------------------------------------------
-# Helper functions
-# -------------------------------------------------
 def get_intent(query: str) -> dict:
-    """Intent classification – with rule override for common product terms."""
+    """Intent classification with strong product override (kept as allowed fallback)."""
+    q_lower = query.lower()
+
+    # Check for product-related keywords first
+    if any(keyword in q_lower for keyword in PRODUCT_KEYWORDS):
+        logger.info(f"🎯 Product keyword detected, forcing product_search")
+        return {"label": "product_search", "confidence": 0.95}
+
+    # Use ML model
     intent_model = app_state.get("intent_model")
     if intent_model:
         try:
             result = intent_model.predict(query)
-            label = result["intent"]
-            conf = result["confidence"]
-
-            # Override if needed
-            if label == "chitchat" and conf > 0.6:
-                product_triggers = [
-                    "face wash", "facewash", "lip balm", "lipbalm",
-                    "laptop", "jacket", "shoe", "shoes", "cream", "serum",
-                    "hair oil", "sunscreen", "spf", "watch", "phone",
-                    "kurti", "kurta", "ethnic", "sweater", "tshirt", "shirt",
-                    "boot", "boots", "sneaker", "gaming", "iphone", "samsung"
-                ]
-                if any(trigger in query.lower() for trigger in product_triggers):
-                    logger.info(f"⚠️ Overriding chitchat → product_search")
-                    label = "product_search"
-                    conf = 0.6
-
-            return {"label": label, "confidence": conf}
+            return {"label": result["intent"], "confidence": result["confidence"]}
         except Exception as e:
             logger.error(f"Intent model error: {e}")
 
-    # Rule-based fallback
-    q = query.lower()
-    if any(greet in q for greet in ["hi", "hello", "hey", "greetings"]):
+    # Simple chitchat fallback (allowed)
+    if any(greet in q_lower for greet in ["hi", "hello", "hey", "greetings"]):
         return {"label": "chitchat", "confidence": 0.9}
+
     return {"label": "product_search", "confidence": 0.8}
 
-
 def format_products(products: list) -> List[ProductResponse]:
-    """Convert product dicts to Pydantic model, converting price from cents to dollars."""
     seen = set()
     unique_products = []
     for p in products:
@@ -186,23 +160,13 @@ def format_products(products: list) -> List[ProductResponse]:
             unique_products.append(p)
 
     formatted = []
-    for p in unique_products[:8]:  # still cap at 8 as safety
-        # Convert price from cents to dollars for display
-        price_cents = p.get("price", 0)
-        # Handle both integer cents and float dollars
-        if price_cents > 1000:  # Likely already in cents (e.g., 8999)
-            price_dollars = price_cents / 100
-        else:
-            price_dollars = price_cents  # Already in dollars
-        
-        # Format to 2 decimal places
-        price_dollars = round(price_dollars, 2)
-        
+    for p in unique_products[:8]:
+        price = p.get("price", 0)
         formatted.append(ProductResponse(
             id=str(p.get("id", "")),
             name=p.get("name", "Unknown"),
             category=p.get("category", "Uncategorized"),
-            price=price_dollars,
+            price=round(price, 2),
             rating=float(p.get("rating")) if p.get("rating") else None,
             description=p.get("description", ""),
             image_url=p.get("image_url") or p.get("image"),
@@ -212,7 +176,6 @@ def format_products(products: list) -> List[ProductResponse]:
         ))
     return formatted
 
-
 def generate_response(query: str, products: list) -> str:
     if not products:
         return f"Sorry, I couldn't find anything for '{query}'. Try different words?"
@@ -220,10 +183,6 @@ def generate_response(query: str, products: list) -> str:
         return f"I found the perfect match: {products[0].name}"
     return f"I found {len(products)} great options for '{query}'. Here are the top picks:"
 
-
-# -------------------------------------------------
-# Endpoints
-# -------------------------------------------------
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
@@ -245,41 +204,40 @@ async def chat(request: ChatRequest):
                 query=query,
             )
 
-        # Process query
+        # Process query with full ML pipeline
         qp = app_state.get("query_processor")
-        if qp:
-            analysis = qp.process(query)
-            search_query = analysis.get("corrected") or analysis.get("normalized") or query
-            product_entities = analysis["product_entities"]
-            brand = analysis["brand"]
-            exact_name = analysis["exact_product_match"]
-            constraints = analysis.get("constraints", {})
-        else:
-            search_query = query
-            product_entities = []
-            brand = None
-            exact_name = None
-            constraints = {}
+        if not qp:
+            raise HTTPException(status_code=503, detail="Query processor not ready")
 
-        logger.info(f"🔍 Search query: '{search_query}', Entities: {product_entities}, "
-                   f"Brand: {brand}, Exact: {exact_name}, Constraints: {constraints}")
+        analysis = qp.process(query)
+        logger.info(f"🔍 Query analysis: {analysis}")
+
+        search_query = query
+        brand = analysis.get('brand')
+        search_category = analysis.get('search_category')
+        subcategory_keywords = analysis.get('subcategory_keywords', [])
+        constraints = analysis.get('constraints', {})
+
+        logger.info(f"🔍 Search params:")
+        logger.info(f"   Brand: {brand}")
+        logger.info(f"   Category: {search_category}")
+        logger.info(f"   Subcategory keywords: {subcategory_keywords}")
+        logger.info(f"   Constraints: {constraints}")
 
         search_engine = app_state.get("search_engine")
         if not search_engine:
             raise HTTPException(status_code=503, detail="Search engine not ready")
 
-        # 🔥 NEW: If the query asks for sorting by rating (maximum/minimum), show only top 3
-        top_k = 3 if 'rating_sort' in constraints else 10
-
         results = search_engine.search(
             query=search_query,
-            product_entities=product_entities,
             brand=brand,
-            exact_name=exact_name,
             constraints=constraints,
-            top_k=top_k,
+            search_category=search_category,
+            subcategory_keywords=subcategory_keywords,
+            top_k=10,
         )
 
+        logger.info(f"🔎 Search engine returned {len(results)} raw results")
         formatted = format_products(results)
         response_text = generate_response(query, formatted)
 
@@ -296,7 +254,6 @@ async def chat(request: ChatRequest):
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/health")
 def health():
     return {
@@ -305,44 +262,14 @@ def health():
         "intent_model": app_state.get("intent_model") is not None,
         "ner_model": app_state.get("ner_model") is not None,
         "search_engine": app_state.get("search_engine") is not None,
-        "refresh_interval": config.REFRESH_INTERVAL,
-        "api_endpoints": config.ECOMMERCE_API_URLS,
     }
-
 
 @app.get("/")
 def root():
     return {
         "message": "Conversational Commerce API",
         "catalog_source": "APIs" if config.ECOMMERCE_API_URLS else "static file",
-        "refresh_interval_sec": config.REFRESH_INTERVAL,
-        "spelling_correction": True,
-        "intent_override": True,
-        "attribute_based_filtering": True,
     }
-
-
-@app.post("/admin/refresh")
-async def admin_refresh():
-    logger.info("🔄 Manual refresh triggered")
-    try:
-        new_products = await load_products(force_refresh=True)
-        app_state["products_data"] = new_products
-
-        from search_engine import SearchEngine
-        app_state["search_engine"] = SearchEngine(new_products)
-
-        if app_state.get("ner_model"):
-            app_state["query_processor"] = QueryProcessor(
-                app_state["ner_model"],
-                new_products
-            )
-
-        return {"status": "success", "product_count": len(new_products)}
-    except Exception as e:
-        logger.error(f"Manual refresh failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 
 if __name__ == "__main__":
     uvicorn.run(app, host=config.API_HOST, port=config.API_PORT)

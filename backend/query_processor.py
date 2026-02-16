@@ -3,72 +3,103 @@ import logging
 from typing import List, Dict, Any, Optional
 from rapidfuzz import fuzz, process
 
-from text_normalizer import TextNormalizer, nlp  # shared spaCy model
+from text_normalizer import TextNormalizer
 from ner_model import MLNERModel
+from price_rating_predictor import HybridConstraintPredictor
 
 logger = logging.getLogger(__name__)
 
 
 class QueryProcessor:
-    # Words that should NEVER be corrected (attribute keywords)
-    PROTECTED_WORDS = {
-        # Rating related
-        "rating", "ratings", "rated", "rate", "reviews", "review", 
-        "best", "top", "highest", "high", "better", "good", "great", "excellent",
-        "worst", "bad", "poor", "lowest", "least", "minimum", "maximum",
-        # Price related
-        "cheapest", "cheap", "expensive", "price", "prices", "cost",
-        "lowest", "low", "least", "most", "under", "over", "above", "below",
-        "budget", "affordable", "premium", "luxury", "reasonable",
-        # Quality related
-        "durable", "sturdy", "quality", "reliable", "perfect",
-        # General
-        "with", "and", "for", "the", "a", "an", "find", "show", "me",
-        "want", "need", "looking", "get", "buy", "purchase",
-        # Added to preserve rating phrases
-        "atleast", "atmost",
-    }
-
-    # Common product terms (these ARE product names, not attributes)
-    COMMON_PRODUCT_TERMS = {
-        # Footwear
-        "shoes", "sneakers", "boots", "sandals", "flats", "heels", "loafers", "footwear",
-        # Tops & jackets
-        "jacket", "jackets", "coat", "coats", "hoodie", "sweater", "sweaters",
-        "shirt", "shirts", "t-shirt", "tshirt", "blouse", "top",
-        # Bottoms
-        "pants", "jeans", "trousers", "shorts", "skirt", "skirts", "dress", "dresses",
-        # Bags
-        "bag", "bags", "backpack", "backpacks", "purse", "tote", "duffel",
-        # Beauty & personal care
-        "lipstick", "lipbalm", "lip balm", "sunscreen", "spf",
-        "shampoo", "conditioner", "mask", "cream", "lotion", "serum",
-        "face wash", "facewash", "body wash", "hair oil",
+    # Enhanced category mapping with direct entries and common misspellings
+    CATEGORY_MAPPING = {
         # Electronics
-        "laptop", "laptops", "phone", "phones", "tablet", "tablets", 
-        "headphones", "speaker", "speakers", "watch", "watches",
-        "smartwatch", "smartwatches",
+        "headphone": "headphones", "headphones": "headphones", "hedphones": "headphones",
+        "earbud": "headphones", "earbuds": "headphones",
+        "headset": "headphones", "airpods": "headphones",
+        "smartphone": "smartphones", "smartphones": "smartphones",
+        "phone": "smartphones", "phones": "smartphones",
+        "iphone": "smartphones", "galaxy": "smartphones",
+        "laptop": "laptops", "laptops": "laptops", "labtop": "laptops",
+        "macbook": "laptops", "notebook": "laptops",
+        "gaming laptop": "laptops", "gaming labtop": "laptops",
+        "gaming laptops": "laptops",
+        "tablet": "tablets", "tablets": "tablets",
+        "ipad": "tablets",
+        "camera": "cameras", "cameras": "cameras",
+        "dslr": "cameras",
+        "watch": "watches", "watches": "watches",
+        "smartwatch": "watches", "smartwatches": "watches",
+        # Gaming
+        "gaming console": "gaming consoles", "console": "gaming consoles",
+        "playstation": "gaming consoles", "xbox": "gaming consoles",
+        "nintendo": "gaming consoles",
+        "gaming accessory": "gaming accessories", "gaming accessories": "gaming accessories",
+        "gaming mouse": "gaming accessories", "gaming keyboard": "gaming accessories",
+        "gaming headset": "gaming accessories",
+        # Clothing - Men
+        "men's shirt": "shirts", "men shirt": "shirts",
+        "formal shirt": "shirts", "dress shirt": "shirts",
+        "oxford shirt": "shirts",
+        "men's jeans": "jeans", "men jeans": "jeans",
+        "denim jeans": "jeans", "jeenz": "jeans",
+        "jeans": "jeans",
+        "men's jacket": "jackets", "leather jacket": "jackets",
+        "bomber jacket": "jackets",
+        # Clothing - Women
+        "women's dress": "dresses", "women dress": "dresses",
+        "summer dress": "dresses", "evening gown": "dresses",
+        "party dress": "dresses",
+        # General clothing terms
+        "dress": "dresses", "dresses": "dresses",
+        "sweater": "sweaters", "sweaters": "sweaters",
+        "shirt": "shirts", "shirts": "shirts",
+        "jacket": "jackets", "jackets": "jackets", "jackt": "jackets",
+        "hoodie": "hoodies", "hoodies": "hoodies",
+        # Footwear
+        "shoe": "footwear", "shoes": "footwear",
+        "running shoe": "footwear", "running shoes": "footwear",
+        "sneaker": "footwear", "sneakers": "footwear",
+        "boot": "footwear", "boots": "footwear",
+        "hiking boot": "footwear", "hiking boots": "footwear",
+        # Cosmetics
+        "lipstick": "makeup", "matte lipstick": "makeup",
+        "mascara": "makeup", "eyeliner": "makeup",
+        "foundation": "makeup",
+        # Skincare
+        "face wash": "skin care", "facewash": "skin care",
+        "face cream": "skin care", "facecream": "skin care",
+        "moisturizer": "skin care", "serum": "skin care",
+        "sunscreen": "skin care", "spf": "skin care",
+        # Ethnic Wear
+        "kurta": "women ethnic wear", "ethnic wear": "women ethnic wear",
+        "saree": "women ethnic wear", "anarkali": "women ethnic wear",
+        "kurti": "women ethnic wear",
+        # Kids
+        "kids wear": "kids wear", "kids clothing": "kids wear",
+        "baby clothing": "baby clothing",
     }
 
-    # Static brand keywords
+    # Subcategory keywords (e.g., for gaming laptops)
+    SUBCATEGORY_KEYWORDS = {
+        "gaming laptop": ["gaming", "rog", "legion", "katana", "victus", "zephyrus", "msi", "asus rog", "lenovo legion", "hp victus", "msi katana"],
+        "hiking boots": ["hiking", "waterproof", "gore-tex"],
+        "casual slip ons": ["casual", "slip on", "slip-ons"],
+    }
+
     BRAND_KEYWORDS = {
-        "apple": ["iphone", "macbook", "ipad", "apple watch", "apple"],
+        "apple": ["iphone", "macbook", "ipad", "apple watch", "apple", "airpods"],
         "samsung": ["samsung", "galaxy"],
-        "hp": ["hp", "hewlett packard"],
-        "dell": ["dell"],
-        "lenovo": ["lenovo", "thinkpad"],
-        "asus": ["asus", "rog"],
-        "msi": ["msi"],
-        "sony": ["sony", "playstation"],
-        "microsoft": ["microsoft", "xbox", "surface"],
-        "nintendo": ["nintendo"],
         "google": ["google", "pixel"],
-        "oneplus": ["oneplus"],
-        "xiaomi": ["xiaomi", "redmi"],
-        "nothing": ["nothing"],
+        "sony": ["sony", "playstation", "wh-1000xm"],
+        "bose": ["bose", "quietcomfort"],
+        "dell": ["dell", "xps"],
+        "hp": ["hp"],
+        "lenovo": ["lenovo", "thinkpad"],
+        "logitech": ["logitech", "mx master"],
+        "canon": ["canon"],
         "nike": ["nike"],
         "adidas": ["adidas"],
-        "puma": ["puma"],
     }
 
     def __init__(self, ner_model: MLNERModel, products: List[Dict[str, Any]]):
@@ -76,359 +107,121 @@ class QueryProcessor:
         self.products = products
         self.normalizer = TextNormalizer()
 
-        # Build vocabulary for spelling correction (only product names)
-        self.product_names = []
-        self.product_terms = set()  # All product-related terms
+        self._build_product_vocabulary()
+        self._build_brand_lookup()
 
-        # Add product names
-        for p in products:
+        # ML‑based constraint predictor – will fail if model missing (no fallback)
+        self.ml_predictor = HybridConstraintPredictor()
+        logger.info("✅ Hybrid constraint predictor ready")
+
+    def _build_product_vocabulary(self):
+        self.product_names = []
+        self.product_by_category = {}
+
+        for p in self.products:
             name = p.get("name", "").lower().strip()
+            cat = p.get("category", "").lower().strip()
             if name:
                 self.product_names.append(name)
-                self.product_terms.add(name)
-                # Add individual words from product names (for partial matching)
-                for word in name.split():
-                    if len(word) >= 3 and word not in self.PROTECTED_WORDS:
-                        # Check if it's not a number
-                        if not word.replace('.', '').isdigit():
-                            self.product_terms.add(word)
-
-            # Add category and product type
-            cat = p.get("category", "").lower().strip()
             if cat:
-                self.product_terms.add(cat)
-                for word in cat.split():
-                    if len(word) >= 3 and word not in self.PROTECTED_WORDS:
-                        if not word.replace('.', '').isdigit():
-                            self.product_terms.add(word)
-
-            ptype = p.get("product_type", "").lower().strip()
-            if ptype:
-                self.product_terms.add(ptype)
-                for word in ptype.split():
-                    if len(word) >= 3 and word not in self.PROTECTED_WORDS:
-                        if not word.replace('.', '').isdigit():
-                            self.product_terms.add(word)
-
-        # Add common product terms
-        for term in self.COMMON_PRODUCT_TERMS:
-            self.product_terms.add(term)
-            for word in term.split():
-                if len(word) >= 3 and word not in self.PROTECTED_WORDS:
-                    if not word.replace('.', '').isdigit():
-                        self.product_terms.add(word)
+                if cat not in self.product_by_category:
+                    self.product_by_category[cat] = []
+                self.product_by_category[cat].append(p)
 
         self.product_names = list(set(self.product_names))
-        self.product_terms = list(self.product_terms)
-        self.product_terms_set = set(self.product_terms)
+        logger.info(f"📂 Built category index with keys: {list(self.product_by_category.keys())}")
 
-        logger.info(f"📚 Built product vocabulary: {len(self.product_names)} product names, "
-                    f"{len(self.product_terms)} total terms")
-
-        # Build reverse brand lookup
+    def _build_brand_lookup(self):
         self.brand_lookup = {}
         for brand, keywords in self.BRAND_KEYWORDS.items():
             for kw in keywords:
                 self.brand_lookup[kw] = brand
 
-    # ------------------------------------------------------------------
-    # 🔤 SMART SPELLING CORRECTION - Prioritise protected words
-    # ------------------------------------------------------------------
-    def _correct_spelling(self, text: str) -> str:
-        """Only correct words that look like misspelled product names or attribute words."""
-        if not text or len(text) < 3:
-            return text
+    def _map_to_category(self, text: str) -> Optional[str]:
+        """Map normalized query text to a category using exact and fuzzy matching."""
+        text_lower = text.lower()
+        logger.info(f"🔍 Mapping text: '{text_lower}'")
+        # Exact match in mapping keys
+        for keyword, category in self.CATEGORY_MAPPING.items():
+            if keyword in text_lower:
+                logger.info(f"🔍 Exact mapped '{keyword}' to '{category}'")
+                return category
 
-        words = text.lower().split()
-        corrected_words = []
-
+        # Fuzzy match on longer words (>=4 chars)
+        words = text_lower.split()
         for word in words:
-            # Never correct protected words if already correct
-            if word in self.PROTECTED_WORDS:
-                corrected_words.append(word)
+            if len(word) < 4:
                 continue
-
-            # Skip numbers
-            if word.replace('.', '').isdigit():
-                corrected_words.append(word)
-                continue
-
-            # Skip short words
-            if len(word) < 3:
-                corrected_words.append(word)
-                continue
-
-            # First, check against protected words (lower threshold)
-            protected_match = process.extractOne(
-                word,
-                self.PROTECTED_WORDS,
-                scorer=fuzz.ratio,
-                score_cutoff=70
-            )
-            if protected_match:
-                matched_word, score, _ = protected_match
-                logger.info(f"🔤 Protected word correction: '{word}' -> '{matched_word}' (score={score})")
-                corrected_words.append(matched_word)
-                continue
-
-            # Then check if it's already a known product term
-            if word in self.product_terms_set:
-                corrected_words.append(word)
-                continue
-
-            # Try to find close match in product terms (threshold 80)
             match = process.extractOne(
                 word,
-                self.product_terms,
-                scorer=fuzz.ratio,
-                score_cutoff=75   # lower cutoff to get candidates, then filter
+                list(self.CATEGORY_MAPPING.keys()),
+                scorer=fuzz.partial_ratio,   # better for substrings
+                score_cutoff=60               # lower threshold for misspellings
             )
             if match:
-                matched_word, score, _ = match
-                if score >= 80 and matched_word not in self.PROTECTED_WORDS:
-                    if not matched_word.replace('.', '').isdigit():
-                        logger.info(f"🔤 Spelling correction: '{word}' -> '{matched_word}' (score={score})")
-                        corrected_words.append(matched_word)
-                    else:
-                        corrected_words.append(word)
-                else:
-                    corrected_words.append(word)
-            else:
-                corrected_words.append(word)
+                matched_word, score = match[0], match[1]
+                logger.info(f"🔍 Fuzzy mapped '{word}' -> '{matched_word}' ({score})")
+                return self.CATEGORY_MAPPING[matched_word]
 
-        return " ".join(corrected_words)
+        # Fallback: direct substring match against actual product categories
+        if hasattr(self, 'product_by_category') and self.product_by_category:
+            categories = list(self.product_by_category.keys())
+            # Try to find any category that appears in the text
+            for cat in categories:
+                if cat in text_lower:
+                    logger.info(f"🔍 Direct category substring match: '{cat}'")
+                    return cat
+            # Fuzzy match against categories
+            match = process.extractOne(text_lower, categories, scorer=fuzz.partial_ratio, score_cutoff=70)
+            if match:
+                matched_cat = match[0]
+                logger.info(f"🔍 Fuzzy matched to actual category: '{matched_cat}'")
+                return matched_cat
 
-    # ------------------------------------------------------------------
-    # 💰 PRICE CONSTRAINT EXTRACTION – requires explicit currency indicator
-    # ------------------------------------------------------------------
-    def _extract_price_constraints(self, text: str) -> Dict[str, Any]:
-        """
-        Extract price constraints only when the number is accompanied by
-        a dollar sign ($), the word 'dollar(s)', or 'price'.
-        This prevents misinterpreting ratings (e.g., "above 4.8") as prices.
-        """
-        constraints = {}
+        logger.info("🔍 No category mapping found")
+        return None
+
+    def _extract_brand(self, text: str) -> Optional[str]:
         text_lower = text.lower()
+        for kw, brand in self.brand_lookup.items():
+            if kw in text_lower:
+                logger.info(f"🏷️ Brand match: '{kw}' -> '{brand}'")
+                return brand
+        return None
 
-        # Patterns that require a dollar sign or the word 'dollar(s)' or 'price'
-        price_patterns = [
-            # under $50, under 50 dollars, under 50 price
-            (r'(?:under|less than|below|max(?:imum)?(?:\s+price)?)\s+\$?(\d+(?:\.\d+)?)(?:\s+dollars?|\s+price\b)', 'max'),
-            # over $50, over 50 dollars, over 50 price
-            (r'(?:over|above|more than|min(?:imum)?(?:\s+price)?)\s+\$?(\d+(?:\.\d+)?)(?:\s+dollars?|\s+price\b)', 'min'),
-            # between $50 and $100, between 50 and 100 dollars
-            (r'between\s+\$?(\d+(?:\.\d+)?)\s+and\s+\$?(\d+(?:\.\d+)?)(?:\s+dollars?)?\b', 'between'),
-            # explicit $50 (dollar sign alone) - we'll ignore for now
-        ]
-
-        for pattern, typ in price_patterns:
-            matches = re.finditer(pattern, text_lower)
-            for match in matches:
-                if typ == 'max':
-                    constraints['price_max'] = float(match.group(1)) * 100
-                elif typ == 'min':
-                    constraints['price_min'] = float(match.group(1)) * 100
-                elif typ == 'between':
-                    constraints['price_min'] = float(match.group(1)) * 100
-                    constraints['price_max'] = float(match.group(2)) * 100
-
-        return constraints
-
-    # ------------------------------------------------------------------
-    # ⭐ RATING CONSTRAINT EXTRACTION – handles all rating phrases
-    # ------------------------------------------------------------------
-    def _extract_rating_constraints(self, text: str) -> Dict[str, Any]:
-        """
-        Extract rating constraints like:
-        - rated above 4.5
-        - above 4.5
-        - 4.5 stars and above
-        - > 4.5
-        - 4.5+ rating
-        - minimum rating 4.5
-        - rating 4.6
-        - rated 4.9
-        - at least 4.5, atleast 4.5, rating at least 4.5, rating atleast 4.5, etc.
-        - rating at least of 4.5 (with optional "of")
-        - at most 4.5, atmost 4.5, rating at most 4.5, etc. (inclusive maximum)
-        Only numbers between 0 and 5 (inclusive) are considered valid ratings.
-        Uses a small epsilon for exclusive comparisons.
-        """
-        constraints = {}
+    def _extract_subcategory_keywords(self, text: str) -> List[str]:
         text_lower = text.lower()
-        EPS = 0.001   # small offset for exclusive comparisons
+        keywords = []
+        for subcat, kw_list in self.SUBCATEGORY_KEYWORDS.items():
+            if subcat in text_lower:
+                logger.info(f"🎮 Subcategory '{subcat}' detected, adding keywords: {kw_list}")
+                keywords.extend(kw_list)
+        return list(set(keywords))
 
-        rating_patterns = [
-            # "above rating 4.5", "above 4.5" (exclusive)
-            (r'(?:above|over|>|>=|≥|greater than|more than)\s+(?:rating\s+)?(\d+(?:\.\d+)?)', True, True),
-            (r'(?:below|under|<|<=|≤|less than)\s+(?:rating\s+)?(\d+(?:\.\d+)?)', False, True),
-            # "rating above 4.5", "rated above 4.5"
-            (r'(?:rated|rating)\s+(?:above|over|>|>=|≥|greater than|more than)\s+(\d+(?:\.\d+)?)', True, True),
-            (r'(?:rated|rating)\s+(?:below|<|<=|≤|less than)\s+(\d+(?:\.\d+)?)', False, True),
-            # "4.5+" inclusive
-            (r'(\d+(?:\.\d+)?)\s*\+\s*(?:stars?|rating)', True, False),
-            # "4.5 and above" inclusive
-            (r'(\d+(?:\.\d+)?)\s*(?:stars?|rating)\s*(?:and above|or higher|or more)', True, False),
-            # "at least 4.5", "atleast 4.5", and variations with optional "of"
-            (r'(?:at\s+least|atleast)\s+(?:rating\s+)?(?:of\s+)?(\d+(?:\.\d+)?)', True, False),
-            (r'(?:rating|rated)\s+(?:at\s+least|atleast)\s+(?:of\s+)?(\d+(?:\.\d+)?)', True, False),
-            # "at most 4.5", "atmost 4.5" (inclusive maximum)
-            (r'(?:at\s+most|atmost)\s+(?:rating\s+)?(?:of\s+)?(\d+(?:\.\d+)?)', False, False),
-            (r'(?:rating|rated)\s+(?:at\s+most|atmost)\s+(?:of\s+)?(\d+(?:\.\d+)?)', False, False),
-            # "minimum rating 4.5" inclusive
-            (r'(?:minimum|min)\s*(?:rating|stars?)\s*(?:of)?\s*(\d+(?:\.\d+)?)', True, False),
-            (r'(?:maximum|max)\s*(?:rating|stars?)\s*(?:of)?\s*(\d+(?:\.\d+)?)', False, False),
-            # "rating 4.6" inclusive
-            (r'(?:rated|rating)\s*[:\s]*(\d+(?:\.\d+)?)', True, False),
-        ]
-
-        for pattern, is_min, exclusive in rating_patterns:
-            matches = re.finditer(pattern, text_lower)
-            for match in matches:
-                num_str = match.group(1)
-                if not num_str:
-                    continue
-                try:
-                    val = float(num_str)
-                except ValueError:
-                    continue
-                if 0 <= val <= 5:
-                    if is_min:
-                        constraints['rating_min'] = val + (EPS if exclusive else 0)
-                    else:
-                        constraints['rating_max'] = val - (EPS if exclusive else 0)
-                    logger.info(f"📊 Extracted {'min' if is_min else 'max'}: {val} "
-                                f"{'(exclusive)' if exclusive else '(inclusive)'}")
-
-        return constraints
-
-    # ------------------------------------------------------------------
-    # 🔽 SORT PREFERENCE EXTRACTION – now includes "least rating", "lowest rating", etc.
-    # ------------------------------------------------------------------
-    def _extract_sort_preferences(self, text: str) -> Dict[str, str]:
-        """Extract sorting preferences (highest rating, cheapest, etc.)"""
-        preferences = {}
-        text_lower = text.lower()
-        
-        # Rating preferences – descending (best/highest/maximum)
-        if re.search(r'\b(highest rating|best rating|best rated|top rated|best reviews|best|maximum rating)\b', text_lower):
-            preferences['rating_sort'] = 'desc'
-        # Rating preferences – ascending (lowest/least/minimum/worst)
-        elif re.search(r'\b(lowest rating|least rating|minimum rating|worst rating|worst rated|lowest rated|least rated|minimum rated)\b', text_lower):
-            preferences['rating_sort'] = 'asc'
-        
-        # Price preferences
-        if re.search(r'\b(cheapest|lowest price|most affordable|budget)\b', text_lower):
-            preferences['price_sort'] = 'asc'
-        elif re.search(r'\b(most expensive|highest price|premium|luxury)\b', text_lower):
-            preferences['price_sort'] = 'desc'
-        
-        return preferences
-    # ------------------------------------------------------------------
-    # 🔍 MAIN PROCESSING
-    # ------------------------------------------------------------------
     def process(self, query: str) -> Dict[str, Any]:
         original = query.strip()
-        normalized = self.normalizer.normalize(original)
-        lemmatized_full = self.normalizer.lemmatize(original)
+        # Normalize a copy for category/brand mapping (remove stopwords, lemmatize)
+        normalized_for_mapping = self.normalizer.normalize(original, for_semantic=True)
 
-        # Apply spelling correction (now prioritises protected words)
-        corrected = self._correct_spelling(original)
-        
-        # For NER, remove attribute words but keep numbers that might be part of product names (like "iPhone 15")
-        words = corrected.split()
-        filtered_for_ner = []
-        for w in words:
-            # Keep numbers (they might be part of product names like "iPhone 15")
-            if w.replace('.', '').isdigit():
-                # Check if it's likely a rating (between 1 and 5)
-                try:
-                    num = float(w)
-                    if 1 <= num <= 5:
-                        # This is probably a rating, don't include in NER
-                        continue
-                except:
-                    pass
-                filtered_for_ner.append(w)
-            elif w not in self.PROTECTED_WORDS:
-                filtered_for_ner.append(w)
-        
-        text_for_ner = " ".join(filtered_for_ner) if filtered_for_ner else corrected
-        
-        # Extract product entities
-        ner_result = self.ner.extract(text_for_ner)
-        raw_entities = [e["text"] for e in ner_result.get("products", [])]
+        # Extract category using normalized text
+        search_category = self._map_to_category(normalized_for_mapping)
 
-        # Fallback entity extraction (only if NER found nothing)
-        if not raw_entities:
-            doc = nlp(text_for_ner.lower())
-            for token in doc:
-                if token.pos_ in ("NOUN", "PROPN") and len(token.text) >= 3:
-                    if token.text.lower() in self.COMMON_PRODUCT_TERMS:
-                        raw_entities.append(token.text.lower())
-                        logger.info(f"🧠 Fallback entity: '{token.text}'")
-            if raw_entities:
-                raw_entities = list(set(raw_entities))
+        # Extract brand (still works with normalized)
+        brand = self._extract_brand(normalized_for_mapping)
 
-        # Clean entities - remove any that are just numbers or protected words
-        cleaned_entities = []
-        for ent in raw_entities:
-            if ent and not ent.replace('.', '').isdigit() and ent not in self.PROTECTED_WORDS:
-                cleaned_entities.append(ent)
-        
-        lemmatised_entities = list({
-            self.normalizer.lemmatize(ent) for ent in cleaned_entities if ent
-        })
+        # Extract subcategory keywords (from original, but normalized may also work)
+        subcategory_keywords = self._extract_subcategory_keywords(original)
 
-        # Brand detection
-        brand = None
-        query_lower = original.lower()
-        for kw, brand_name in self.brand_lookup.items():
-            if kw in query_lower:
-                brand = brand_name
-                logger.info(f"🏷️ Detected brand: {brand}")
-                break
+        # Get constraints from the hybrid predictor (uses original query to preserve price words)
+        constraints = self.ml_predictor.predict(original)
 
-        # Fuzzy exact-product match
-        exact_match = None
-        candidates_to_try = [
-            corrected,
-            normalized,
-            lemmatized_full,
-            " ".join(cleaned_entities) if cleaned_entities else None
-        ]
-        
-        for candidate in candidates_to_try:
-            if not candidate or len(candidate) < 3:
-                continue
-            result = process.extractOne(
-                candidate,
-                self.product_names,
-                scorer=fuzz.token_sort_ratio,
-                score_cutoff=75
-            )
-            if result:
-                exact_match = result[0]
-                logger.info(f"🔍 Fuzzy product match: '{candidate}' -> '{exact_match}' (score={result[1]})")
-                break
-
-        # Extract constraints and preferences from the corrected query (so that fixed spelling works)
-        price_constraints = self._extract_price_constraints(corrected)
-        rating_constraints = self._extract_rating_constraints(corrected)
-        sort_preferences = self._extract_sort_preferences(corrected)
-        
-        # Combine
-        constraints = {**price_constraints, **rating_constraints, **sort_preferences}
+        logger.info(f"📝 Final: category={search_category}, brand={brand}, subcategory_keywords={subcategory_keywords}, constraints={constraints}")
 
         return {
             "original": original,
-            "corrected": corrected,
-            "normalized": normalized,
-            "lemmatized": lemmatized_full,
-            "product_entities": lemmatised_entities,
-            "product_entities_raw": cleaned_entities,
+            "normalized": normalized_for_mapping,
             "brand": brand,
-            "exact_product_match": exact_match,
-            "keywords": normalized.split(),
+            "search_category": search_category,
+            "subcategory_keywords": subcategory_keywords,
             "constraints": constraints,
         }
