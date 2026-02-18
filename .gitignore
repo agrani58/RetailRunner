@@ -1,0 +1,63 @@
+# ==============================
+# Node / Frontend
+# ==============================
+node_modules/
+dist/
+.vite/
+.env
+*.log
+
+# MacOS
+.DS_Store
+
+# ==============================
+# Python / Backend
+# ==============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.env
+.env
+*.sqlite3
+*.log
+*.egg-info/
+venv/
+*.pyc
+
+# ==============================
+# Editor / IDE
+# ==============================
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# ==============================
+# Others
+# ==============================
+*.swp
+# ENV
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+backend/venv/
+
+# Node
+node_modules/
+dist/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+# Ignore backend models and data
+/backend/models/**
+/backend/data/**

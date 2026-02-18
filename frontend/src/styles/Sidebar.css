@@ -1,0 +1,130 @@
+.sidebar {
+  width: 72px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px 0;
+
+  position: relative;
+  z-index: 100; /* ↑ increase base stacking level */
+}
+
+/* ---------------------------------- */
+
+.sidebar-top,
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+/* ---------------------------------- */
+
+.sidebar-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--icon);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sidebar-icon:hover {
+  background: var(--bg-soft);
+  color: var(--accent);
+}
+
+.sidebar-icon svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------------------------------- */
+
+.user-menu-container {
+  position: relative;
+}
+
+/* 🔥 IMPORTANT FIX */
+.user-popover {
+  position: fixed; /* was absolute */
+  left: 88px;      /* 72px sidebar + padding */
+  bottom: 24px;    /* align nicely from bottom */
+
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
+  min-width: 220px;
+
+  z-index: 9999; /* guarantee top layer */
+  pointer-events: auto;
+
+  animation: popIn 0.15s ease-out;
+}
+
+/* ---------------------------------- */
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---------------------------------- */
+
+.user-email {
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text);
+  word-break: break-all;
+}
+
+.user-popover-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-profile-btn,
+.logout-btn {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-size: 14px;
+  transition: background 0.15s ease;
+}
+
+.edit-profile-btn:hover,
+.logout-btn:hover {
+  background: var(--bg-soft);
+}
+
+.logout-btn {
+  color: #ef4444;
+}

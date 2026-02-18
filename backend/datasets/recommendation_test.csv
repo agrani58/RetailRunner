@@ -1,0 +1,436 @@
+query,intent_type,price_min,price_max,price_currency,rating_min,rating_max,rating_qualitative,sort_type,sort_direction
+"show me products under 50 dollars",price_max,0,50,USD,,,,,
+"find cheapest items available",price_sort,,,,,,,price,asc
+"products between 100 and 200 dollars",price_range,100,200,USD,,,,,
+"i want the most expensive products in the store",price_sort,,,,,,,price,desc
+"show me items with maximum price of 30",price_max,0,30,USD,,,,,
+"products with minimum price of 500",price_min,500,,USD,,,,,
+"budget friendly stuff under 40 dollars",price_max,0,40,USD,,,,,
+"premium items over 1000 dollars",price_min,1000,,USD,,,,,
+"affordable things less than 25 dollars",price_max,0,25,USD,,,,,
+"luxury goods above 2000",price_min,2000,,USD,,,,,
+"show me products under Rs 2000",price_max,0,2000,NPR,,,,,
+"cheapest items under 15000 NPR",price_max,0,15000,NPR,,,,"price",asc
+"products between Rs 5000 and Rs 10000",price_range,5000,10000,NPR,,,,,
+"most expensive items above Rs 50000",price_min,50000,,NPR,,,,"price",desc
+"products with maximum price of Rs 3000",price_max,0,3000,NPR,,,,,
+"minimum price 1000 rupees",price_min,1000,,NPR,,,,,
+"products rated above 4.5",rating_min,,,,,4.5,,,
+"show me items with rating at least 4.8",rating_min,,,,,4.8,,,
+"best rated products in the catalog",rating_sort,,,,,,,rating,desc
+"products with rating below 3",rating_max,,,,,3,,,
+"minimum rating 4.0",rating_min,,,,,4.0,,,
+"worst rated items available",rating_sort,,,,,,,rating,asc
+"at least 4.5 star rating",rating_min,,,,,4.5,,,
+"rating above 4.7",rating_min,,,,,4.7,,,
+"products with 4 stars and above",rating_min,,,,,4.0,,,
+"highly recommended items",rating_min,,,,,4.5,good,,
+"good quality products",rating_min,,,,,4.0,good,,
+"excellent rated merchandise",rating_min,,,,,4.8,excellent,,
+"poorly reviewed things",rating_max,,,,,2.0,poor,,
+"average quality stuff",rating_min,,,,,3.0,average,,
+"decent rating products",rating_min,,,,,3.5,decent,,
+"cheapest items with good quality",combined,,,,4.0,good,price,asc
+"best products with maximum price 1000",price_max,0,1000,USD,4.5,excellent,,
+"least expensive but good quality",combined,,,,4.0,good,price,asc
+"most expensive with excellent reviews",combined,,,,4.8,excellent,price,desc
+"budget friendly with great rating",combined,,,,4.5,good,price,asc
+"affordable and well rated",combined,,,,4.5,good,price,asc
+"premium stuff with best reviews",combined,,,,4.8,excellent,price,desc
+"cheapest under 50 with 4+ stars",price_max,0,50,USD,4.0,good,price,asc
+"items under 100 dollars with rating above 4.5",price_max,0,100,USD,4.5,,,
+"stuff under 30000 NPR with excellent rating",price_max,0,30000,NPR,4.8,excellent,,
+"best rated products under 25 dollars",price_max,0,25,USD,4.5,excellent,rating,desc
+"worst rated expensive stuff above 1000",price_min,1000,,USD,,,poor,rating,asc
+"cheapest with minimum 4.2 rating",price_min,,,,,4.2,,price,asc
+"most expensive with decent quality",combined,,,,3.5,decent,price,desc
+"top rated budget items under 100",price_max,0,100,USD,4.5,excellent,rating,desc
+"highly rated premium goods above 500",price_min,500,,USD,4.7,excellent,,
+"stuff with price less than 2000 and rating more than 4.5",price_max,0,2000,USD,4.5,,,
+"items above 100 with minimum rating 4.6",price_min,100,,USD,4.6,,,
+"cheapest items with at least 4 star rating",combined,,,,4.0,,price,asc
+"best value for money under 50",price_max,0,50,USD,4.3,good,rating,desc
+"show me the cheapest items under 600 dollars",price_max,0,600,USD,,,,"price",asc
+"i want the most expensive with rating above 4.8",price_min,1000,,USD,4.8,,price,desc
+"find me affordable with good rating under 80",price_max,0,80,USD,4.0,good,,
+"show premium with excellent reviews above 200",price_min,200,,USD,4.7,excellent,,
+"items between 50 and 150 with at least 4.4",price_range,50,150,USD,4.4,,,
+"budget under 10000 NPR with high rating",price_max,0,10000,NPR,4.5,good,,
+"luxury above 5000 dollars with best rating",price_min,5000,,USD,4.8,excellent,,
+"cheapest with rating above 4.3",price_min,,,,,4.3,,price,asc
+"most expensive with good rating",price_min,500,,USD,4.0,good,price,desc
+"under 30 dollars with excellent",price_max,0,30,USD,4.8,excellent,,
+"above 200 with decent",price_min,200,,USD,3.5,decent,,
+"between 75 and 125 with above 4.6",price_range,75,125,USD,4.6,,,
+"cheapest with at least 4.5 rating",combined,,,,4.5,,price,asc
+"most expensive with good reviews",price_min,800,,USD,4.0,good,price,desc
+"budget friendly and highly rated",price_max,0,100,USD,4.5,good,,
+"premium quality with excellent rating",price_min,300,,USD,4.8,excellent,,
+"products under 40 with above 4.2",price_max,0,40,USD,4.2,,,
+"items above 250 with min 4.7",price_min,250,,USD,4.7,,,
+"affordable between 1000 and 2000 NPR with good",price_range,1000,2000,NPR,4.0,good,,
+"cheapest with excellent under 500",price_max,0,500,USD,4.8,excellent,price,asc
+"most expensive with at least 4.4",price_min,400,,USD,4.4,,price,desc
+"best rated under 60 dollars",price_max,0,60,USD,4.5,excellent,rating,desc
+"worst rated above 100 dollars",price_min,100,,USD,,,poor,rating,asc
+"highly rated budget under 50",price_max,0,50,USD,4.5,good,,
+"decently rated premium above 200",price_min,200,,USD,3.5,decent,,
+"price less than 1500 and rating more than 4.6",price_max,0,1500,USD,4.6,,,
+"under 2000 NPR with at least 4.3",price_max,0,2000,NPR,4.3,,,
+"cheapest with rating above 4.8",combined,,,,4.8,,price,asc
+"best value with good under 75",price_max,0,75,USD,4.0,good,rating,desc
+"show me under 1000 with above 4.5",price_max,0,1000,USD,4.5,,,
+"find between 20000 and 40000 NPR with excellent",price_range,20000,40000,NPR,4.8,excellent,,
+"i want above 150 dollars with good",price_min,150,,USD,4.0,good,,
+"show cheapest with at least 4.6",combined,,,,4.6,,price,asc
+"most expensive with decent",price_min,1000,,USD,3.5,decent,price,desc
+"budget friendly with above 4.2 under 80",price_max,0,80,USD,4.2,,,
+"premium with excellent under 500",price_max,0,500,USD,4.7,excellent,,
+"between 25 and 75 with at least 4.4",price_range,25,75,USD,4.4,,,
+"affordable under 150 with high rating",price_max,0,150,USD,4.5,good,,
+"luxury above 2000 with best",price_min,2000,,USD,4.8,excellent,,
+"cheapest with above 4.0",price_min,,,,,4.0,,price,asc
+"most expensive with excellent above 1000",price_min,1000,,USD,4.8,excellent,price,desc
+"under 20 with excellent",price_max,0,20,USD,4.8,excellent,,
+"above 300 with decent",price_min,300,,USD,3.5,decent,,
+"between 100 and 200 with above 4.7",price_range,100,200,USD,4.7,,,
+"cheapest with excellent under 800",price_max,0,800,USD,4.8,excellent,price,asc
+"most expensive with good",price_min,900,,USD,4.0,good,price,desc
+"budget friendly and highly rated under 60",price_max,0,60,USD,4.5,good,,
+"premium with excellent above 400",price_min,400,,USD,4.8,excellent,,
+"under 35 with above 4.1",price_max,0,35,USD,4.1,,,
+"above 275 with min 4.8",price_min,275,,USD,4.8,,,
+"affordable between 2000 and 4000 NPR with good",price_range,2000,4000,NPR,4.0,good,,
+"cheapest with excellent under 400",price_max,0,400,USD,4.8,excellent,price,asc
+"most expensive with at least 4.5",price_min,350,,USD,4.5,,price,desc
+"best rated under 55",price_max,0,55,USD,4.5,excellent,rating,desc
+"worst rated above 150",price_min,150,,USD,,,poor,rating,asc
+"highly rated budget under 45",price_max,0,45,USD,4.5,good,,
+"decently rated premium above 250",price_min,250,,USD,3.5,decent,,
+"price less than 1200 and rating more than 4.4",price_max,0,1200,USD,4.4,,,
+"under 3000 NPR with at least 4.6",price_max,0,3000,NPR,4.6,,,
+"cheapest with rating above 4.7",combined,,,,4.7,,price,asc
+"best value with good under 85",price_max,0,85,USD,4.0,good,rating,desc
+"find cheapest with rating above 4.5",combined,,,,4.5,,price,asc
+"show most expensive with at least 4.8",price_min,1000,,USD,4.8,,price,desc
+"i want budget under 30 with good",price_max,0,30,USD,4.0,good,,
+"give me premium above 500 with excellent",price_min,500,,USD,4.8,excellent,,
+"show between 80 and 120 with above 4.3",price_range,80,120,USD,4.3,,,
+"find affordable under 700 with high",price_max,0,700,USD,4.5,good,,
+"i need above 400 with at least 4.6",price_min,400,,USD,4.6,,,
+"show me under 2000 NPR with excellent",price_max,0,2000,NPR,4.8,excellent,,
+"cheapest with decent",combined,,,,3.5,decent,price,asc
+"most expensive with good",price_min,500,,USD,4.0,good,price,desc
+"under 40 with excellent",price_max,0,40,USD,4.8,excellent,,
+"above 600 with good",price_min,600,,USD,4.0,good,,
+"between 150 and 250 with above 4.9",price_range,150,250,USD,4.9,,,
+"cheapest with at least 4.4",combined,,,,4.4,,price,asc
+"most expensive with good above 2000",price_min,2000,,USD,4.0,good,price,desc
+"budget friendly and highly rated under 90",price_max,0,90,USD,4.5,good,,
+"premium with excellent above 700",price_min,700,,USD,4.8,excellent,,
+"under 45 with above 4.0",price_max,0,45,USD,4.0,,,
+"above 325 with min 4.5",price_min,325,,USD,4.5,,,
+"affordable between 500 and 1000 NPR with good",price_range,500,1000,NPR,4.0,good,,
+"cheapest with excellent under 300",price_max,0,300,USD,4.8,excellent,price,asc
+"most expensive with at least 4.2",price_min,400,,USD,4.2,,price,desc
+"best rated under 70",price_max,0,70,USD,4.5,excellent,rating,desc
+"worst rated above 200",price_min,200,,USD,,,poor,rating,asc
+"highly rated budget under 55",price_max,0,55,USD,4.5,good,,
+"decently rated premium above 350",price_min,350,,USD,3.5,decent,,
+"price less than 1800 and rating more than 4.2",price_max,0,1800,USD,4.2,,,
+"under 5000 NPR with at least 4.7",price_max,0,5000,NPR,4.7,,,
+"cheapest with rating above 4.9",combined,,,,4.9,,price,asc
+"best value with good under 95",price_max,0,95,USD,4.0,good,rating,desc
+"show cheapest with rating above 4.3",combined,,,,4.3,,price,asc
+"find most expensive with at least 4.8",price_min,900,,USD,4.8,,price,desc
+"i want budget under 80 with good",price_max,0,80,USD,4.0,good,,
+"give me premium above 800 with excellent",price_min,800,,USD,4.8,excellent,,
+"show between 90 and 110 with above 4.4",price_range,90,110,USD,4.4,,,
+"find affordable under 250 with high",price_max,0,250,USD,4.5,good,,
+"i need above 600 with at least 4.7",price_min,600,,USD,4.7,,,
+"show under 3000 NPR with excellent",price_max,0,3000,NPR,4.8,excellent,,
+"cheapest with good",combined,,,,4.0,good,price,asc
+"most expensive with decent",price_min,700,,USD,3.5,decent,price,desc
+"under 25 with excellent",price_max,0,25,USD,4.8,excellent,,
+"above 800 with good",price_min,800,,USD,4.0,good,,
+"between 110 and 130 with above 4.7",price_range,110,130,USD,4.7,,,
+"cheapest with at least 4.1",combined,,,,4.1,,price,asc
+"most expensive with good above 1500",price_min,1500,,USD,4.0,good,price,desc
+"budget friendly highly rated under 65",price_max,0,65,USD,4.5,good,,
+"premium excellent above 900",price_min,900,,USD,4.8,excellent,,
+"under 32 with above 3.9",price_max,0,32,USD,3.9,,,
+"above 375 with min 4.6",price_min,375,,USD,4.6,,,
+"affordable between 1000 and 3000 NPR with good",price_range,1000,3000,NPR,4.0,good,,
+"cheapest excellent under 450",price_max,0,450,USD,4.8,excellent,price,asc
+"most expensive with at least 4.3",price_min,450,,USD,4.3,,price,desc
+"best rated under 80",price_max,0,80,USD,4.5,excellent,rating,desc
+"worst rated above 250",price_min,250,,USD,,,poor,rating,asc
+"highly rated budget under 42",price_max,0,42,USD,4.5,good,,
+"decently rated premium above 400",price_min,400,,USD,3.5,decent,,
+"price less than 2200 and rating more than 4.5",price_max,0,2200,USD,4.5,,,
+"under 8000 NPR with at least 4.4",price_max,0,8000,NPR,4.4,,,
+"cheapest with rating above 4.6",combined,,,,4.6,,price,asc
+"best value good under 120",price_max,0,120,USD,4.0,good,rating,desc
+"find cheapest with excellent",combined,,,,4.8,excellent,price,asc
+"show most expensive with good",price_min,800,,USD,4.0,good,price,desc
+"i want budget under 200 with high",price_max,0,200,USD,4.5,good,,
+"give me premium above 1200 with excellent",price_min,1200,,USD,4.8,excellent,,
+"show between 50 and 100 with above 4.2",price_range,50,100,USD,4.2,,,
+"find affordable under 4000 NPR with good",price_max,0,4000,NPR,4.0,good,,
+"i need above 800 with at least 4.8",price_min,800,,USD,4.8,,,
+"show under 5000 NPR with excellent",price_max,0,5000,NPR,4.8,excellent,,
+"cheapest with decent",combined,,,,3.5,decent,price,asc
+"most expensive with good",price_min,1000,,USD,4.0,good,price,desc
+"under 15 with excellent",price_max,0,15,USD,4.8,excellent,,
+"above 1000 with good",price_min,1000,,USD,4.0,good,,
+"between 30 and 60 with above 4.5",price_range,30,60,USD,4.5,,,
+"cheapest with at least 4.2",combined,,,,4.2,,price,asc
+"most expensive with good above 3000",price_min,3000,,USD,4.0,good,price,desc
+"budget friendly highly rated under 150",price_max,0,150,USD,4.5,good,,
+"premium excellent above 1500",price_min,1500,,USD,4.8,excellent,,
+"under 28 with above 3.8",price_max,0,28,USD,3.8,,,
+"above 425 with min 4.7",price_min,425,,USD,4.7,,,
+"affordable under 2000 NPR with good",price_max,0,2000,NPR,4.0,good,,
+"cheapest excellent under 600",price_max,0,600,USD,4.8,excellent,price,asc
+"most expensive with at least 4.1",price_min,500,,USD,4.1,,price,desc
+"best rated under 90",price_max,0,90,USD,4.5,excellent,rating,desc
+"worst rated above 300",price_min,300,,USD,,,poor,rating,asc
+"highly rated budget under 38",price_max,0,38,USD,4.5,good,,
+"decently rated premium above 450",price_min,450,,USD,3.5,decent,,
+"price less than 3000 and rating more than 4.8",price_max,0,3000,USD,4.8,,,
+"under 10000 NPR with at least 4.5",price_max,0,10000,NPR,4.5,,,
+"cheapest with rating above 4.4",combined,,,,4.4,,price,asc
+"best value good under 200",price_max,0,200,USD,4.0,good,rating,desc
+"show under Rs 500 with above 4.3",price_max,0,500,NPR,4.3,,,
+"find cheapest between 10000 and 20000 NPR",price_range,10000,20000,NPR,,,,"price",asc
+"i want most expensive above Rs 10000",price_min,10000,,NPR,,,,"price",desc
+"max price Rs 1500 and at least 4.5",price_max,0,1500,NPR,4.5,,,
+"min price 2000 rupees with good",price_min,2000,,NPR,4.0,good,,
+"budget friendly under Rs 1000",price_max,0,1000,NPR,,,,,
+"luxury above Rs 5000",price_min,5000,,NPR,,,,,
+"affordable less than Rs 800",price_max,0,800,NPR,,,,,
+"premium above Rs 15000",price_min,15000,,NPR,,,,,
+"between Rs 200 and Rs 500 with good",price_range,200,500,NPR,4.0,good,,
+"cheapest under Rs 2000 with excellent",price_max,0,2000,NPR,4.8,excellent,price,asc
+"most expensive with rating above 4.7",price_min,50000,,NPR,4.7,,price,desc
+"price less than Rs 3000 and rating more than 4.4",price_max,0,3000,NPR,4.4,,,
+"above Rs 4000 with min 4.6",price_min,4000,,NPR,4.6,,,
+"affordable between 30000 and 50000 NPR with good",price_range,30000,50000,NPR,4.0,good,,
+"cheapest excellent under Rs 1000",price_max,0,1000,NPR,4.8,excellent,price,asc
+"most expensive with at least 4.5 above Rs 8000",price_min,8000,,NPR,4.5,,price,desc
+"best rated under Rs 1500",price_max,0,1500,NPR,4.5,excellent,rating,desc
+"worst rated above Rs 2000",price_min,2000,,NPR,,,poor,rating,asc
+"highly rated budget under Rs 500",price_max,0,500,NPR,4.5,good,,
+"decently rated premium above Rs 3000",price_min,3000,,NPR,3.5,decent,,
+"under Rs 250 with above 4.2",price_max,0,250,NPR,4.2,,,
+"above Rs 6000 with min 4.8",price_min,6000,,NPR,4.8,,,
+"affordable between 1000 and 2000 NPR with good",price_range,1000,2000,NPR,4.0,good,,
+"cheapest with above 4.7 under Rs 2000",price_max,0,2000,NPR,4.7,,price,asc
+"best value good under Rs 800",price_max,0,800,NPR,4.0,good,rating,desc
+"show cheapest with above 4.3 under Rs 40000",price_max,0,40000,NPR,4.3,,price,asc
+"find most expensive with at least 4.8 above Rs 50000",price_min,50000,,NPR,4.8,,price,desc
+"i want budget under Rs 3000 with good",price_max,0,3000,NPR,4.0,good,,
+"give me premium above Rs 60000 with excellent",price_min,60000,,NPR,4.8,excellent,,
+"show between Rs 500 and Rs 1500 with above 4.4",price_range,500,1500,NPR,4.4,,,
+"find affordable under Rs 8000 with high",price_max,0,8000,NPR,4.5,good,,
+"i need above Rs 2000 with at least 4.7",price_min,2000,,NPR,4.7,,,
+"show under Rs 1000 with excellent",price_max,0,1000,NPR,4.8,excellent,,
+"cheapest with good under Rs 500",price_max,0,500,NPR,4.0,good,price,asc
+"most expensive with decent above Rs 10000",price_min,10000,,NPR,3.5,decent,price,desc
+"under Rs 200 with excellent",price_max,0,200,NPR,4.8,excellent,,
+"above rs 5000 with good",price_min,5000,,NPR,4.0,good,,
+"between rs 800 and rs 1200 with above 4.6",price_range,800,1200,NPR,4.6,,,
+"cheapest with at least 4.1 under rs 1500",price_max,0,1500,NPR,4.1,,price,asc
+"most expensive with good above rs 20000",price_min,20000,,NPR,4.0,good,price,desc
+"budget friendly highly rated under rs 600",price_max,0,600,NPR,4.5,good,,
+"premium excellent above rs 7000",price_min,7000,,NPR,4.8,excellent,,
+"under rs 350 with above 3.9",price_max,0,350,NPR,3.9,,,
+"above rs 4500 with min 4.6",price_min,4500,,NPR,4.6,,,
+"affordable between 2000 and 5000 NPR with good",price_range,2000,5000,NPR,4.0,good,,
+"cheapest excellent under rs 1200",price_max,0,1200,NPR,4.8,excellent,price,asc
+"most expensive with at least 4.3 above rs 3000",price_min,3000,,NPR,4.3,,price,desc
+"best rated under rs 1800",price_max,0,1800,NPR,4.5,excellent,rating,desc
+"worst rated above rs 2500",price_min,2500,,NPR,,,poor,rating,asc
+"highly rated budget under rs 400",price_max,0,400,NPR,4.5,good,,
+"decently rated premium above rs 4000",price_min,4000,,NPR,3.5,decent,,
+"price less than rs 2800 and rating more than 4.5",price_max,0,2800,NPR,4.5,,,
+"under rs 9000 with at least 4.4",price_max,0,9000,NPR,4.4,,,
+"cheapest with above 4.6 under rs 1800",price_max,0,1800,NPR,4.6,,price,asc
+"best value good under rs 700",price_max,0,700,NPR,4.0,good,rating,desc
+"find cheapest under rs 35000 with excellent",price_max,0,35000,NPR,4.8,excellent,price,asc
+"show most expensive above rs 45000 with good",price_min,45000,,NPR,4.0,good,price,desc
+"i want budget under rs 15000 with high",price_max,0,15000,NPR,4.5,good,,
+"give me premium above rs 80000 with excellent",price_min,80000,,NPR,4.8,excellent,,
+"show between rs 300 and rs 800 with above 4.2",price_range,300,800,NPR,4.2,,,
+"find affordable under rs 5000 with good",price_max,0,5000,NPR,4.0,good,,
+"i need above rs 12000 with at least 4.8",price_min,12000,,NPR,4.8,,,
+"show under rs 6000 with excellent",price_max,0,6000,NPR,4.8,excellent,,
+"cheapest with decent under rs 300",price_max,0,300,NPR,3.5,decent,price,asc
+"most expensive with good above rs 15000",price_min,15000,,NPR,4.0,good,price,desc
+"under rs 150 with excellent",price_max,0,150,NPR,4.8,excellent,,
+"above rs 7000 with good",price_min,7000,,NPR,4.0,good,,
+"between rs 200 and rs 400 with above 4.5",price_range,200,400,NPR,4.5,,,
+"cheapest with at least 4.2 under rs 20000",price_max,0,20000,NPR,4.2,,price,asc
+"most expensive with good above rs 25000",price_min,25000,,NPR,4.0,good,price,desc
+"budget friendly highly rated under rs 1200",price_max,0,1200,NPR,4.5,good,,
+"premium excellent above rs 9000",price_min,9000,,NPR,4.8,excellent,,
+"under rs 280 with above 3.8",price_max,0,280,NPR,3.8,,,
+"above rs 5500 with min 4.7",price_min,5500,,NPR,4.7,,,
+"affordable under rs 1500 with good",price_max,0,1500,NPR,4.0,good,,
+"cheapest excellent under rs 2200",price_max,0,2200,NPR,4.8,excellent,price,asc
+"most expensive with at least 4.1 above rs 2000",price_min,2000,,NPR,4.1,,price,desc
+"best rated under rs 2500",price_max,0,2500,NPR,4.5,excellent,rating,desc
+"worst rated above rs 3000",price_min,3000,,NPR,,,poor,rating,asc
+"highly rated budget under rs 900",price_max,0,900,NPR,4.5,good,,
+"decently rated premium above rs 6000",price_min,6000,,NPR,3.5,decent,,
+"price less than rs 1800 and rating more than 4.8",price_max,0,1800,NPR,4.8,,,
+"under rs 12000 with at least 4.5",price_max,0,12000,NPR,4.5,,,
+"cheapest with above 4.4 under rs 2500",price_max,0,2500,NPR,4.4,,price,asc
+"best value good under rs 1000",price_max,0,1000,NPR,4.0,good,rating,desc
+"show me under 5 dollars",price_max,0,5,USD,,,,,
+"find cheapest deals",price_sort,,,,,,,price,asc
+"products between 10 and 20 dollars",price_range,10,20,USD,,,,,
+"i want the priciest deals",price_sort,,,,,,,price,desc
+"show me with max price 3",price_max,0,3,USD,,,,,
+"products with min price 15",price_min,15,,USD,,,,,
+"economical under 2 dollars",price_max,0,2,USD,,,,,
+"high-end over 150 dollars",price_min,150,,USD,,,,,
+"inexpensive less than 1 dollar",price_max,0,1,USD,,,,,
+"upscale above 300",price_min,300,,USD,,,,,
+"show under rs 20",price_max,0,20,NPR,,,,,
+"cheapest under 200 NPR",price_max,0,200,NPR,,,,"price",asc
+"between RS 10 and RS 30",price_range,10,30,NPR,,,,,
+"most expensive above RS 800",price_min,800,,NPR,,,,"price",desc
+"max price RS 15",price_max,0,15,NPR,,,,,
+"min price 25 rupees",price_min,25,,NPR,,,,,
+"rated above 2.8",rating_min,,,,,2.8,,,
+"at least 3.2 rating",rating_min,,,,,3.2,,,
+"top scoring",rating_sort,,,,,,,rating,desc
+"below 1.2",rating_max,,,,,1.2,,,
+"min rating 2.2",rating_min,,,,,2.2,,,
+"lowest scoring",rating_sort,,,,,,,rating,asc
+"at least 2.5 stars",rating_min,,,,,2.5,,,
+"above 2.0",rating_min,,,,,2.0,,,
+"with 2.2 stars and above",rating_min,,,,,2.2,,,
+"crowd favorites",rating_min,,,,,4.0,good,,
+"properly reviewed",rating_min,,,,,4.0,good,,
+"phenomenal reviews",rating_min,,,,,4.8,excellent,,
+"dreadful reviews",rating_max,,,,,1.0,poor,,
+"mid-tier quality",rating_min,,,,,3.0,average,,
+"acceptable rating",rating_min,,,,,3.5,decent,,
+"cheapest with acceptable",combined,,,,3.5,decent,price,asc
+"best under 4",price_max,0,4,USD,4.5,excellent,,
+"least expensive but acceptable",combined,,,,3.5,decent,price,asc
+"most expensive with phenomenal",combined,,,,4.8,excellent,price,desc
+"budget friendly crowd favorite",combined,,,,4.0,good,price,asc
+"affordable crowd favorite",combined,,,,4.0,good,price,asc
+"premium with phenomenal reviews",combined,,,,4.8,excellent,price,desc
+"cheapest under 1.5 with 4 stars",price_max,0,1.5,USD,4.0,good,price,asc
+"under 3 with above 2.5",price_max,0,3,USD,2.5,,,
+"under 150 NPR with phenomenal",price_max,0,150,NPR,4.8,excellent,,
+"best rated under 1",price_max,0,1,USD,4.5,excellent,rating,desc
+"worst rated expensive above 15",price_min,15,,USD,,,poor,rating,asc
+"cheapest with min 1.8 under 4",price_max,0,4,USD,1.8,,price,asc
+"most expensive with acceptable above 12",price_min,12,,USD,3.5,decent,price,desc
+"top rated budget under 2",price_max,0,2,USD,4.5,excellent,rating,desc
+"highly rated premium above 8",price_min,8,,USD,4.7,excellent,,
+"price less than 6 and rating more than 2.0",price_max,0,6,USD,2.0,,,
+"above 4 with min 1.9",price_min,4,,USD,1.9,,,
+"cheapest with at least 1.8 stars",combined,,,,1.8,,price,asc
+"best value under 1.2",price_max,0,1.2,USD,4.3,good,rating,desc
+"show cheapest under 4",price_sort,,,,,,,price,asc
+"i want most expensive with above 2.5",price_min,20,,USD,2.5,,price,desc
+"find affordable with proper under 2",price_max,0,2,USD,4.0,good,,
+"show premium with phenomenal above 6",price_min,6,,USD,4.7,excellent,,
+"between 1 and 3 with at least 2.2",price_range,1,3,USD,2.2,,,
+"budget under 50 NPR with high",price_max,0,50,NPR,4.5,good,,
+"luxury above 30 with best",price_min,30,,USD,4.8,excellent,,
+"cheapest with above 1.9",price_min,,,,,1.9,,price,asc
+"most expensive with proper above 10",price_min,10,,USD,4.0,good,price,desc
+"under 1.2 with excellent",price_max,0,1.2,USD,4.8,excellent,,
+"above 5 with decent",price_min,5,,USD,3.5,decent,,
+"between 1.5 and 3.5 with above 2.3",price_range,1.5,3.5,USD,2.3,,,
+"cheapest with at least 1.7 under 5",combined,,,,1.7,,price,asc
+"most expensive with proper above 8",price_min,8,,USD,4.0,good,price,desc
+"budget friendly highly rated under 1.8",price_max,0,1.8,USD,4.5,good,,
+"premium excellent above 5",price_min,5,,USD,4.8,excellent,,
+"under 1 with above 1.5",price_max,0,1,USD,1.5,,,
+"above 3 with min 2.2",price_min,3,,USD,2.2,,,
+"affordable between 5 and 15 NPR with good",price_range,5,15,NPR,4.0,good,,
+"cheapest excellent under 3",price_max,0,3,USD,4.8,excellent,price,asc
+"most expensive with at least 1.6 above 4",price_min,4,,USD,1.6,,price,desc
+"best rated under 0.8",price_max,0,0.8,USD,4.5,excellent,rating,desc
+"worst rated above 2",price_min,2,,USD,,,poor,rating,asc
+"highly rated budget under 0.7",price_max,0,0.7,USD,4.5,good,,
+"decently rated premium above 3",price_min,3,,USD,3.5,decent,,
+"price less than 2 and rating more than 1.6",price_max,0,2,USD,1.6,,,
+"under 20 NPR with at least 2.0",price_max,0,20,NPR,2.0,,,
+"cheapest with rating above 2.1",combined,,,,2.1,,price,asc
+"best value proper under 1.5",price_max,0,1.5,USD,4.0,good,rating,desc
+"show me under 2 with acceptable",price_max,0,2,USD,3.5,decent,,
+"find cheapest with phenomenal",combined,,,,4.8,excellent,price,asc
+"between 0.5 and 1.5 with acceptable",price_range,0.5,1.5,USD,3.5,decent,,
+"i want most expensive with mid",price_min,8,,USD,3.0,average,price,desc
+"show max price 0.8 and above 1.6",price_max,0,0.8,USD,1.6,,,
+"min price 1.2 with acceptable",price_min,1.2,,USD,3.5,decent,,
+"budget friendly under 1 with phenomenal",price_max,0,1,USD,4.8,excellent,,
+"premium above 4 with at least 2.4",price_min,4,,USD,2.4,,,
+"affordable less than 0.5 with acceptable",price_max,0,0.5,USD,3.5,decent,,
+"luxury above 10 with phenomenal",price_min,10,,USD,4.8,excellent,,
+"show under RS 5 with above 2.0",price_max,0,5,NPR,2.0,,,
+"cheapest under 30 NPR with acceptable",price_max,0,30,NPR,3.5,decent,price,asc
+"between RS 2 and RS 8 with phenomenal",price_range,2,8,NPR,4.8,excellent,,
+"most expensive above RS 60 with reasonable",price_min,60,,NPR,3.5,decent,price,desc
+"max price RS 3 and at least 2.0",price_max,0,3,NPR,2.0,,,
+"min price 4 rupees with acceptable",price_min,4,,NPR,3.5,decent,,
+"show me stuff under 0.2 dollars",price_max,0,0.2,USD,,,,,
+"find value items",price_sort,,,,,,,price,asc
+"between 1.5 and 3 dollars",price_range,1.5,3,USD,,,,,
+"i want premium stuff",price_sort,,,,,,,price,desc
+"max price 0.6",price_max,0,0.6,USD,,,,,
+"min price 1",price_min,1,,USD,,,,,
+"value under 0.3",price_max,0,0.3,USD,,,,,
+"elite over 20",price_min,20,,USD,,,,,
+"economy under 0.1",price_max,0,0.1,USD,,,,,
+"top-tier above 15",price_min,15,,USD,,,,,
+"show under RS 2",price_max,0,2,NPR,,,,,
+"cheapest under 15 NPR",price_max,0,15,NPR,,,,"price",asc
+"between RS 1 and RS 4",price_range,1,4,NPR,,,,,
+"most expensive above RS 50",price_min,50,,NPR,,,,"price",desc
+"max price RS 1.5",price_max,0,1.5,NPR,,,,,
+"min price 2 rupees",price_min,2,,NPR,,,,,
+"rated above 1.2",rating_min,,,,,1.2,,,
+"at least 1.5",rating_min,,,,,1.5,,,
+"highest scoring",rating_sort,,,,,,,rating,desc
+"below 0.2",rating_max,,,,,0.2,,,
+"min rating 0.5",rating_min,,,,,0.5,,,
+"lowest scoring",rating_sort,,,,,,,rating,asc
+"at least 1.0 stars",rating_min,,,,,1.0,,,
+"above 0.8",rating_min,,,,,0.8,,,
+"with 0.9 stars and above",rating_min,,,,,0.9,,,
+"audience approved",rating_min,,,,,4.0,good,,
+"decently scored",rating_min,,,,,4.0,good,,
+"extraordinary scores",rating_min,,,,,4.8,excellent,,
+"terribly scored",rating_max,,,,,1.0,poor,,
+"middle ground",rating_min,,,,,3.0,average,,
+"passable score",rating_min,,,,,3.5,decent,,
+"cheapest with passable",combined,,,,3.5,decent,price,asc
+"best under 0.8",price_max,0,0.8,USD,4.5,excellent,,
+"least expensive but passable",combined,,,,3.5,decent,price,asc
+"most expensive with extraordinary",combined,,,,4.8,excellent,price,desc
+"budget friendly audience approved",combined,,,,4.0,good,price,asc
+"affordable audience approved",combined,,,,4.0,good,price,asc
+"premium with extraordinary",combined,,,,4.8,excellent,price,desc
+"cheapest under 0.3 with 4 stars",price_max,0,0.3,USD,4.0,good,price,asc
+"under 0.6 with above 1.2",price_max,0,0.6,USD,1.2,,,
+"under 10 NPR with extraordinary",price_max,0,10,NPR,4.8,excellent,,
+"best rated under 0.2",price_max,0,0.2,USD,4.5,excellent,rating,desc
+"worst rated expensive above 3",price_min,3,,USD,,,poor,rating,asc
+"cheapest with min 0.8 under 1",price_max,0,1,USD,0.8,,price,asc
+"most expensive with passable above 2",price_min,2,,USD,3.5,decent,price,desc
+"top rated budget under 0.5",price_max,0,0.5,USD,4.5,excellent,rating,desc
+"highly rated premium above 1",price_min,1,,USD,4.7,excellent,,
+"price less than 0.7 and rating more than 1.0",price_max,0,0.7,USD,1.0,,,
+"above 0.3 with min 0.9",price_min,0.3,,USD,0.9,,,
+"cheapest with at least 0.8 stars",combined,,,,0.8,,price,asc
+"best value under 0.3",price_max,0,0.3,USD,4.3,good,rating,desc
