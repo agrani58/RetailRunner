@@ -172,7 +172,7 @@ class SearchEngine:
 
             # 4. Single-word phrase: use fuzzy matching
             fuzzy = fuzz.partial_ratio(phrase_lower, name)
-            if fuzzy >= 80:
+            if fuzzy >= 85:
                 return fuzzy
             # Also check description / product_type
             if phrase_lower in desc or phrase_lower in ptype:

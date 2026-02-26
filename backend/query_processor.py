@@ -1,27 +1,5 @@
 """
-query_processor.py — v7 (Scalable + Spell Correction)
-
-Major upgrades over v6:
-  1. SPELL CORRECTION: integrated SpellCorrector runs before NER.
-     "hai roli" → "hair oil", "coots" → "boots", "lipbalm" → "lip balm".
-     Correction is logged so UI can display "Showing results for: 'hair oil'".
-
-  2. DYNAMIC SYNONYMS: BROWSE_SYNONYMS and PRODUCT_SYNONYMS auto-expand
-     from the catalog at startup. Any new product/category added to the API
-     is automatically recognized — no code changes needed.
-
-  3. BETTER ENTITY FALLBACK: if entity filter returns 0 results, automatically
-     falls back to category browse so users always get something relevant.
-
-  4. "NOT FOUND" HANDLING: if no category can be inferred even after spell
-     correction, spell corrector tries to match against product names and
-     suggests "Did you mean X?"
-
-  5. All v6 fixes preserved:
-     - Two-tier BROWSE/PRODUCT synonym system
-     - Plural normalization
-     - Multi-word phrase handling
-     - Skip-filter decision logic
+query_processor.py – corrected version
 """
 
 import re
@@ -62,6 +40,7 @@ BROWSE_SYNONYMS: Dict[str, str] = {
     "tshirt": "t-shirts", "t-shirt": "t-shirts",
     "tee": "t-shirts", "tees": "t-shirts",
     "shirt": "t-shirts", "shirts": "t-shirts",
+    # "sweater" moved to PRODUCT_SYNONYMS
     "shoe": "footwear", "shoes": "footwear",
     "sneaker": "footwear", "sneakers": "footwear",
     "boot": "footwear", "boots": "footwear",
@@ -75,17 +54,14 @@ BROWSE_SYNONYMS: Dict[str, str] = {
     "kurta": "women ethnic wear", "kurtis": "women ethnic wear", "kurti": "women ethnic wear",
     "saree": "women ethnic wear", "sarees": "women ethnic wear",
     "salwar": "women ethnic wear",
-    # Skin care — bare words only
-    # (moved specific product terms to PRODUCT_SYNONYMS)
+    # Skin care — bare words only (all specific terms moved to PRODUCT_SYNONYMS)
     # Personal care — bare words only
     "lotion": "personal care", "lotions": "personal care",
     "soap": "personal care", "soaps": "personal care",
     "deodorant": "personal care", "deodorants": "personal care",
     "wipes": "personal care",
-    # Hair care — bare words only
-    "shampoo": "hair care", "shampoos": "hair care",
-    "conditioner": "hair care", "conditioners": "hair care",
-    # Makeup — bare words only (specifics moved)
+    # Hair care — bare words only (shampoo, conditioner etc. moved to PRODUCT_SYNONYMS)
+    # Makeup — bare words only (lipstick, foundation etc. moved to PRODUCT_SYNONYMS)
     # Gaming
     "console": "gaming consoles", "consoles": "gaming consoles",
     "playstation": "gaming consoles", "xbox": "gaming consoles",
@@ -161,9 +137,7 @@ PRODUCT_SYNONYMS: Dict[str, str] = {
     "cucumber gel": "skin care",
     "rosehip": "skin care",
     "retinol": "skin care",
-    # Single-word skin care terms (moved from BROWSE)
-    "lipstick": "makeup",
-    "lipsticks": "makeup",
+    # Single-word skin care terms (now here, not in BROWSE)
     "moisturizer": "skin care",
     "moisturiser": "skin care",
     "sunscreen": "skin care",
@@ -176,6 +150,11 @@ PRODUCT_SYNONYMS: Dict[str, str] = {
     "cleansers": "skin care",
     "cream": "skin care",
     "creams": "skin care",
+    # ── Makeup specific products ──────────────────────────────
+    "lipstick": "makeup",
+    "lipsticks": "makeup",
+    "lip balm": "personal care",
+    "lip balms": "personal care",
     "foundation": "makeup",
     "mascara": "makeup",
     "blush": "makeup",
@@ -183,45 +162,21 @@ PRODUCT_SYNONYMS: Dict[str, str] = {
     "concealer": "makeup",
     "eyeshadow": "makeup",
     "eyeliner": "makeup",
-    # ── Personal care specific products ───────────────────────
-    "hand cream": "personal care",
-    "hand creams": "personal care",
-    "hand wash": "personal care",
-    "hand lotion": "personal care",
-    "hand sanitizer": "personal care",
-    "body lotion": "personal care",
-    "body wash": "personal care",
-    "body cream": "personal care",
-    "body scrub": "personal care",
-    "body oil": "personal care",
-    "body spray": "personal care",
-    "body mist": "personal care",
-    "foot cream": "personal care",
-    "foot scrub": "personal care",
-    "foot care": "personal care",
-    "foot care cream": "personal care",
-    "lip balm": "personal care",
-    "lip balms": "personal care",
-    "lip gloss": "personal care",
-    "lip liner": "personal care",
-    "lip oil": "personal care",
-    "shower gel": "personal care",
-    "bathing soap": "personal care",
-    "bath soap": "personal care",
-    "roll on": "personal care",
-    "roll ons": "personal care",
-    "roll-on": "personal care",
-    "roll-ons": "personal care",
-    "deodorant roll on": "personal care",
-    "deodorant roll ons": "personal care",
-    "deodorant stick": "personal care",
-    "deodorant spray": "personal care",
-    "beard oil": "personal care",
-    "beard growth oil": "personal care",
-    "intimate wash": "personal care",
-    "makeup remover": "personal care",
-    "makeup remover wipes": "personal care",
+    "bb cream": "makeup",
+    "cc cream": "makeup",
+    "compact powder": "makeup",
+    "waterproof mascara": "makeup",
+    "eyeliner pen": "makeup",
+    "matte lipstick": "makeup",
+    "fixing spray": "makeup",
+    "makeup fixing spray": "makeup",
+    "highlighter stick": "makeup",
+    "liquid foundation": "makeup",
     # ── Hair care specific products ───────────────────────────
+    "shampoo": "hair care",
+    "shampoos": "hair care",
+    "conditioner": "hair care",
+    "conditioners": "hair care",
     "hair oil": "hair care",
     "hair oils": "hair care",
     "hair serum": "hair care",
@@ -244,17 +199,42 @@ PRODUCT_SYNONYMS: Dict[str, str] = {
     "scalp detox": "hair care",
     "scalp scrub": "hair care",
     "herbal hair mask": "hair care",
-    # ── Makeup specific products ──────────────────────────────
-    "bb cream": "makeup",
-    "cc cream": "makeup",
-    "compact powder": "makeup",
-    "waterproof mascara": "makeup",
-    "eyeliner pen": "makeup",
-    "matte lipstick": "makeup",
-    "fixing spray": "makeup",
-    "makeup fixing spray": "makeup",
-    "highlighter stick": "makeup",
-    "liquid foundation": "makeup",
+    # ── Personal care specific products ───────────────────────
+    "hand cream": "personal care",
+    "hand creams": "personal care",
+    "hand wash": "personal care",
+    "hand lotion": "personal care",
+    "hand sanitizer": "personal care",
+    "body lotion": "personal care",
+    "body wash": "personal care",
+    "body cream": "personal care",
+    "body scrub": "personal care",
+    "body oil": "personal care",
+    "body spray": "personal care",
+    "body mist": "personal care",
+    "foot cream": "personal care",
+    "foot scrub": "personal care",
+    "foot care": "personal care",
+    "foot care cream": "personal care",
+    "lip gloss": "personal care",
+    "lip liner": "personal care",
+    "lip oil": "personal care",
+    "shower gel": "personal care",
+    "bathing soap": "personal care",
+    "bath soap": "personal care",
+    "roll on": "personal care",
+    "roll ons": "personal care",
+    "roll-on": "personal care",
+    "roll-ons": "personal care",
+    "deodorant roll on": "personal care",
+    "deodorant roll ons": "personal care",
+    "deodorant stick": "personal care",
+    "deodorant spray": "personal care",
+    "beard oil": "personal care",
+    "beard growth oil": "personal care",
+    "intimate wash": "personal care",
+    "makeup remover": "personal care",
+    "makeup remover wipes": "personal care",
     # ── Dresses specific types ────────────────────────────────
     "maxi dress": "dresses",
     "maxi dresses": "dresses",
@@ -279,6 +259,9 @@ PRODUCT_SYNONYMS: Dict[str, str] = {
     "pinafore dress": "dresses",
     "pleated dress": "dresses",
     "a-line dress": "dresses",
+    # ADD SWEATER (SINGLE WORD) HERE – maps to dresses, will apply entity filter
+    "sweater": "dresses",
+    "sweaters": "dresses",
     # ── T-shirt specific types ────────────────────────────────
     "graphic tee": "t-shirts",
     "oversized tee": "t-shirts",

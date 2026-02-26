@@ -66,6 +66,13 @@ PRODUCT_TERMS_FOR_OVERRIDE = {
     "kurta", "ethnic", "gown", "gowns", "makeup", "foundation", "lipstick",
     "cream", "moisturizer", "sunscreen", "facewash", "face wash", "body lotion",
     "lotion", "serum", "mask", "cleanser", "toner"
+    "hair", "oil", "oils", "shampoo", "shampoos", "conditioner", "conditioners",
+    "serum", "serums", "mask", "masks", "spray", "gel", "wax", "cream", "creams",
+    # Skin care
+    "moisturizer", "moisturisers", "toner", "toners", "cleanser", "cleansers",
+    "facewash", "face wash", "sunscreen", "lip balm", "body lotion", "lotion",
+    # Clothing
+    "sweater", "sweaters", "hoodie", "jeans", "dress", "dresses", "kurta",
 }
 
 # ---------- WebSocket connection manager ----------

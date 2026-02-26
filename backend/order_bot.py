@@ -51,7 +51,7 @@ async def place_order_bot(
             print(f"⚠️ Screenshot failed: {e}")
         return filename
 
-    # Helper to fill a field by label text or placeholder
+    # Helper to fill a field by label text, placeholder, or common selectors
     async def fill_field(page, label_patterns, placeholder_patterns, value, field_desc):
         # Try by label (visible text)
         for pattern in label_patterns:
@@ -74,9 +74,12 @@ async def place_order_bot(
             except:
                 pass
         # Fallback: try common input selectors
-        for selector in [f'input[name="{pattern}"]' for pattern in label_patterns] + \
-                        [f'input[type="{pattern}"]' for pattern in label_patterns] + \
-                        ['input[type="text"]', 'input[type="email"]', 'input[type="tel"]']:
+        selectors = []
+        for pattern in label_patterns:
+            selectors.append(f'input[name="{pattern}"]')
+            selectors.append(f'input[type="{pattern}"]')
+        selectors.extend(['input[type="text"]', 'input[type="email"]', 'input[type="tel"]', 'input[type="password"]'])
+        for selector in selectors:
             try:
                 locator = page.locator(selector).first
                 if await locator.count() > 0:
@@ -113,50 +116,102 @@ async def place_order_bot(
             await fill_field(page, ["email", "e-mail"], ["Email", "E-mail"], user_info["email"], "email")
             await fill_field(page, ["password"], ["Password"], user_info["password"], "password")
 
-            async with page.expect_navigation(wait_until="domcontentloaded", timeout=15000):
-                await page.click('button[type="submit"], button:has-text("Login")')
+            await page.click('button[type="submit"], button:has-text("Login")')
             await page.wait_for_timeout(2000)
-            await take_screenshot(page, "02_after_login_click")
 
-            # Check for login error
-            error = await page.query_selector(
-                '.error, .alert, .message, :text("Invalid"), :text("incorrect")'
-            )
-            if error:
-                error_text = await error.text_content()
-                print(f" Login failed: {error_text}")
+            # Check if login succeeded by looking for a logged-in indicator
+            logged_in_indicators = [
+                'a[href*="/profile"]',
+                'button:has-text("Logout")',
+                '.cart-icon',
+                'a[href*="/products"]',
+                'text="Welcome"',
+            ]
+            login_successful = False
+            for selector in logged_in_indicators:
+                try:
+                    await page.wait_for_selector(selector, timeout=5000)
+                    login_successful = True
+                    print("✅ Login successful")
+                    break
+                except:
+                    continue
 
-                # ----- STEP 2: REGISTER NEW USER -----
+            if not login_successful:
+                print(" Login failed or not logged in – proceeding to registration.")
+
+                # ----- STEP 2: REGISTER NEW USER (DIRECT INPUT FILLING) -----
                 log_step(2, "Registering New User")
                 await page.goto(f"{frontend_url}/register", wait_until="domcontentloaded")
                 await page.wait_for_timeout(2000)
                 await take_screenshot(page, "03_register_page")
 
-                await fill_field(page, ["name", "full name"], ["Name", "Full Name"], user_info["name"], "name")
-                await fill_field(page, ["email", "e-mail"], ["Email", "E-mail"], user_info["email"], "email")
-                await fill_field(page, ["password"], ["Password"], user_info["password"], "password")
-                await fill_field(page, ["confirm password", "password confirmation"], ["Confirm Password"], user_info["password"], "confirm password")
-
-                async with page.expect_navigation(wait_until="domcontentloaded", timeout=15000):
-                    await page.click('button[type="submit"], button:has-text("Register")')
-                print(" Registration form submitted")
-                await page.wait_for_timeout(3000)
-                await take_screenshot(page, "04_after_registration")
-
-                if "login" in page.url.lower() or "register" in page.url.lower():
-                    print(" Registration successful, logging in...")
-                    await page.goto(f"{frontend_url}/login")
-                    await page.wait_for_timeout(2000)
+                # Get all input fields on the register page
+                inputs = await page.query_selector_all('input')
+                # Expected order: name, email, password, confirm password
+                # Fill sequentially with our data
+                if len(inputs) >= 4:
+                    await inputs[0].fill(user_info["name"])
+                    await inputs[1].fill(user_info["email"])
+                    await inputs[2].fill(user_info["password"])
+                    await inputs[3].fill(user_info["password"])  # confirm password
+                    print("✅ Filled registration form directly via input order")
+                else:
+                    # Fallback to label-based filling
+                    await fill_field(page, ["name", "full name"], ["Name", "Full Name"], user_info["name"], "name")
                     await fill_field(page, ["email", "e-mail"], ["Email", "E-mail"], user_info["email"], "email")
                     await fill_field(page, ["password"], ["Password"], user_info["password"], "password")
-                    async with page.expect_navigation(wait_until="domcontentloaded", timeout=15000):
-                        await page.click('button[type="submit"], button:has-text("Login")')
-                    await page.wait_for_timeout(3000)
-                    await take_screenshot(page, "05_after_login")
-                else:
-                    print("✅ Already logged in after registration")
+                    await fill_field(page, ["confirm password", "password confirmation"], ["Confirm Password", "Confirm"], user_info["password"], "confirm password")
 
-            # Ensure we are on products page
+                await page.click('button[type="submit"], button:has-text("Register")')
+                print(" Registration form submitted")
+                await page.wait_for_timeout(3000)
+
+                # Check if registration succeeded (maybe redirected to login or products)
+                # If we see a login page, fill credentials and log in
+                if "login" in page.url.lower():
+                    print(" Registration successful, redirected to login – logging in...")
+                    await fill_field(page, ["email", "e-mail"], ["Email", "E-mail"], user_info["email"], "email")
+                    await fill_field(page, ["password"], ["Password"], user_info["password"], "password")
+                    await page.click('button[type="submit"], button:has-text("Login")')
+                    await page.wait_for_timeout(2000)
+                elif "products" in page.url.lower() or any(await page.query_selector(sel) for sel in logged_in_indicators):
+                    print("✅ Registration successful and logged in")
+                else:
+                    # Check for error message (e.g., email already taken)
+                    error = await page.query_selector('.error, .alert, .message, :text("already"), :text("taken")')
+                    if error:
+                        error_text = await error.text_content()
+                        print(f" Registration failed: {error_text}")
+                        # If email already exists, we can try logging in again
+                        print(" Attempting login with existing credentials...")
+                        await page.goto(f"{frontend_url}/login")
+                        await page.wait_for_timeout(2000)
+                        await fill_field(page, ["email", "e-mail"], ["Email", "E-mail"], user_info["email"], "email")
+                        await fill_field(page, ["password"], ["Password"], user_info["password"], "password")
+                        await page.click('button[type="submit"], button:has-text("Login")')
+                        await page.wait_for_timeout(2000)
+                    else:
+                        print(" Registration may have succeeded but not confirmed.")
+
+                # Final login check
+                for selector in logged_in_indicators:
+                    try:
+                        await page.wait_for_selector(selector, timeout=5000)
+                        login_successful = True
+                        print("✅ Logged in after registration")
+                        break
+                    except:
+                        continue
+
+                if not login_successful:
+                    print("⚠️ Could not verify login after registration. Proceeding anyway...")
+
+                await take_screenshot(page, "04_after_registration")
+
+            await take_screenshot(page, "02_after_login_click")
+
+            # Ensure we are on products page (if not, navigate)
             if "products" not in page.url:
                 await page.goto(f"{frontend_url}/products", wait_until="domcontentloaded")
                 await page.wait_for_timeout(2000)

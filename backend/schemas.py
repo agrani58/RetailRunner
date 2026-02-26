@@ -36,4 +36,3 @@ class UserResponse(BaseModel):
     email: str
     created_at: Optional[datetime] = None  # ← changed from str to datetime
 
-    # 
