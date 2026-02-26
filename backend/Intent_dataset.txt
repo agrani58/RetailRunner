@@ -1999,3 +1999,103 @@ the waffle maker is hot and ready for batter|0
 maple syrup|1
 want to grab a bottle of maple syrup|1
 i poured some maple syrup over my pancakes|0
+i want to buy a new laptop|1
+i need to buy a pair of headphones|1
+i'm looking for a denim jacket|1
+can you recommend a good smartphone|1
+do you sell wireless earbuds|1
+where can i find a leather bag|1
+i'd like to purchase a gaming mouse|1
+i'm in the market for a 4k monitor|1
+i need to get a new winter coat|1
+i want to buy some running shoes|1
+i need a face moisturizer for dry skin|1
+looking for a mechanical keyboard|1
+can you show me some graphic tshirts|1
+do you have any noise cancelling headphones|1
+i want to buy a gift for my wife|1
+i need a new phone charger|1
+i'm searching for a waterproof jacket|1
+i'd like to find a comfortable hoodie|1
+i need to replace my old camera|1
+i want to buy a smartwatch|1
+i wan to buy a laptoop|1
+i ned a new fone|1
+lookin for a jecket|1
+do u have any tshirts|1
+can u recomend a good mouse|1
+where to get a coffe maker|1
+i want to purchse a tabblet|1
+i'm looking for a ps5|1
+i need a new pair of glases|1
+i wanna buy some snikers|1
+i was thinking of getting a new blender|1
+i might need to buy a new mattress|1
+i'm considering purchasing a standing desk|1
+i've been looking for a good pair of boots|1
+i'm interested in buying a drone|1
+i could use a new backpack for work|1
+i'm after a new set of pots and pans|1
+i'm hoping to find a decent vacuum cleaner|1
+i'm in need of some new bedsheets|1
+i want to treat myself to a nice watch|1
+buy iphone 15|1
+buy leather jacket|1
+buy running shoes online|1
+buy cheap headphones|1
+buy a new tv for the living room|1
+buy a gift for my brother|1
+buy a high end camera|1
+buy a gaming pc|1
+buy a winter parka|1
+buy a silk dress|1
+i just finished reading a great book|0
+what do you think about the weather today|0
+i wonder if it will rain later|0
+my favorite color is blue|0
+do you like to travel|0
+i've been to paris once|0
+what is your favorite season|0
+i prefer summer over winter|0
+i'm feeling a bit under the weather|0
+the coffee here is amazing|0
+i need to call my mom later|0
+have you seen any good movies lately|0
+i love listening to podcasts|0
+what is the meaning of life|0
+i'm trying to learn spanish|0
+do you believe in aliens|0
+i think i'll go for a run|0
+the sunset is beautiful tonight|0
+i'm so tired today|0
+what's your favorite hobby|0
+i enjoy painting in my free time|0
+do you have any siblings|0
+i have two cats and a dog|0
+i'm a huge fan of jazz music|0
+can you tell me a joke|0
+why is the sky blue|0
+i'm feeling very motivated today|0
+i wish i could play the piano|0
+what's the best way to learn a new language|0
+i think i'll bake some cookies|0
+do you like spicy food|0
+i'm not a fan of horror movies|0
+the traffic was terrible this morning|0
+i'm looking forward to the weekend|0
+what's your favorite type of cuisine|0
+i love italian food|0
+i'm thinking about redecorating my room|0
+do you have any advice for staying productive|0
+i feel so relaxed after yoga|0
+i saw a beautiful rainbow today|0
+what's your favorite animal|0
+i'm afraid of heights|0
+i love the smell of fresh bread|0
+do you believe in ghosts|0
+i'm trying to meditate more often|0
+what's the most interesting fact you know|0
+i'm excited for my vacation next month|0
+i miss my friends from college|0
+do you think robots will take over|0
+i'm grateful for another day|0

@@ -1,35 +1,43 @@
-
 {
-  "overall": {
-    "accuracy": 0.9225,
-    "f1_score": 0.9224956403797714,
-    "precision": 0.922595083893876,
-    "recall": 0.9225
-  },
-  "per_class": {
-    "chitchat": {
-      "f1": 0.9219143576826196,
-      "precision": 0.9289340101522843,
-      "recall": 0.915,
-      "support": 200
-    },
-    "product_search": {
-      "f1": 0.9230769230769231,
-      "precision": 0.916256157635468,
-      "recall": 0.93,
-      "support": 200
-    }
-  },
-  "confusion_matrix": [
-    [
-      183,
-      17
+  "model_info": {
+    "classes": [
+      "chitchat",
+      "product_search"
     ],
-    [
-      14,
-      186
-    ]
-  ],
-  "classification_report": "                precision    recall  f1-score   support\n\n      chitchat     0.9289    0.9150    0.9219       200\nproduct_search     0.9163    0.9300    0.9231       200\n\n      accuracy                         0.9225       400\n     macro avg     0.9226    0.9225    0.9225       400\n  weighted avg     0.9226    0.9225    0.9225       400\n",
-  "sample_count": 400
+    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2"
+  },
+  "evaluation_metrics": {
+    "overall": {
+      "accuracy": 0.9625935162094763,
+      "f1_score": 0.9625888632276943,
+      "precision": 0.9628836693731078,
+      "recall": 0.9625935162094763
+    },
+    "per_class": {
+      "chitchat": {
+        "f1": 0.9622166246851386,
+        "precision": 0.9744897959183674,
+        "recall": 0.9502487562189055,
+        "support": 201
+      },
+      "product_search": {
+        "f1": 0.9629629629629629,
+        "precision": 0.9512195121951219,
+        "recall": 0.975,
+        "support": 200
+      }
+    },
+    "confusion_matrix": [
+      [
+        191,
+        10
+      ],
+      [
+        5,
+        195
+      ]
+    ],
+    "classification_report": "                precision    recall  f1-score   support\n\n      chitchat     0.9745    0.9502    0.9622       201\nproduct_search     0.9512    0.9750    0.9630       200\n\n      accuracy                         0.9626       401\n     macro avg     0.9629    0.9626    0.9626       401\n  weighted avg     0.9629    0.9626    0.9626       401\n",
+    "sample_count": 401
+  }
 }

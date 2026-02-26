@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import "../styles/ProfilePage.css";
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
 
   // Profile key tied to email to support multiple users
@@ -43,11 +43,16 @@ export default function ProfilePage() {
     e.preventDefault();
     setIsSaving(true);
 
+    // Simulate async save (or real API call if needed)
     setTimeout(() => {
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(formData));
+      updateProfile(formData); // updates context and localStorage
       setIsSaving(false);
       setMessage("Profile saved successfully!");
-      setTimeout(() => setMessage(""), 3000);
+      setTimeout(() => {
+        setMessage("");
+        navigate(-1); // go back after save
+      }, 1500);
     }, 500);
   };
 
@@ -65,6 +70,7 @@ export default function ProfilePage() {
               value={formData.email}
               onChange={handleChange}
               required
+              disabled // email should not be editable
             />
           </div>
 

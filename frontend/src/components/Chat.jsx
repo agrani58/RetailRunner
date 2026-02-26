@@ -1,9 +1,10 @@
+// frontend/src/components/Chat.jsx (inside the product list mapping)
 import React, { useState, useEffect, useRef } from "react";
 import Message from "./Message";
 import ProductCard from "./ProductCard";
 import "../styles/Chat.css";
 
-export default function Chat({ messages, onSend }) {
+export default function Chat({ messages, onSend, onBuyNow }) {  // ← add onBuyNow prop
   const [input, setInput] = useState("");
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
@@ -12,13 +13,11 @@ export default function Chat({ messages, onSend }) {
     if (!input.trim()) return;
     onSend(input);
     setInput("");
-    // Reset textarea height after send
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
   };
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -26,14 +25,13 @@ export default function Chat({ messages, onSend }) {
     }
   }, [input]);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // prevent newline
+      e.preventDefault();
       send();
     }
   };
@@ -48,7 +46,11 @@ export default function Chat({ messages, onSend }) {
               <div key={i} className="message-row product-row">
                 <div className="product-list">
                   {productsToShow.map((p, j) => (
-                    <ProductCard key={`${p.id}-${p.store}-${j}`} product={p} />
+                    <ProductCard 
+                      key={`${p.id}-${p.store}-${j}`} 
+                      product={p} 
+                      onBuyNow={onBuyNow}   // ← pass callback
+                    />
                   ))}
                 </div>
               </div>
@@ -66,7 +68,6 @@ export default function Chat({ messages, onSend }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Floating input with textarea */}
       <div className="chat-input-wrapper">
         <div className="chat-input-shell">
           <textarea

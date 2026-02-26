@@ -22,8 +22,22 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUserState] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState({ message: "", visible: false });
+  const [showProfileModal, setShowProfileModal] = useState(false); // <-- new
   const navigate = useNavigate();
+
+  // Helper to load profile from localStorage for a given email
+  const loadProfile = (email) => {
+    if (!email) return {};
+    const saved = localStorage.getItem(`user_profile_${email}`);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse profile", e);
+      }
+    }
+    return {};
+  };
 
   // Helper to check if profile exists for current user
   const profileExists = (email) => {
@@ -36,6 +50,13 @@ export const AuthProvider = ({ children }) => {
     } catch {
       return false;
     }
+  };
+
+  // Merge user data with profile from localStorage
+  const mergeWithProfile = (userData) => {
+    if (!userData || !userData.email) return userData;
+    const profile = loadProfile(userData.email);
+    return { ...userData, ...profile };
   };
 
   // Restore session on app start
@@ -52,15 +73,17 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const userData = await getCurrentUser(accessToken);
-        setUserState(userData);
-        setUser(userData);
+        const mergedUser = mergeWithProfile(userData);
+        setUserState(mergedUser);
+        setUser(mergedUser);
       } catch {
         try {
           const refreshData = await refreshAccessToken(refreshToken);
           const { access_token, refresh_token, user_data } = refreshData;
           setTokens(access_token, refresh_token);
-          setUser(user_data);
-          setUserState(user_data);
+          const mergedUser = mergeWithProfile(user_data);
+          setUser(mergedUser);
+          setUserState(mergedUser);
         } catch {
           clearTokens();
           clearUser();
@@ -74,27 +97,26 @@ export const AuthProvider = ({ children }) => {
     restoreSession();
   }, []);
 
-  // ✅ Login with toast logic
+  // ✅ Login with mandatory profile check
   const login = async (email, password, rememberMe) => {
     try {
       const data = await apiLogin(email, password);
       const { access_token, refresh_token, user_data } = data;
 
+      const mergedUser = mergeWithProfile(user_data);
+
       setTokens(access_token, refresh_token);
-      setUser(user_data);
-      setUserState(user_data);
+      setUser(mergedUser);
+      setUserState(mergedUser);
 
       if (rememberMe) localStorage.setItem("last_used_email", email);
       else localStorage.removeItem("last_used_email");
 
       navigate("/");
 
-      // Show toast only if profile not exists
+      // If profile does not exist, force the modal
       if (!profileExists(user_data.email)) {
-        setToast({
-          message: "Would you like to complete your profile now?",
-          visible: true,
-        });
+        setShowProfileModal(true);
       }
 
       return { success: true };
@@ -128,21 +150,32 @@ export const AuthProvider = ({ children }) => {
     clearTokens();
     clearUser();
     setUserState(null);
-    navigate("/login"); // ✅ logout redirect
+    setShowProfileModal(false); // close modal on logout
+    navigate("/login");
   };
 
-  const hideToast = () => setToast({ message: "", visible: false });
+  // ✅ Update profile and close modal
+  const updateProfile = (profileData) => {
+    const updatedUser = { ...user, ...profileData };
+    setUserState(updatedUser);
+    setUser(updatedUser);
+    if (user?.email) {
+      localStorage.setItem(`user_profile_${user.email}`, JSON.stringify(profileData));
+    }
+    // Close the mandatory modal if it was open
+    setShowProfileModal(false);
+  };
 
   const value = {
     user,
     login,
     signup,
     logout,
+    updateProfile,
     isAuthenticated: !!user,
     loading,
-    toast,
-    hideToast,
-    setToast,
+    showProfileModal,      // <-- expose
+    setShowProfileModal,   // <-- expose (optional, for manual close after save)
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

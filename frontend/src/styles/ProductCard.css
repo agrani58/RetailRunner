@@ -220,6 +220,22 @@
 [data-theme="light"] .store-badge-simple {
   background: rgba(0, 0, 0, 0.7);
 }
+.buy-now-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.buy-now-btn:hover {
+  background: color-mix(in srgb, var(--accent) 80%, black);
+}
 
 /* Media Queries */
 @media (max-width: 900px) {

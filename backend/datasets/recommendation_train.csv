@@ -1,1601 +1,1528 @@
-query,intent_type,price_min,price_max,price_currency,rating_min,rating_max,rating_qualitative,sort_type,sort_direction
-"show me products under 50 dollars",price_max,0,50,USD,,,,,
-"find cheapest items",price_sort,,,,,,,price,asc
-"products between 100 and 200 dollars",price_range,100,200,USD,,,,,
-"i want the most expensive products",price_sort,,,,,,,price,desc
-"show me items with maximum price of 30",price_max,0,30,USD,,,,,
-"products with minimum price of 500",price_min,500,,USD,,,,,
-"budget friendly items under 40 dollars",price_max,0,40,USD,,,,,
-"premium products over 1000 dollars",price_min,1000,,USD,,,,,
-"affordable things less than 25 dollars",price_max,0,25,USD,,,,,
-"luxury items above 2000",price_min,2000,,USD,,,,,
-"show me products under RS 2000",price_max,0,2000,NPR,,,,,
-"cheapest items under 15000 NPR",price_max,0,15000,NPR,,,,"price",asc
-"products between RS 5000 and RS 10000",price_range,5000,10000,NPR,,,,,
-"most expensive items above RS 50000",price_min,50000,,NPR,,,,"price",desc
-"products with maximum price of RS 3000",price_max,0,3000,NPR,,,,,
-"minimum price 1000 rupees",price_min,1000,,NPR,,,,,
-"products rated above 4.5",rating_min,,,,,4.5,,,
-"show me items with rating at least 4.8",rating_min,,,,,4.8,,,
-"best rated products",rating_sort,,,,,,,rating,desc
-"products with rating below 3",rating_max,,,,,3,,,
-"minimum rating 4.0",rating_min,,,,,4.0,,,
-"worst rated items",rating_sort,,,,,,,rating,asc
-"at least 4.5 star rating",rating_min,,,,,4.5,,,
-"rating above 4.7",rating_min,,,,,4.7,,,
-"products with 4 stars and above",rating_min,,,,,4.0,,,
-"highly rated items",rating_min,,,,,4.5,,,
-"good rating products",rating_min,,,,,4.0,good,,
-"excellent rated items",rating_min,,,,,4.8,excellent,,
-"poorly rated things",rating_max,,,,,2.0,poor,,
-"average rating products",rating_min,,,,,3.0,average,,
-"decent rating items",rating_min,,,,,3.5,decent,,
-"cheapest items with good rating",combined,,,,4.0,good,price,asc
-"best products with maximum price 1000",price_max,0,1000,USD,4.5,excellent,,
-"least expensive but good rating",combined,,,,4.0,good,price,asc
-"most expensive with excellent reviews",combined,,,,4.8,excellent,price,desc
-"budget friendly with high rating",combined,,,,4.5,good,price,asc
-"affordable and highly rated",combined,,,,4.5,good,price,asc
-"premium products with best rating",combined,,,,4.8,excellent,price,desc
-"cheapest under 50 with 4+ stars",price_max,0,50,USD,4.0,good,price,asc
-"products under 100 dollars with rating above 4.5",price_max,0,100,USD,4.5,,,
-"items under 30000 NPR with excellent rating",price_max,0,30000,NPR,4.8,excellent,,
-"best rated products under 25 dollars",price_max,0,25,USD,4.5,excellent,rating,desc
-"worst rated expensive products",price_min,1000,,USD,,,poor,rating,asc
-"cheapest with minimum 4.2 rating",price_min,,,,,4.2,,price,asc
-"most expensive with decent rating",combined,,,,3.5,decent,price,desc
-"top rated budget items",price_max,0,100,USD,4.5,excellent,rating,desc
-"highly rated premium items",price_min,500,,USD,4.7,excellent,,
-"products with price less than 2000 and rating more than 4.5",price_max,0,2000,USD,4.5,,,
-"items above 100 dollars with minimum rating 4.6",price_min,100,,USD,4.6,,,
-"cheapest items with at least 4 star rating",combined,,,,4.0,,price,asc
-"best value for money under 50",price_max,0,50,USD,4.3,good,rating,desc
-"show me the cheapest items under 600 dollars",price_max,0,600,USD,,,,"price",asc
-"i want the most expensive items with rating above 4.8",price_min,1000,,USD,4.8,,,"price",desc
-"find me affordable items with good rating",price_max,0,80,USD,4.0,good,,
-"show premium items with excellent reviews",price_min,200,,USD,4.7,excellent,,
-"products between 50 and 150 with rating at least 4.4",price_range,50,150,USD,4.4,,,
-"budget items under 10000 NPR with high rating",price_max,0,10000,NPR,4.5,good,,
-"luxury items above 5000 dollars with best rating",price_min,5000,,USD,4.8,excellent,,
-"cheapest products with rating above 4.3",price_min,,,,,4.3,,price,asc
-"most expensive with good rating",price_min,500,,USD,4.0,good,price,desc
-"under 30 dollars with excellent rating",price_max,0,30,USD,4.8,excellent,,
-"above 200 dollars with decent rating",price_min,200,,USD,3.5,decent,,
-"between 75 and 125 with rating above 4.6",price_range,75,125,USD,4.6,,,
-"cheapest items with at least 4.5 rating",combined,,,,4.5,,price,asc
-"most expensive items with good reviews",price_min,800,,USD,4.0,good,price,desc
-"budget friendly and highly rated",price_max,0,100,USD,4.5,good,,
-"premium quality with excellent rating",price_min,300,,USD,4.8,excellent,,
-"products under 40 dollars with rating above 4.2",price_max,0,40,USD,4.2,,,
-"items above 250 with minimum 4.7 rating",price_min,250,,USD,4.7,,,
-"affordable items between 1000 and 2000 NPR with good rating",price_range,1000,2000,NPR,4.0,good,,
-"cheapest products with excellent rating under 500",price_max,0,500,USD,4.8,excellent,price,asc
-"most expensive with at least 4.4 rating",price_min,400,,USD,4.4,,price,desc
-"best rated under 60 dollars",price_max,0,60,USD,4.5,excellent,rating,desc
-"worst rated above 100 dollars",price_min,100,,USD,,,poor,rating,asc
-"highly rated budget items",price_max,0,50,USD,4.5,good,,
-"decently rated premium products",price_min,200,,USD,3.5,decent,,
-"products with price less than 1500 and rating more than 4.6",price_max,0,1500,USD,4.6,,,
-"items under 2000 NPR with at least 4.3 rating",price_max,0,2000,NPR,4.3,,,
-"cheapest items with rating above 4.8",combined,,,,4.8,,price,asc
-"best value with good rating under 75",price_max,0,75,USD,4.0,good,rating,desc
-"show me items under 1000 with rating above 4.5",price_max,0,1000,USD,4.5,,,
-"find items between 20000 and 40000 NPR with excellent rating",price_range,20000,40000,NPR,4.8,excellent,,
-"i want items above 150 dollars with good rating",price_min,150,,USD,4.0,good,,
-"show me the cheapest items with at least 4.6 rating",combined,,,,4.6,,price,asc
-"most expensive items with decent rating",price_min,1000,,USD,3.5,decent,price,desc
-"budget friendly items with rating above 4.2",price_max,0,80,USD,4.2,,,
-"premium items with excellent reviews under 500",price_max,0,500,USD,4.7,excellent,,
-"products between 25 and 75 with rating at least 4.4",price_range,25,75,USD,4.4,,,
-"affordable items under 150 with high rating",price_max,0,150,USD,4.5,good,,
-"luxury items above 2000 with best rating",price_min,2000,,USD,4.8,excellent,,
-"cheapest products with rating above 4.0",price_min,,,,,4.0,,price,asc
-"most expensive with excellent rating above 4.8",price_min,1000,,USD,4.8,excellent,price,desc
-"under 20 dollars with good rating",price_max,0,20,USD,4.0,good,,
-"above 300 with decent rating",price_min,300,,USD,3.5,decent,,
-"between 100 and 200 with rating above 4.7",price_range,100,200,USD,4.7,,,
-"cheapest items with excellent rating under 800",price_max,0,800,USD,4.8,excellent,price,asc
-"most expensive items with good rating",price_min,900,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 60",price_max,0,60,USD,4.5,good,,
-"premium quality with excellent rating above 400",price_min,400,,USD,4.8,excellent,,
-"products under 35 with rating above 4.1",price_max,0,35,USD,4.1,,,
-"items above 275 with minimum 4.8 rating",price_min,275,,USD,4.8,,,
-"affordable items between 2000 and 4000 NPR with good rating",price_range,2000,4000,NPR,4.0,good,,
-"cheapest products with excellent rating under 400",price_max,0,400,USD,4.8,excellent,price,asc
-"most expensive with at least 4.5 rating",price_min,350,,USD,4.5,,price,desc
-"best rated under 55 dollars",price_max,0,55,USD,4.5,excellent,rating,desc
-"worst rated above 150 dollars",price_min,150,,USD,,,poor,rating,asc
-"highly rated budget items under 45",price_max,0,45,USD,4.5,good,,
-"decently rated premium products above 250",price_min,250,,USD,3.5,decent,,
-"products with price less than 1200 and rating more than 4.4",price_max,0,1200,USD,4.4,,,
-"items under 3000 NPR with at least 4.6 rating",price_max,0,3000,NPR,4.6,,,
-"cheapest items with rating above 4.7",combined,,,,4.7,,price,asc
-"best value with good rating under 85",price_max,0,85,USD,4.0,good,rating,desc
-"find me the cheapest items with rating above 4.5",combined,,,,4.5,,price,asc
-"show me the most expensive items with at least 4.8 rating",price_min,1000,,USD,4.8,,price,desc
-"i want budget items under 30 dollars with good rating",price_max,0,30,USD,4.0,good,,
-"give me premium items above 500 with excellent rating",price_min,500,,USD,4.8,excellent,,
-"show products between 80 and 120 with rating above 4.3",price_range,80,120,USD,4.3,,,
-"find affordable items under 700 with high rating",price_max,0,700,USD,4.5,good,,
-"i need items with price above 400 and rating at least 4.6",price_min,400,,USD,4.6,,,
-"show me items under 2000 NPR with excellent reviews",price_max,0,2000,NPR,4.8,excellent,,
-"cheapest products with decent rating",combined,,,,3.5,decent,price,asc
-"most expensive items with good rating",price_min,500,,USD,4.0,good,price,desc
-"under 40 with excellent rating",price_max,0,40,USD,4.8,excellent,,
-"above 600 with good rating",price_min,600,,USD,4.0,good,,
-"between 150 and 250 with rating above 4.9",price_range,150,250,USD,4.9,,,
-"cheapest items with at least 4.4 rating",combined,,,,4.4,,price,asc
-"most expensive items with good rating above 2000",price_min,2000,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 90",price_max,0,90,USD,4.5,good,,
-"premium quality with excellent rating above 700",price_min,700,,USD,4.8,excellent,,
-"products under 45 with rating above 4.0",price_max,0,45,USD,4.0,,,
-"items above 325 with minimum 4.5 rating",price_min,325,,USD,4.5,,,
-"affordable items between 500 and 1000 NPR with good rating",price_range,500,1000,NPR,4.0,good,,
-"cheapest products with excellent rating under 300",price_max,0,300,USD,4.8,excellent,price,asc
-"most expensive with at least 4.2 rating",price_min,400,,USD,4.2,,price,desc
-"best rated under 70 dollars",price_max,0,70,USD,4.5,excellent,rating,desc
-"worst rated above 200 dollars",price_min,200,,USD,,,poor,rating,asc
-"highly rated budget items under 55",price_max,0,55,USD,4.5,good,,
-"decently rated premium products above 350",price_min,350,,USD,3.5,decent,,
-"products with price less than 1800 and rating more than 4.2",price_max,0,1800,USD,4.2,,,
-"items under 5000 NPR with at least 4.7 rating",price_max,0,5000,NPR,4.7,,,
-"cheapest items with rating above 4.9",combined,,,,4.9,,price,asc
-"best value with good rating under 95",price_max,0,95,USD,4.0,good,rating,desc
-"show me the cheapest items with rating above 4.3",combined,,,,4.3,,price,asc
-"find the most expensive items with at least 4.8 rating",price_min,900,,USD,4.8,,price,desc
-"i want budget items under 80 with good rating",price_max,0,80,USD,4.0,good,,
-"give me premium items above 800 with excellent rating",price_min,800,,USD,4.8,excellent,,
-"show products between 90 and 110 with rating above 4.4",price_range,90,110,USD,4.4,,,
-"find affordable items under 250 with high rating",price_max,0,250,USD,4.5,good,,
-"i need items with price above 600 and rating at least 4.7",price_min,600,,USD,4.7,,,
-"show me items under 3000 NPR with excellent reviews",price_max,0,3000,NPR,4.8,excellent,,
-"cheapest products with good rating",combined,,,,4.0,good,price,asc
-"most expensive items with decent rating",price_min,700,,USD,3.5,decent,price,desc
-"under 25 with excellent rating",price_max,0,25,USD,4.8,excellent,,
-"above 800 with good rating",price_min,800,,USD,4.0,good,,
-"between 110 and 130 with rating above 4.7",price_range,110,130,USD,4.7,,,
-"cheapest items with at least 4.1 rating",combined,,,,4.1,,price,asc
-"most expensive items with good rating above 1500",price_min,1500,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 65",price_max,0,65,USD,4.5,good,,
-"premium quality with excellent rating above 900",price_min,900,,USD,4.8,excellent,,
-"products under 32 with rating above 3.9",price_max,0,32,USD,3.9,,,
-"items above 375 with minimum 4.6 rating",price_min,375,,USD,4.6,,,
-"affordable items between 1000 and 3000 NPR with good rating",price_range,1000,3000,NPR,4.0,good,,
-"cheapest products with excellent rating under 450",price_max,0,450,USD,4.8,excellent,price,asc
-"most expensive with at least 4.3 rating",price_min,450,,USD,4.3,,price,desc
-"best rated under 80 dollars",price_max,0,80,USD,4.5,excellent,rating,desc
-"worst rated above 250 dollars",price_min,250,,USD,,,poor,rating,asc
-"highly rated budget items under 42",price_max,0,42,USD,4.5,good,,
-"decently rated premium products above 400",price_min,400,,USD,3.5,decent,,
-"products with price less than 2200 and rating more than 4.5",price_max,0,2200,USD,4.5,,,
-"items under 8000 NPR with at least 4.4 rating",price_max,0,8000,NPR,4.4,,,
-"cheapest items with rating above 4.6",combined,,,,4.6,,price,asc
-"best value with good rating under 120",price_max,0,120,USD,4.0,good,rating,desc
-"find me the cheapest items with excellent rating",combined,,,,4.8,excellent,price,asc
-"show me the most expensive items with good rating",price_min,800,,USD,4.0,good,price,desc
-"i want budget items under 200 with high rating",price_max,0,200,USD,4.5,good,,
-"give me premium items above 1200 with excellent rating",price_min,1200,,USD,4.8,excellent,,
-"show products between 50 and 100 with rating above 4.2",price_range,50,100,USD,4.2,,,
-"find affordable items under 4000 NPR with good rating",price_max,0,4000,NPR,4.0,good,,
-"i need items with price above 800 and rating at least 4.8",price_min,800,,USD,4.8,,,
-"show me items under 5000 NPR with excellent reviews",price_max,0,5000,NPR,4.8,excellent,,
-"cheapest products with decent rating",combined,,,,3.5,decent,price,asc
-"most expensive items with good rating",price_min,1000,,USD,4.0,good,price,desc
-"under 15 with excellent rating",price_max,0,15,USD,4.8,excellent,,
-"above 1000 with good rating",price_min,1000,,USD,4.0,good,,
-"between 30 and 60 with rating above 4.5",price_range,30,60,USD,4.5,,,
-"cheapest items with at least 4.2 rating",combined,,,,4.2,,price,asc
-"most expensive items with good rating above 3000",price_min,3000,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 150",price_max,0,150,USD,4.5,good,,
-"premium quality with excellent rating above 1500",price_min,1500,,USD,4.8,excellent,,
-"products under 28 with rating above 3.8",price_max,0,28,USD,3.8,,,
-"items above 425 with minimum 4.7 rating",price_min,425,,USD,4.7,,,
-"affordable items under 2000 NPR with good rating",price_max,0,2000,NPR,4.0,good,,
-"cheapest products with excellent rating under 600",price_max,0,600,USD,4.8,excellent,price,asc
-"most expensive with at least 4.1 rating",price_min,500,,USD,4.1,,price,desc
-"best rated under 90 dollars",price_max,0,90,USD,4.5,excellent,rating,desc
-"worst rated above 300 dollars",price_min,300,,USD,,,poor,rating,asc
-"highly rated budget items under 38",price_max,0,38,USD,4.5,good,,
-"decently rated premium products above 450",price_min,450,,USD,3.5,decent,,
-"products with price less than 3000 and rating more than 4.8",price_max,0,3000,USD,4.8,,,
-"items under 10000 NPR with at least 4.5 rating",price_max,0,10000,NPR,4.5,,,
-"cheapest items with rating above 4.4",combined,,,,4.4,,price,asc
-"best value with good rating under 200",price_max,0,200,USD,4.0,good,rating,desc
-"show me products under RS 500 with rating above 4.3",price_max,0,500,NPR,4.3,,,
-"find cheapest items between 10000 and 20000 NPR",price_range,10000,20000,NPR,,,,"price",asc
-"i want the most expensive items above RS 10000",price_min,10000,,NPR,,,,"price",desc
-"products with maximum price of RS 1500 and rating at least 4.5",price_max,0,1500,NPR,4.5,,,
-"minimum price 2000 rupees with good rating",price_min,2000,,NPR,4.0,good,,
-"budget friendly items under RS 1000",price_max,0,1000,NPR,,,,,
-"luxury items above RS 5000",price_min,5000,,NPR,,,,,
-"affordable things less than RS 800",price_max,0,800,NPR,,,,,
-"premium items above RS 15000",price_min,15000,,NPR,,,,,
-"products between RS 200 and RS 500 with good rating",price_range,200,500,NPR,4.0,good,,
-"cheapest items under RS 2000 with excellent rating",price_max,0,2000,NPR,4.8,excellent,price,asc
-"most expensive items with rating above 4.7",price_min,50000,,NPR,4.7,,price,desc
-"products with price less than RS 3000 and rating more than 4.4",price_max,0,3000,NPR,4.4,,,
-"items above RS 4000 with minimum 4.6 rating",price_min,4000,,NPR,4.6,,,
-"affordable items between 30000 and 50000 NPR with good rating",price_range,30000,50000,NPR,4.0,good,,
-"cheapest products with excellent rating under RS 1000",price_max,0,1000,NPR,4.8,excellent,price,asc
-"most expensive with at least 4.5 rating above RS 8000",price_min,8000,,NPR,4.5,,price,desc
-"best rated under RS 1500",price_max,0,1500,NPR,4.5,excellent,rating,desc
-"worst rated above RS 2000",price_min,2000,,NPR,,,poor,rating,asc
-"highly rated budget items under RS 500",price_max,0,500,NPR,4.5,good,,
-"decently rated premium products above RS 3000",price_min,3000,,NPR,3.5,decent,,
-"products under RS 250 with rating above 4.2",price_max,0,250,NPR,4.2,,,
-"items above RS 6000 with minimum 4.8 rating",price_min,6000,,NPR,4.8,,,
-"affordable items between 1000 and 2000 NPR with good rating",price_range,1000,2000,NPR,4.0,good,,
-"cheapest items with rating above 4.7 under RS 2000",price_max,0,2000,NPR,4.7,,price,asc
-"best value with good rating under RS 800",price_max,0,800,NPR,4.0,good,rating,desc
-"show me the cheapest items with rating above 4.3 under RS 40000",price_max,0,40000,NPR,4.3,,price,asc
-"find the most expensive items with at least 4.8 rating above RS 50000",price_min,50000,,NPR,4.8,,price,desc
-"i want budget items under RS 3000 with good rating",price_max,0,3000,NPR,4.0,good,,
-"give me premium items above RS 60000 with excellent rating",price_min,60000,,NPR,4.8,excellent,,
-"show products between RS 500 and RS 1500 with rating above 4.4",price_range,500,1500,NPR,4.4,,,
-"find affordable items under RS 8000 with high rating",price_max,0,8000,NPR,4.5,good,,
-"i need items with price above RS 2000 and rating at least 4.7",price_min,2000,,NPR,4.7,,,
-"show me items under RS 1000 with excellent reviews",price_max,0,1000,NPR,4.8,excellent,,
-"cheapest products with good rating under RS 500",price_max,0,500,NPR,4.0,good,price,asc
-"most expensive items with decent rating above RS 10000",price_min,10000,,NPR,3.5,decent,price,desc
-"under RS 200 with excellent rating",price_max,0,200,NPR,4.8,excellent,,
-"above RS 5000 with good rating",price_min,5000,,NPR,4.0,good,,
-"between RS 800 and RS 1200 with rating above 4.6",price_range,800,1200,NPR,4.6,,,
-"cheapest items with at least 4.1 rating under RS 1500",price_max,0,1500,NPR,4.1,,price,asc
-"most expensive items with good rating above RS 20000",price_min,20000,,NPR,4.0,good,price,desc
-"budget friendly and highly rated under RS 600",price_max,0,600,NPR,4.5,good,,
-"premium quality with excellent rating above RS 7000",price_min,7000,,NPR,4.8,excellent,,
-"products under RS 350 with rating above 3.9",price_max,0,350,NPR,3.9,,,
-"items above RS 4500 with minimum 4.6 rating",price_min,4500,,NPR,4.6,,,
-"affordable items between 2000 and 5000 NPR with good rating",price_range,2000,5000,NPR,4.0,good,,
-"cheapest products with excellent rating under RS 1200",price_max,0,1200,NPR,4.8,excellent,price,asc
-"most expensive with at least 4.3 rating above RS 3000",price_min,3000,,NPR,4.3,,price,desc
-"best rated under RS 1800",price_max,0,1800,NPR,4.5,excellent,rating,desc
-"worst rated above RS 2500",price_min,2500,,NPR,,,poor,rating,asc
-"highly rated budget items under RS 400",price_max,0,400,NPR,4.5,good,,
-"decently rated premium products above RS 4000",price_min,4000,,NPR,3.5,decent,,
-"products with price less than RS 2800 and rating more than 4.5",price_max,0,2800,NPR,4.5,,,
-"items under RS 9000 with at least 4.4 rating",price_max,0,9000,NPR,4.4,,,
-"cheapest items with rating above 4.6 under RS 1800",price_max,0,1800,NPR,4.6,,price,asc
-"best value with good rating under RS 700",price_max,0,700,NPR,4.0,good,rating,desc
-"find me the cheapest items under RS 35000 with excellent rating",price_max,0,35000,NPR,4.8,excellent,price,asc
-"show me the most expensive items above RS 45000 with good rating",price_min,45000,,NPR,4.0,good,price,desc
-"i want budget items under RS 15000 with high rating",price_max,0,15000,NPR,4.5,good,,
-"give me premium items above RS 80000 with excellent rating",price_min,80000,,NPR,4.8,excellent,,
-"show products between RS 300 and RS 800 with rating above 4.2",price_range,300,800,NPR,4.2,,,
-"find affordable items under RS 5000 with good rating",price_max,0,5000,NPR,4.0,good,,
-"i need items with price above RS 12000 and rating at least 4.8",price_min,12000,,NPR,4.8,,,
-"show me items under RS 6000 with excellent reviews",price_max,0,6000,NPR,4.8,excellent,,
-"cheapest products with decent rating under RS 300",price_max,0,300,NPR,3.5,decent,price,asc
-"most expensive items with good rating above RS 15000",price_min,15000,,NPR,4.0,good,price,desc
-"under RS 150 with excellent rating",price_max,0,150,NPR,4.8,excellent,,
-"above RS 7000 with good rating",price_min,7000,,NPR,4.0,good,,
-"between RS 200 and RS 400 with rating above 4.5",price_range,200,400,NPR,4.5,,,
-"cheapest items with at least 4.2 rating under RS 20000",price_max,0,20000,NPR,4.2,,price,asc
-"most expensive items with good rating above RS 25000",price_min,25000,,NPR,4.0,good,price,desc
-"budget friendly and highly rated under RS 1200",price_max,0,1200,NPR,4.5,good,,
-"premium quality with excellent rating above RS 9000",price_min,9000,,NPR,4.8,excellent,,
-"products under RS 280 with rating above 3.8",price_max,0,280,NPR,3.8,,,
-"items above RS 5500 with minimum 4.7 rating",price_min,5500,,NPR,4.7,,,
-"affordable items under RS 1500 with good rating",price_max,0,1500,NPR,4.0,good,,
-"cheapest products with excellent rating under RS 2200",price_max,0,2200,NPR,4.8,excellent,price,asc
-"most expensive with at least 4.1 rating above RS 2000",price_min,2000,,NPR,4.1,,price,desc
-"best rated under RS 2500",price_max,0,2500,NPR,4.5,excellent,rating,desc
-"worst rated above RS 3000",price_min,3000,,NPR,,,poor,rating,asc
-"highly rated budget items under RS 900",price_max,0,900,NPR,4.5,good,,
-"decently rated premium products above RS 6000",price_min,6000,,NPR,3.5,decent,,
-"products with price less than RS 1800 and rating more than 4.8",price_max,0,1800,NPR,4.8,,,
-"items under RS 12000 with at least 4.5 rating",price_max,0,12000,NPR,4.5,,,
-"cheapest items with rating above 4.4 under RS 2500",price_max,0,2500,NPR,4.4,,price,asc
-"best value with good rating under RS 1000",price_max,0,1000,NPR,4.0,good,rating,desc
-"show me products under 75 dollars",price_max,0,75,USD,,,,,
-"find cheapest items",price_sort,,,,,,,price,asc
-"products between 150 and 300 dollars",price_range,150,300,USD,,,,,
-"i want the most expensive items",price_sort,,,,,,,price,desc
-"show me items with maximum price of 45",price_max,0,45,USD,,,,,
-"products with minimum price of 400",price_min,400,,USD,,,,,
-"budget friendly items under 60 dollars",price_max,0,60,USD,,,,,
-"premium items above 1200 dollars",price_min,1200,,USD,,,,,
-"affordable things less than 35 dollars",price_max,0,35,USD,,,,,
-"luxury items above 2500",price_min,2500,,USD,,,,,
-"show me products under rs 3000",price_max,0,3000,NPR,,,,,
-"cheapest items under 25000 NPR",price_max,0,25000,NPR,,,,"price",asc
-"products between rs 1500 and rs 4000",price_range,1500,4000,NPR,,,,,
-"most expensive items above rs 75000",price_min,75000,,NPR,,,,"price",desc
-"products with maximum price of rs 2500",price_max,0,2500,NPR,,,,,
-"minimum price 5000 rupees",price_min,5000,,NPR,,,,,
-"products rated above 4.6",rating_min,,,,,4.6,,,
-"show me items with rating at least 4.9",rating_min,,,,,4.9,,,
-"best rated items",rating_sort,,,,,,,rating,desc
-"products with rating below 3.5",rating_max,,,,,3.5,,,
-"minimum rating 4.2",rating_min,,,,,4.2,,,
-"worst rated items",rating_sort,,,,,,,rating,asc
-"at least 4.7 star rating",rating_min,,,,,4.7,,,
-"rating above 4.3",rating_min,,,,,4.3,,,
-"products with 4.5 stars and above",rating_min,,,,,4.5,,,
-"highly rated items",rating_min,,,,,4.5,,,
-"good rating products",rating_min,,,,,4.0,good,,
-"excellent rated items",rating_min,,,,,4.8,excellent,,
-"poorly rated things",rating_max,,,,,2.0,poor,,
-"average rating products",rating_min,,,,,3.0,average,,
-"decent rating items",rating_min,,,,,3.5,decent,,
-"cheapest items with excellent rating",combined,,,,4.8,excellent,price,asc
-"best items with maximum price 1000",price_max,0,1000,USD,4.5,excellent,,
-"least expensive but good rating under 100",price_max,0,100,USD,4.0,good,price,asc
-"most expensive with excellent reviews above 2000",price_min,2000,,USD,4.8,excellent,price,desc
-"budget friendly with high rating under 40",price_max,0,40,USD,4.5,good,price,asc
-"affordable and highly rated under 80",price_max,0,80,USD,4.5,good,price,asc
-"premium products with best rating above 1000",price_min,1000,,USD,4.8,excellent,price,desc
-"cheapest under 60 with 4.5+ stars",price_max,0,60,USD,4.5,good,price,asc
-"items under 150 with rating above 4.6",price_max,0,150,USD,4.6,,,
-"items under 40000 NPR with excellent rating",price_max,0,40000,NPR,4.8,excellent,,
-"best rated items under 30",price_max,0,30,USD,4.5,excellent,rating,desc
-"worst rated expensive items above 1000",price_min,1000,,USD,,,poor,rating,asc
-"cheapest with minimum 4.3 rating under 200",price_max,0,200,USD,4.3,,price,asc
-"most expensive with decent rating above 800",price_min,800,,USD,3.5,decent,price,desc
-"top rated budget items under 90",price_max,0,90,USD,4.5,excellent,rating,desc
-"highly rated premium items above 700",price_min,700,,USD,4.7,excellent,,
-"items with price less than 2500 and rating more than 4.6",price_max,0,2500,USD,4.6,,,
-"items above 150 with minimum rating 4.7",price_min,150,,USD,4.7,,,
-"cheapest items with at least 4.2 star rating",combined,,,,4.2,,price,asc
-"best value for money under 120",price_max,0,120,USD,4.3,good,rating,desc
-"show me the cheapest items under 500",price_sort,,,,,,,price,asc
-"i want the most expensive items with rating above 4.9",price_min,2000,,USD,4.9,,price,desc
-"find me affordable items with good rating under 70",price_max,0,70,USD,4.0,good,,
-"show premium items with excellent reviews above 300",price_min,300,,USD,4.7,excellent,,
-"items between 80 and 160 with rating at least 4.5",price_range,80,160,USD,4.5,,,
-"budget items under 15000 NPR with high rating",price_max,0,15000,NPR,4.5,good,,
-"luxury items above 8000 dollars with best rating",price_min,8000,,USD,4.8,excellent,,
-"cheapest products with rating above 4.4",price_min,,,,,4.4,,price,asc
-"most expensive with good rating above 1500",price_min,1500,,USD,4.0,good,price,desc
-"under 40 with excellent rating",price_max,0,40,USD,4.8,excellent,,
-"above 300 with decent rating",price_min,300,,USD,3.5,decent,,
-"between 90 and 140 with rating above 4.7",price_range,90,140,USD,4.7,,,
-"cheapest items with at least 4.6 rating under 1000",combined,,,,4.6,,price,asc
-"most expensive items with good reviews above 1200",price_min,1200,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 110",price_max,0,110,USD,4.5,good,,
-"premium quality with excellent rating above 600",price_min,600,,USD,4.8,excellent,,
-"items under 50 with rating above 4.3",price_max,0,50,USD,4.3,,,
-"items above 350 with minimum 4.8 rating",price_min,350,,USD,4.8,,,
-"affordable items between 2000 and 5000 NPR with good rating",price_range,2000,5000,NPR,4.0,good,,
-"cheapest products with excellent rating under 450",price_max,0,450,USD,4.8,excellent,price,asc
-"most expensive with at least 4.5 rating above 700",price_min,700,,USD,4.5,,price,desc
-"best rated under 85",price_max,0,85,USD,4.5,excellent,rating,desc
-"worst rated above 180",price_min,180,,USD,,,poor,rating,asc
-"highly rated budget items under 35",price_max,0,35,USD,4.5,good,,
-"decently rated premium products above 400",price_min,400,,USD,3.5,decent,,
-"items with price less than 2000 and rating more than 4.7",price_max,0,2000,USD,4.7,,,
-"items under 6000 NPR with at least 4.4 rating",price_max,0,6000,NPR,4.4,,,
-"cheapest items with rating above 4.8",combined,,,,4.8,,price,asc
-"best value with good rating under 160",price_max,0,160,USD,4.0,good,rating,desc
-"show me the cheapest items with rating above 4.6",combined,,,,4.6,,price,asc
-"find the most expensive items with at least 4.8 rating above 3000",price_min,3000,,USD,4.8,,price,desc
-"i want budget items under 45 with good rating",price_max,0,45,USD,4.0,good,,
-"give me premium items above 900 with excellent rating",price_min,900,,USD,4.8,excellent,,
-"show items between 100 and 180 with rating above 4.4",price_range,100,180,USD,4.4,,,
-"find affordable items under 850 with high rating",price_max,0,850,USD,4.5,good,,
-"i need items with price above 600 and rating at least 4.7",price_min,600,,USD,4.7,,,
-"show me items under 3000 NPR with excellent reviews",price_max,0,3000,NPR,4.8,excellent,,
-"cheapest products with decent rating under 40",combined,,,,3.5,decent,price,asc
-"most expensive items with good rating above 2000",price_min,2000,,USD,4.0,good,price,desc
-"under 55 with excellent rating",price_max,0,55,USD,4.8,excellent,,
-"above 750 with good rating",price_min,750,,USD,4.0,good,,
-"between 200 and 300 with rating above 4.9",price_range,200,300,USD,4.9,,,
-"cheapest items with at least 4.5 rating",combined,,,,4.5,,price,asc
-"most expensive items with good rating above 4000",price_min,4000,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 140",price_max,0,140,USD,4.5,good,,
-"premium quality with excellent rating above 1300",price_min,1300,,USD,4.8,excellent,,
-"items under 38 with rating above 4.1",price_max,0,38,USD,4.1,,,
-"items above 500 with minimum 4.6 rating",price_min,500,,USD,4.6,,,
-"affordable items between 800 and 2000 NPR with good rating",price_range,800,2000,NPR,4.0,good,,
-"cheapest products with excellent rating under 350",price_max,0,350,USD,4.8,excellent,price,asc
-"most expensive with at least 4.3 rating above 650",price_min,650,,USD,4.3,,price,desc
-"best rated under 95",price_max,0,95,USD,4.5,excellent,rating,desc
-"worst rated above 280",price_min,280,,USD,,,poor,rating,asc
-"highly rated budget items under 48",price_max,0,48,USD,4.5,good,,
-"decently rated premium products above 650",price_min,650,,USD,3.5,decent,,
-"items with price less than 2200 and rating more than 4.3",price_max,0,2200,USD,4.3,,,
-"items under 7000 NPR with at least 4.7 rating",price_max,0,7000,NPR,4.7,,,
-"cheapest items with rating above 4.9",combined,,,,4.9,,price,asc
-"best value with good rating under 200",price_max,0,200,USD,4.0,good,rating,desc
-"show me the cheapest items with rating above 4.4",combined,,,,4.4,,price,asc
-"find the most expensive items with at least 4.8 rating above 1500",price_min,1500,,USD,4.8,,price,desc
-"i want budget items under 100 with good rating",price_max,0,100,USD,4.0,good,,
-"give me premium items above 2500 with excellent rating",price_min,2500,,USD,4.8,excellent,,
-"show items between 120 and 190 with rating above 4.5",price_range,120,190,USD,4.5,,,
-"find affordable items under 300 with high rating",price_max,0,300,USD,4.5,good,,
-"i need items with price above 900 and rating at least 4.8",price_min,900,,USD,4.8,,,
-"show me items under 4000 NPR with excellent reviews",price_max,0,4000,NPR,4.8,excellent,,
-"cheapest products with good rating under 50",combined,,,,4.0,good,price,asc
-"most expensive items with decent rating above 1200",price_min,1200,,USD,3.5,decent,price,desc
-"under 18 with excellent rating",price_max,0,18,USD,4.8,excellent,,
-"above 950 with good rating",price_min,950,,USD,4.0,good,,
-"between 40 and 80 with rating above 4.6",price_range,40,80,USD,4.6,,,
-"cheapest items with at least 4.2 rating",combined,,,,4.2,,price,asc
-"most expensive items with good rating above 5000",price_min,5000,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 170",price_max,0,170,USD,4.5,good,,
-"premium quality with excellent rating above 2500",price_min,2500,,USD,4.8,excellent,,
-"items under 22 with rating above 3.9",price_max,0,22,USD,3.9,,,
-"items above 600 with minimum 4.7 rating",price_min,600,,USD,4.7,,,
-"affordable items between 200 and 450 with good rating",price_range,200,450,USD,4.0,good,,
-"cheapest products with excellent rating under 400",price_max,0,400,USD,4.8,excellent,price,asc
-"most expensive with at least 4.4 rating above 800",price_min,800,,USD,4.4,,price,desc
-"best rated under 130",price_max,0,130,USD,4.5,excellent,rating,desc
-"worst rated above 320",price_min,320,,USD,,,poor,rating,asc
-"highly rated budget items under 58",price_max,0,58,USD,4.5,good,,
-"decently rated premium products above 750",price_min,750,,USD,3.5,decent,,
-"items with price less than 4000 and rating more than 4.8",price_max,0,4000,USD,4.8,,,
-"items under 10000 NPR with at least 4.5 rating",price_max,0,10000,NPR,4.5,,,
-"cheapest items with rating above 4.7",combined,,,,4.7,,price,asc
-"best value with good rating under 220",price_max,0,220,USD,4.0,good,rating,desc
-"show me things under 25 dollars",price_max,0,25,USD,,,,,
-"find cheapest stuff",price_sort,,,,,,,price,asc
-"products between 300 and 500 dollars",price_range,300,500,USD,,,,,
-"i want the most expensive things",price_sort,,,,,,,price,desc
-"show me items with max price 75",price_max,0,75,USD,,,,,
-"products with min price 250",price_min,250,,USD,,,,,
-"budget friendly stuff under 15 dollars",price_max,0,15,USD,,,,,
-"premium items over 2000 dollars",price_min,2000,,USD,,,,,
-"affordable things less than 12 dollars",price_max,0,12,USD,,,,,
-"luxury goods above 5000",price_min,5000,,USD,,,,,
-"show me products under rs 800",price_max,0,800,NPR,,,,,
-"cheapest items under 5000 NPR",price_max,0,5000,NPR,,,,"price",asc
-"products between rs 2000 and rs 6000",price_range,2000,6000,NPR,,,,,
-"most expensive items above rs 20000",price_min,20000,,NPR,,,,"price",desc
-"products with maximum price of rs 1200",price_max,0,1200,NPR,,,,,
-"minimum price 3000 rupees",price_min,3000,,NPR,,,,,
-"products rated above 4.2",rating_min,,,,,4.2,,,
-"show me items with rating at least 4.6",rating_min,,,,,4.6,,,
-"top rated products",rating_sort,,,,,,,rating,desc
-"products with rating below 2.5",rating_max,,,,,2.5,,,
-"minimum rating 3.8",rating_min,,,,,3.8,,,
-"lowest rated items",rating_sort,,,,,,,rating,asc
-"at least 4.0 star rating",rating_min,,,,,4.0,,,
-"rating above 4.4",rating_min,,,,,4.4,,,
-"products with 3.5 stars and above",rating_min,,,,,3.5,,,
-"top rated stuff",rating_min,,,,,4.5,,,
-"good quality items",rating_min,,,,,4.0,good,,
-"excellent rated goods",rating_min,,,,,4.8,excellent,,
-"badly rated products",rating_max,,,,,2.0,poor,,
-"average quality things",rating_min,,,,,3.0,average,,
-"decent quality products",rating_min,,,,,3.5,decent,,
-"cheapest items with good quality",combined,,,,4.0,good,price,asc
-"best products under 200",price_max,0,200,USD,4.5,excellent,,
-"least expensive but good quality",combined,,,,4.0,good,price,asc
-"most expensive with excellent quality",combined,,,,4.8,excellent,price,desc
-"budget friendly with great rating",combined,,,,4.5,good,price,asc
-"affordable and well rated",combined,,,,4.5,good,price,asc
-"premium stuff with best reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 20 with 4+ stars",price_max,0,20,USD,4.0,good,price,asc
-"items under 80 dollars with rating above 4.3",price_max,0,80,USD,4.3,,,
-"stuff under 20000 NPR with excellent rating",price_max,0,20000,NPR,4.8,excellent,,
-"best rated items under 15",price_max,0,15,USD,4.5,excellent,rating,desc
-"worst rated expensive stuff above 500",price_min,500,,USD,,,poor,rating,asc
-"cheapest with minimum 4.1 rating under 100",price_max,0,100,USD,4.1,,price,asc
-"most expensive with decent quality above 400",price_min,400,,USD,3.5,decent,price,desc
-"top rated budget stuff under 45",price_max,0,45,USD,4.5,excellent,rating,desc
-"highly rated premium goods above 300",price_min,300,,USD,4.7,excellent,,
-"stuff with price less than 800 and rating more than 4.5",price_max,0,800,USD,4.5,,,
-"items above 50 with minimum rating 4.4",price_min,50,,USD,4.4,,,
-"cheapest items with at least 4.3 star rating",combined,,,,4.3,,price,asc
-"best value for money under 30",price_max,0,30,USD,4.3,good,rating,desc
-"show me the cheapest stuff under 200 dollars",price_sort,,,,,,,price,asc
-"i want the most expensive items with rating above 4.7",price_min,500,,USD,4.7,,price,desc
-"find me affordable goods with good rating under 25",price_max,0,25,USD,4.0,good,,
-"show premium stuff with excellent reviews above 150",price_min,150,,USD,4.7,excellent,,
-"items between 30 and 70 with rating at least 4.3",price_range,30,70,USD,4.3,,,
-"budget items under 8000 NPR with high rating",price_max,0,8000,NPR,4.5,good,,
-"luxury goods above 3000 dollars with best rating",price_min,3000,,USD,4.8,excellent,,
-"cheapest products with rating above 4.2",price_min,,,,,4.2,,price,asc
-"most expensive with good rating above 600",price_min,600,,USD,4.0,good,price,desc
-"under 18 with excellent rating",price_max,0,18,USD,4.8,excellent,,
-"above 150 with decent rating",price_min,150,,USD,3.5,decent,,
-"between 45 and 85 with rating above 4.5",price_range,45,85,USD,4.5,,,
-"cheapest items with at least 4.4 rating under 400",combined,,,,4.4,,price,asc
-"most expensive items with good reviews above 800",price_min,800,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 55",price_max,0,55,USD,4.5,good,,
-"premium quality with excellent rating above 350",price_min,350,,USD,4.8,excellent,,
-"items under 22 with rating above 4.0",price_max,0,22,USD,4.0,,,
-"items above 200 with minimum 4.6 rating",price_min,200,,USD,4.6,,,
-"affordable stuff between 600 and 1500 NPR with good rating",price_range,600,1500,NPR,4.0,good,,
-"cheapest products with excellent rating under 180",price_max,0,180,USD,4.8,excellent,price,asc
-"most expensive with at least 4.2 rating above 300",price_min,300,,USD,4.2,,price,desc
-"best rated under 40",price_max,0,40,USD,4.5,excellent,rating,desc
-"worst rated above 90",price_min,90,,USD,,,poor,rating,asc
-"highly rated budget items under 20",price_max,0,20,USD,4.5,good,,
-"decently rated premium products above 200",price_min,200,,USD,3.5,decent,,
-"stuff with price less than 600 and rating more than 4.4",price_max,0,600,USD,4.4,,,
-"items under 2500 NPR with at least 4.5 rating",price_max,0,2500,NPR,4.5,,,
-"cheapest items with rating above 4.6",combined,,,,4.6,,price,asc
-"best value with good rating under 45",price_max,0,45,USD,4.0,good,rating,desc
-"show me products under 35 dollars with good reviews",price_max,0,35,USD,4.0,good,,
-"find cheapest stuff with high rating",combined,,,,4.5,good,price,asc
-"products between 80 and 140 dollars with excellent rating",price_range,80,140,USD,4.8,excellent,,
-"i want the most expensive items with decent quality",price_min,400,,USD,3.5,decent,price,desc
-"show me items with max price 22 and rating above 4.1",price_max,0,22,USD,4.1,,,
-"products with min price 180 and good rating",price_min,180,,USD,4.0,good,,
-"budget friendly things under 32 dollars with excellent rating",price_max,0,32,USD,4.8,excellent,,
-"premium items above 700 dollars with at least 4.6 rating",price_min,700,,USD,4.6,,,
-"affordable things less than 16 dollars with good rating",price_max,0,16,USD,4.0,good,,
-"luxury items above 1800 with excellent rating",price_min,1800,,USD,4.8,excellent,,
-"show me products under rs 1500 with rating above 4.3",price_max,0,1500,NPR,4.3,,,
-"cheapest items under 12000 NPR with good rating",price_max,0,12000,NPR,4.0,good,price,asc
-"products between rs 800 and rs 2000 with excellent rating",price_range,800,2000,NPR,4.8,excellent,,
-"most expensive items above rs 40000 with decent rating",price_min,40000,,NPR,3.5,decent,price,desc
-"products with maximum price of rs 900 and rating at least 4.4",price_max,0,900,NPR,4.4,,,
-"minimum price 2000 rupees with good rating",price_min,2000,,NPR,4.0,good,,
-"show me things under 10 dollars",price_max,0,10,USD,,,,,
-"find inexpensive items",price_sort,,,,,,,price,asc
-"products between 400 and 700 dollars",price_range,400,700,USD,,,,,
-"i want the priciest things",price_sort,,,,,,,price,desc
-"show me items with max price 90",price_max,0,90,USD,,,,,
-"products with min price 800",price_min,800,,USD,,,,,
-"economical stuff under 8 dollars",price_max,0,8,USD,,,,,
-"high-end items over 3000 dollars",price_min,3000,,USD,,,,,
-"cheap things less than 5 dollars",price_max,0,5,USD,,,,,
-"upscale goods above 8000",price_min,8000,,USD,,,,,
-"show me products under rs 400",price_max,0,400,NPR,,,,,
-"cheapest items under 3000 NPR",price_max,0,3000,NPR,,,,"price",asc
-"products between rs 1000 and rs 3000",price_range,1000,3000,NPR,,,,,
-"most expensive items above rs 30000",price_min,30000,,NPR,,,,"price",desc
-"products with maximum price of rs 600",price_max,0,600,NPR,,,,,
-"minimum price 1500 rupees",price_min,1500,,NPR,,,,,
-"products rated above 4.1",rating_min,,,,,4.1,,,
-"show me items with rating at least 4.4",rating_min,,,,,4.4,,,
-"highest rated products",rating_sort,,,,,,,rating,desc
-"products with rating below 2",rating_max,,,,,2.0,,,
-"minimum rating 3.2",rating_min,,,,,3.2,,,
-"poorest rated items",rating_sort,,,,,,,rating,asc
-"at least 4.2 star rating",rating_min,,,,,4.2,,,
-"rating above 4.0",rating_min,,,,,4.0,,,
-"products with 4.2 stars and above",rating_min,,,,,4.2,,,
-"well-reviewed stuff",rating_min,,,,,4.5,good,,
-"quality rated items",rating_min,,,,,4.0,good,,
-"superbly rated goods",rating_min,,,,,4.8,excellent,,
-"terribly rated products",rating_max,,,,,1.5,poor,,
-"mediocre quality things",rating_min,,,,,3.0,average,,
-"satisfactory rating items",rating_min,,,,,3.5,decent,,
-"cheapest items with satisfactory rating",combined,,,,3.5,decent,price,asc
-"best products under 60",price_max,0,60,USD,4.5,excellent,,
-"least expensive but well-rated",combined,,,,4.0,good,price,asc
-"most expensive with superb quality",combined,,,,4.8,excellent,price,desc
-"budget friendly with great reviews",combined,,,,4.5,good,price,asc
-"affordable and well-reviewed",combined,,,,4.5,good,price,asc
-"premium stuff with top reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 12 with 4+ stars",price_max,0,12,USD,4.0,good,price,asc
-"items under 45 dollars with rating above 4.2",price_max,0,45,USD,4.2,,,
-"stuff under 15000 NPR with excellent rating",price_max,0,15000,NPR,4.8,excellent,,
-"best rated items under 10",price_max,0,10,USD,4.5,excellent,rating,desc
-"worst rated expensive stuff above 300",price_min,300,,USD,,,poor,rating,asc
-"cheapest with minimum 3.9 rating under 80",price_max,0,80,USD,3.9,,price,asc
-"most expensive with satisfactory quality above 250",price_min,250,,USD,3.5,decent,price,desc
-"top rated budget stuff under 25",price_max,0,25,USD,4.5,excellent,rating,desc
-"highly rated premium goods above 200",price_min,200,,USD,4.7,excellent,,
-"stuff with price less than 400 and rating more than 4.3",price_max,0,400,USD,4.3,,,
-"items above 30 with minimum rating 4.2",price_min,30,,USD,4.2,,,
-"cheapest items with at least 4.0 star rating",combined,,,,4.0,,price,asc
-"best value for money under 18",price_max,0,18,USD,4.3,good,rating,desc
-"show me the cheapest stuff under 120 dollars",price_sort,,,,,,,price,asc
-"i want the most expensive items with rating above 4.5",price_min,400,,USD,4.5,,price,desc
-"find me affordable goods with good rating under 15",price_max,0,15,USD,4.0,good,,
-"show premium stuff with excellent reviews above 90",price_min,90,,USD,4.7,excellent,,
-"items between 20 and 50 with rating at least 4.2",price_range,20,50,USD,4.2,,,
-"budget items under 5000 NPR with high rating",price_max,0,5000,NPR,4.5,good,,
-"luxury goods above 2000 dollars with best rating",price_min,2000,,USD,4.8,excellent,,
-"cheapest products with rating above 4.0",price_min,,,,,4.0,,price,asc
-"most expensive with good rating above 350",price_min,350,,USD,4.0,good,price,desc
-"under 12 with excellent rating",price_max,0,12,USD,4.8,excellent,,
-"above 90 with decent rating",price_min,90,,USD,3.5,decent,,
-"between 25 and 55 with rating above 4.3",price_range,25,55,USD,4.3,,,
-"cheapest items with at least 4.1 rating under 250",combined,,,,4.1,,price,asc
-"most expensive items with good reviews above 500",price_min,500,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 35",price_max,0,35,USD,4.5,good,,
-"premium quality with excellent rating above 200",price_min,200,,USD,4.8,excellent,,
-"items under 14 with rating above 3.8",price_max,0,14,USD,3.8,,,
-"items above 120 with minimum 4.4 rating",price_min,120,,USD,4.4,,,
-"affordable stuff between 400 and 1000 NPR with good rating",price_range,400,1000,NPR,4.0,good,,
-"cheapest products with excellent rating under 100",price_max,0,100,USD,4.8,excellent,price,asc
-"most expensive with at least 4.0 rating above 180",price_min,180,,USD,4.0,,price,desc
-"best rated under 25",price_max,0,25,USD,4.5,excellent,rating,desc
-"worst rated above 60",price_min,60,,USD,,,poor,rating,asc
-"highly rated budget items under 12",price_max,0,12,USD,4.5,good,,
-"decently rated premium products above 150",price_min,150,,USD,3.5,decent,,
-"stuff with price less than 300 and rating more than 4.2",price_max,0,300,USD,4.2,,,
-"items under 1500 NPR with at least 4.3 rating",price_max,0,1500,NPR,4.3,,,
-"cheapest items with rating above 4.4",combined,,,,4.4,,price,asc
-"best value with good rating under 28",price_max,0,28,USD,4.0,good,rating,desc
-"show me products under 150 dollars with great reviews",price_max,0,150,USD,4.5,excellent,,
-"find cheapest items with excellent rating",combined,,,,4.8,excellent,price,asc
-"products between 60 and 120 dollars with good rating",price_range,60,120,USD,4.0,good,,
-"i want the most expensive items with average rating",price_min,600,,USD,3.0,average,price,desc
-"show me items with max price 18 and rating above 4.0",price_max,0,18,USD,4.0,,,
-"products with min price 120 and good rating",price_min,120,,USD,4.0,good,,
-"budget friendly things under 24 dollars with excellent rating",price_max,0,24,USD,4.8,excellent,,
-"premium items above 400 dollars with at least 4.5 rating",price_min,400,,USD,4.5,,,
-"affordable things less than 9 dollars with good rating",price_max,0,9,USD,4.0,good,,
-"luxury items above 1200 with excellent rating",price_min,1200,,USD,4.8,excellent,,
-"show me products under rs 600 with rating above 4.2",price_max,0,600,NPR,4.2,,,
-"cheapest items under 8000 NPR with good rating",price_max,0,8000,NPR,4.0,good,price,asc
-"products between rs 500 and rs 1200 with excellent rating",price_range,500,1200,NPR,4.8,excellent,,
-"most expensive items above rs 25000 with decent rating",price_min,25000,,NPR,3.5,decent,price,desc
-"products with maximum price of rs 700 and rating at least 4.2",price_max,0,700,NPR,4.2,,,
-"minimum price 1200 rupees with good rating",price_min,1200,,NPR,4.0,good,,
-"show me things under 3 dollars",price_max,0,3,USD,,,,,
-"find low-cost items",price_sort,,,,,,,price,asc
-"products between 600 and 900 dollars",price_range,600,900,USD,,,,,
-"i want the costliest things",price_sort,,,,,,,price,desc
-"show me items with max price 150",price_max,0,150,USD,,,,,
-"products with min price 1200",price_min,1200,,USD,,,,,
-"value stuff under 7 dollars",price_max,0,7,USD,,,,,
-"deluxe items over 5000 dollars",price_min,5000,,USD,,,,,
-"inexpensive things less than 4 dollars",price_max,0,4,USD,,,,,
-"high-end goods above 10000",price_min,10000,,USD,,,,,
-"show me products under rs 200",price_max,0,200,NPR,,,,,
-"cheapest items under 2000 NPR",price_max,0,2000,NPR,,,,"price",asc
-"products between rs 400 and rs 800",price_range,400,800,NPR,,,,,
-"most expensive items above rs 15000",price_min,15000,,NPR,,,,"price",desc
-"products with maximum price of rs 400",price_max,0,400,NPR,,,,,
-"minimum price 800 rupees",price_min,800,,NPR,,,,,
-"products rated above 3.8",rating_min,,,,,3.8,,,
-"show me items with rating at least 4.1",rating_min,,,,,4.1,,,
-"top-ranked products",rating_sort,,,,,,,rating,desc
-"products with rating below 1.5",rating_max,,,,,1.5,,,
-"minimum rating 3.0",rating_min,,,,,3.0,,,
-"bottom rated items",rating_sort,,,,,,,rating,asc
-"at least 3.8 star rating",rating_min,,,,,3.8,,,
-"rating above 3.5",rating_min,,,,,3.5,,,
-"products with 3.2 stars and above",rating_min,,,,,3.2,,,
-"popular rated stuff",rating_min,,,,,4.0,good,,
-"nice rated items",rating_min,,,,,4.0,good,,
-"fantastic rated goods",rating_min,,,,,4.8,excellent,,
-"horribly rated products",rating_max,,,,,1.0,poor,,
-"so-so quality things",rating_min,,,,,3.0,average,,
-"okay rating items",rating_min,,,,,3.5,decent,,
-"cheapest items with okay rating",combined,,,,3.5,decent,price,asc
-"best products under 30",price_max,0,30,USD,4.5,excellent,,
-"least expensive but okay rated",combined,,,,3.5,decent,price,asc
-"most expensive with fantastic quality",combined,,,,4.8,excellent,price,desc
-"budget friendly with popular rating",combined,,,,4.0,good,price,asc
-"affordable and popular rated",combined,,,,4.0,good,price,asc
-"premium stuff with fantastic reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 8 with 4+ stars",price_max,0,8,USD,4.0,good,price,asc
-"items under 25 dollars with rating above 3.9",price_max,0,25,USD,3.9,,,
-"stuff under 10000 NPR with excellent rating",price_max,0,10000,NPR,4.8,excellent,,
-"best rated items under 8",price_max,0,8,USD,4.5,excellent,rating,desc
-"worst rated expensive stuff above 200",price_min,200,,USD,,,poor,rating,asc
-"cheapest with minimum 3.5 rating under 50",price_max,0,50,USD,3.5,,price,asc
-"most expensive with okay quality above 150",price_min,150,,USD,3.5,decent,price,desc
-"top rated budget stuff under 15",price_max,0,15,USD,4.5,excellent,rating,desc
-"highly rated premium goods above 120",price_min,120,,USD,4.7,excellent,,
-"stuff with price less than 200 and rating more than 4.0",price_max,0,200,USD,4.0,,,
-"items above 20 with minimum rating 3.9",price_min,20,,USD,3.9,,,
-"cheapest items with at least 3.8 star rating",combined,,,,3.8,,price,asc
-"best value for money under 12",price_max,0,12,USD,4.3,good,rating,desc
-"show me the cheapest stuff under 80 dollars",price_sort,,,,,,,price,asc
-"i want the most expensive items with rating above 4.2",price_min,300,,USD,4.2,,price,desc
-"find me affordable goods with good rating under 10",price_max,0,10,USD,4.0,good,,
-"show premium stuff with excellent reviews above 60",price_min,60,,USD,4.7,excellent,,
-"items between 12 and 30 with rating at least 4.0",price_range,12,30,USD,4.0,,,
-"budget items under 3000 NPR with high rating",price_max,0,3000,NPR,4.5,good,,
-"luxury goods above 1200 dollars with best rating",price_min,1200,,USD,4.8,excellent,,
-"cheapest products with rating above 3.8",price_min,,,,,3.8,,price,asc
-"most expensive with good rating above 200",price_min,200,,USD,4.0,good,price,desc
-"under 8 with excellent rating",price_max,0,8,USD,4.8,excellent,,
-"above 60 with decent rating",price_min,60,,USD,3.5,decent,,
-"between 15 and 35 with rating above 4.1",price_range,15,35,USD,4.1,,,
-"cheapest items with at least 3.9 rating under 150",combined,,,,3.9,,price,asc
-"most expensive items with good reviews above 300",price_min,300,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 20",price_max,0,20,USD,4.5,good,,
-"premium quality with excellent rating above 120",price_min,120,,USD,4.8,excellent,,
-"items under 9 with rating above 3.5",price_max,0,9,USD,3.5,,,
-"items above 80 with minimum 4.2 rating",price_min,80,,USD,4.2,,,
-"affordable stuff between 200 and 500 NPR with good rating",price_range,200,500,NPR,4.0,good,,
-"cheapest products with excellent rating under 60",price_max,0,60,USD,4.8,excellent,price,asc
-"most expensive with at least 3.8 rating above 100",price_min,100,,USD,3.8,,price,desc
-"best rated under 16",price_max,0,16,USD,4.5,excellent,rating,desc
-"worst rated above 40",price_min,40,,USD,,,poor,rating,asc
-"highly rated budget items under 8",price_max,0,8,USD,4.5,good,,
-"decently rated premium products above 90",price_min,90,,USD,3.5,decent,,
-"stuff with price less than 150 and rating more than 3.9",price_max,0,150,USD,3.9,,,
-"items under 800 NPR with at least 4.0 rating",price_max,0,800,NPR,4.0,,,
-"cheapest items with rating above 4.1",combined,,,,4.1,,price,asc
-"best value with good rating under 16",price_max,0,16,USD,4.0,good,rating,desc
-"show me products under 200 dollars with nice reviews",price_max,0,200,USD,4.0,good,,
-"find cheapest items with fantastic rating",combined,,,,4.8,excellent,price,asc
-"products between 40 and 80 dollars with nice rating",price_range,40,80,USD,4.0,good,,
-"i want the most expensive items with so-so rating",price_min,500,,USD,3.0,average,price,desc
-"show me items with max price 12 and rating above 3.8",price_max,0,12,USD,3.8,,,
-"products with min price 80 and nice rating",price_min,80,,USD,4.0,good,,
-"budget friendly things under 15 dollars with fantastic rating",price_max,0,15,USD,4.8,excellent,,
-"premium items above 250 dollars with at least 4.3 rating",price_min,250,,USD,4.3,,,
-"affordable things less than 6 dollars with nice rating",price_max,0,6,USD,4.0,good,,
-"luxury items above 800 with fantastic rating",price_min,800,,USD,4.8,excellent,,
-"show me products under rs 300 with rating above 4.0",price_max,0,300,NPR,4.0,,,
-"cheapest items under 4000 NPR with nice rating",price_max,0,4000,NPR,4.0,good,price,asc
-"products between rs 300 and rs 700 with fantastic rating",price_range,300,700,NPR,4.8,excellent,,
-"most expensive items above rs 12000 with okay rating",price_min,12000,,NPR,3.5,decent,price,desc
-"products with maximum price of rs 350 and rating at least 4.0",price_max,0,350,NPR,4.0,,,
-"minimum price 600 rupees with nice rating",price_min,600,,NPR,4.0,good,,
-"show me things under 2 dollars",price_max,0,2,USD,,,,,
-"find budget items",price_sort,,,,,,,price,asc
-"products between 800 and 1200 dollars",price_range,800,1200,USD,,,,,
-"i want the priciest stuff",price_sort,,,,,,,price,desc
-"show me items with max price 200",price_max,0,200,USD,,,,,
-"products with min price 1500",price_min,1500,,USD,,,,,
-"economical stuff under 6 dollars",price_max,0,6,USD,,,,,
-"prestige items over 6000 dollars",price_min,6000,,USD,,,,,
-"cheap things less than 3 dollars",price_max,0,3,USD,,,,,
-"exclusive goods above 12000",price_min,12000,,USD,,,,,
-"show me products under rs 150",price_max,0,150,NPR,,,,,
-"cheapest items under 1500 NPR",price_max,0,1500,NPR,,,,"price",asc
-"products between rs 200 and rs 500",price_range,200,500,NPR,,,,,
-"most expensive items above rs 10000",price_min,10000,,NPR,,,,"price",desc
-"products with maximum price of rs 250",price_max,0,250,NPR,,,,,
-"minimum price 500 rupees",price_min,500,,NPR,,,,,
-"products rated above 3.5",rating_min,,,,,3.5,,,
-"show me items with rating at least 3.9",rating_min,,,,,3.9,,,
-"highest-rated products",rating_sort,,,,,,,rating,desc
-"products with rating below 1",rating_max,,,,,1.0,,,
-"minimum rating 2.5",rating_min,,,,,2.5,,,
-"lowest-rated items",rating_sort,,,,,,,rating,asc
-"at least 3.5 star rating",rating_min,,,,,3.5,,,
-"rating above 3.2",rating_min,,,,,3.2,,,
-"products with 3.0 stars and above",rating_min,,,,,3.0,,,
-"well-liked stuff",rating_min,,,,,4.0,good,,
-"solid rated items",rating_min,,,,,4.0,good,,
-"outstanding rated goods",rating_min,,,,,4.8,excellent,,
-"dreadfully rated products",rating_max,,,,,1.0,poor,,
-"medium quality things",rating_min,,,,,3.0,average,,
-"acceptable rating items",rating_min,,,,,3.5,decent,,
-"cheapest items with acceptable rating",combined,,,,3.5,decent,price,asc
-"best products under 20",price_max,0,20,USD,4.5,excellent,,
-"least expensive but acceptable rated",combined,,,,3.5,decent,price,asc
-"most expensive with outstanding quality",combined,,,,4.8,excellent,price,desc
-"budget friendly with solid rating",combined,,,,4.0,good,price,asc
-"affordable and solid rated",combined,,,,4.0,good,price,asc
-"premium stuff with outstanding reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 5 with 4+ stars",price_max,0,5,USD,4.0,good,price,asc
-"items under 15 dollars with rating above 3.7",price_max,0,15,USD,3.7,,,
-"stuff under 5000 NPR with excellent rating",price_max,0,5000,NPR,4.8,excellent,,
-"best rated items under 5",price_max,0,5,USD,4.5,excellent,rating,desc
-"worst rated expensive stuff above 150",price_min,150,,USD,,,poor,rating,asc
-"cheapest with minimum 3.2 rating under 30",price_max,0,30,USD,3.2,,price,asc
-"most expensive with acceptable quality above 100",price_min,100,,USD,3.5,decent,price,desc
-"top rated budget stuff under 10",price_max,0,10,USD,4.5,excellent,rating,desc
-"highly rated premium goods above 80",price_min,80,,USD,4.7,excellent,,
-"stuff with price less than 100 and rating more than 3.8",price_max,0,100,USD,3.8,,,
-"items above 15 with minimum rating 3.7",price_min,15,,USD,3.7,,,
-"cheapest items with at least 3.5 star rating",combined,,,,3.5,,price,asc
-"best value for money under 8",price_max,0,8,USD,4.3,good,rating,desc
-"show me the cheapest stuff under 50 dollars",price_sort,,,,,,,price,asc
-"i want the most expensive items with rating above 4.0",price_min,200,,USD,4.0,,price,desc
-"find me affordable goods with solid rating under 8",price_max,0,8,USD,4.0,good,,
-"show premium stuff with outstanding reviews above 40",price_min,40,,USD,4.7,excellent,,
-"items between 8 and 20 with rating at least 3.8",price_range,8,20,USD,3.8,,,
-"budget items under 2000 NPR with high rating",price_max,0,2000,NPR,4.5,good,,
-"luxury goods above 800 dollars with best rating",price_min,800,,USD,4.8,excellent,,
-"cheapest products with rating above 3.5",price_min,,,,,3.5,,price,asc
-"most expensive with solid rating above 150",price_min,150,,USD,4.0,good,price,desc
-"under 5 with excellent rating",price_max,0,5,USD,4.8,excellent,,
-"above 40 with decent rating",price_min,40,,USD,3.5,decent,,
-"between 10 and 25 with rating above 3.9",price_range,10,25,USD,3.9,,,
-"cheapest items with at least 3.6 rating under 100",combined,,,,3.6,,price,asc
-"most expensive items with solid reviews above 200",price_min,200,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 12",price_max,0,12,USD,4.5,good,,
-"premium quality with excellent rating above 80",price_min,80,,USD,4.8,excellent,,
-"items under 6 with rating above 3.2",price_max,0,6,USD,3.2,,,
-"items above 50 with minimum 4.0 rating",price_min,50,,USD,4.0,,,
-"affordable stuff between 100 and 300 NPR with good rating",price_range,100,300,NPR,4.0,good,,
-"cheapest products with excellent rating under 40",price_max,0,40,USD,4.8,excellent,price,asc
-"most expensive with at least 3.5 rating above 70",price_min,70,,USD,3.5,,price,desc
-"best rated under 10",price_max,0,10,USD,4.5,excellent,rating,desc
-"worst rated above 30",price_min,30,,USD,,,poor,rating,asc
-"highly rated budget items under 5",price_max,0,5,USD,4.5,good,,
-"decently rated premium products above 60",price_min,60,,USD,3.5,decent,,
-"stuff with price less than 80 and rating more than 3.6",price_max,0,80,USD,3.6,,,
-"items under 500 NPR with at least 3.8 rating",price_max,0,500,NPR,3.8,,,
-"cheapest items with rating above 3.9",combined,,,,3.9,,price,asc
-"best value with solid rating under 10",price_max,0,10,USD,4.0,good,rating,desc
-"show me products under 500 dollars with great reviews",price_max,0,500,USD,4.5,excellent,,
-"find cheapest items with outstanding rating",combined,,,,4.8,excellent,price,asc
-"products between 20 and 50 dollars with solid rating",price_range,20,50,USD,4.0,good,,
-"i want the most expensive items with medium rating",price_min,400,,USD,3.0,average,price,desc
-"show me items with max price 8 and rating above 3.5",price_max,0,8,USD,3.5,,,
-"products with min price 50 and solid rating",price_min,50,,USD,4.0,good,,
-"budget friendly things under 10 dollars with outstanding rating",price_max,0,10,USD,4.8,excellent,,
-"premium items above 150 dollars with at least 4.1 rating",price_min,150,,USD,4.1,,,
-"affordable things less than 4 dollars with solid rating",price_max,0,4,USD,4.0,good,,
-"luxury items above 500 with outstanding rating",price_min,500,,USD,4.8,excellent,,
-"show me products under rs 200 with rating above 3.8",price_max,0,200,NPR,3.8,,,
-"cheapest items under 2500 NPR with solid rating",price_max,0,2500,NPR,4.0,good,price,asc
-"products between rs 150 and rs 400 with outstanding rating",price_range,150,400,NPR,4.8,excellent,,
-"most expensive items above rs 8000 with acceptable rating",price_min,8000,,NPR,3.5,decent,price,desc
-"products with maximum price of rs 200 and rating at least 3.8",price_max,0,200,NPR,3.8,,,
-"minimum price 400 rupees with solid rating",price_min,400,,NPR,4.0,good,,
-"show me things under 1 dollar",price_max,0,1,USD,,,,,
-"find value items",price_sort,,,,,,,price,asc
-"products between 1000 and 1500 dollars",price_range,1000,1500,USD,,,,,
-"i want the premium stuff",price_sort,,,,,,,price,desc
-"show me items with max price 300",price_max,0,300,USD,,,,,
-"products with min price 2000",price_min,2000,,USD,,,,,
-"value-oriented stuff under 5 dollars",price_max,0,5,USD,,,,,
-"elite items over 8000 dollars",price_min,8000,,USD,,,,,
-"economy things less than 2 dollars",price_max,0,2,USD,,,,,
-"top-tier goods above 15000",price_min,15000,,USD,,,,,
-"show me products under rs 100",price_max,0,100,NPR,,,,,
-"cheapest items under 1000 NPR",price_max,0,1000,NPR,,,,"price",asc
-"products between rs 100 and rs 300",price_range,100,300,NPR,,,,,
-"most expensive items above rs 5000",price_min,5000,,NPR,,,,"price",desc
-"products with maximum price of rs 150",price_max,0,150,NPR,,,,,
-"minimum price 300 rupees",price_min,300,,NPR,,,,,
-"products rated above 3.2",rating_min,,,,,3.2,,,
-"show me items with rating at least 3.5",rating_min,,,,,3.5,,,
-"top-performing products",rating_sort,,,,,,,rating,desc
-"products with rating below 0.5",rating_max,,,,,0.5,,,
-"minimum rating 2.0",rating_min,,,,,2.0,,,
-"bottom-performing items",rating_sort,,,,,,,rating,asc
-"at least 3.0 star rating",rating_min,,,,,3.0,,,
-"rating above 2.8",rating_min,,,,,2.8,,,
-"products with 2.5 stars and above",rating_min,,,,,2.5,,,
-"customer favorites",rating_min,,,,,4.0,good,,
-"decently rated",rating_min,,,,,4.0,good,,
-"spectacular rated",rating_min,,,,,4.8,excellent,,
-"terribly rated",rating_max,,,,,1.0,poor,,
-"mid-range quality",rating_min,,,,,3.0,average,,
-"fair rating",rating_min,,,,,3.5,decent,,
-"cheapest items with fair rating",combined,,,,3.5,decent,price,asc
-"best products under 15",price_max,0,15,USD,4.5,excellent,,
-"least expensive but fair rated",combined,,,,3.5,decent,price,asc
-"most expensive with spectacular quality",combined,,,,4.8,excellent,price,desc
-"budget friendly with customer favorite",combined,,,,4.0,good,price,asc
-"affordable and customer favorite",combined,,,,4.0,good,price,asc
-"premium stuff with spectacular reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 3 with 4+ stars",price_max,0,3,USD,4.0,good,price,asc
-"items under 10 dollars with rating above 3.5",price_max,0,10,USD,3.5,,,
-"stuff under 2000 NPR with spectacular rating",price_max,0,2000,NPR,4.8,excellent,,
-"best rated items under 3",price_max,0,3,USD,4.5,excellent,rating,desc
-"worst rated expensive stuff above 100",price_min,100,,USD,,,poor,rating,asc
-"cheapest with minimum 3.0 rating under 20",price_max,0,20,USD,3.0,,price,asc
-"most expensive with fair quality above 80",price_min,80,,USD,3.5,decent,price,desc
-"top rated budget stuff under 6",price_max,0,6,USD,4.5,excellent,rating,desc
-"highly rated premium goods above 50",price_min,50,,USD,4.7,excellent,,
-"stuff with price less than 50 and rating more than 3.5",price_max,0,50,USD,3.5,,,
-"items above 10 with minimum rating 3.4",price_min,10,,USD,3.4,,,
-"cheapest items with at least 3.2 star rating",combined,,,,3.2,,price,asc
-"best value for money under 5",price_max,0,5,USD,4.3,good,rating,desc
-"show me products under 25 dollars",price_max,0,25,USD,,,,,
-"find cheapest items",price_sort,,,,,,,price,asc
-"products between 300 and 500 dollars",price_range,300,500,USD,,,,,
-"i want the most expensive products",price_sort,,,,,,,price,desc
-"show me items with maximum price of 75",price_max,0,75,USD,,,,,
-"products with minimum price of 250",price_min,250,,USD,,,,,
-"budget friendly stuff under 15 dollars",price_max,0,15,USD,,,,,
-"premium items over 2000 dollars",price_min,2000,,USD,,,,,
-"affordable things less than 12 dollars",price_max,0,12,USD,,,,,
-"luxury goods above 5000",price_min,5000,,USD,,,,,
-"show me products under rs 800",price_max,0,800,NPR,,,,,
-"cheapest items under 5000 NPR",price_max,0,5000,NPR,,,,"price",asc
-"products between rs 2000 and rs 6000",price_range,2000,6000,NPR,,,,,
-"most expensive items above rs 20000",price_min,20000,,NPR,,,,"price",desc
-"products with maximum price of rs 1200",price_max,0,1200,NPR,,,,,
-"minimum price 3000 rupees",price_min,3000,,NPR,,,,,
-"products rated above 4.2",rating_min,,,,,4.2,,,
-"show me items with rating at least 4.6",rating_min,,,,,4.6,,,
-"top rated products",rating_sort,,,,,,,rating,desc
-"products with rating below 2.5",rating_max,,,,,2.5,,,
-"minimum rating 3.8",rating_min,,,,,3.8,,,
-"lowest rated items",rating_sort,,,,,,,rating,asc
-"at least 4.0 star rating",rating_min,,,,,4.0,,,
-"rating above 4.4",rating_min,,,,,4.4,,,
-"products with 3.5 stars and above",rating_min,,,,,3.5,,,
-"top rated stuff",rating_min,,,,,4.5,,,
-"good quality items",rating_min,,,,,4.0,good,,
-"excellent rated goods",rating_min,,,,,4.8,excellent,,
-"badly rated products",rating_max,,,,,2.0,poor,,
-"average quality things",rating_min,,,,,3.0,average,,
-"decent quality products",rating_min,,,,,3.5,decent,,
-"cheapest items with good quality",combined,,,,4.0,good,price,asc
-"best products under 200",price_max,0,200,USD,4.5,excellent,,
-"least expensive but good quality",combined,,,,4.0,good,price,asc
-"most expensive with excellent quality",combined,,,,4.8,excellent,price,desc
-"budget friendly with great rating",combined,,,,4.5,good,price,asc
-"affordable and well rated",combined,,,,4.5,good,price,asc
-"premium stuff with best reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 20 with 4+ stars",price_max,0,20,USD,4.0,good,price,asc
-"items under 80 dollars with rating above 4.3",price_max,0,80,USD,4.3,,,
-"stuff under 20000 NPR with excellent rating",price_max,0,20000,NPR,4.8,excellent,,
-"best rated items under 15",price_max,0,15,USD,4.5,excellent,rating,desc
-"worst rated expensive stuff above 500",price_min,500,,USD,,,poor,rating,asc
-"cheapest with minimum 4.1 rating under 100",price_max,0,100,USD,4.1,,price,asc
-"most expensive with decent quality above 400",price_min,400,,USD,3.5,decent,price,desc
-"top rated budget stuff under 45",price_max,0,45,USD,4.5,excellent,rating,desc
-"highly rated premium goods above 300",price_min,300,,USD,4.7,excellent,,
-"stuff with price less than 800 and rating more than 4.5",price_max,0,800,USD,4.5,,,
-"items above 50 with minimum rating 4.4",price_min,50,,USD,4.4,,,
-"cheapest items with at least 4.3 star rating",combined,,,,4.3,,price,asc
-"best value for money under 30",price_max,0,30,USD,4.3,good,rating,desc
-"show me the cheapest stuff under 200 dollars",price_sort,,,,,,,price,asc
-"i want the most expensive items with rating above 4.7",price_min,500,,USD,4.7,,price,desc
-"find me affordable goods with good rating under 25",price_max,0,25,USD,4.0,good,,
-"show premium stuff with excellent reviews above 150",price_min,150,,USD,4.7,excellent,,
-"items between 30 and 70 with rating at least 4.3",price_range,30,70,USD,4.3,,,
-"budget items under 8000 NPR with high rating",price_max,0,8000,NPR,4.5,good,,
-"luxury goods above 3000 dollars with best rating",price_min,3000,,USD,4.8,excellent,,
-"cheapest products with rating above 4.2",price_min,,,,,4.2,,price,asc
-"most expensive with good rating above 600",price_min,600,,USD,4.0,good,price,desc
-"under 18 with excellent rating",price_max,0,18,USD,4.8,excellent,,
-"above 150 with decent rating",price_min,150,,USD,3.5,decent,,
-"between 45 and 85 with rating above 4.5",price_range,45,85,USD,4.5,,,
-"cheapest items with at least 4.4 rating under 400",combined,,,,4.4,,price,asc
-"most expensive items with good reviews above 800",price_min,800,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 55",price_max,0,55,USD,4.5,good,,
-"premium quality with excellent rating above 350",price_min,350,,USD,4.8,excellent,,
-"items under 22 with rating above 4.0",price_max,0,22,USD,4.0,,,
-"items above 200 with minimum 4.6 rating",price_min,200,,USD,4.6,,,
-"affordable stuff between 600 and 1500 NPR with good rating",price_range,600,1500,NPR,4.0,good,,
-"cheapest products with excellent rating under 180",price_max,0,180,USD,4.8,excellent,price,asc
-"most expensive with at least 4.2 rating above 300",price_min,300,,USD,4.2,,price,desc
-"best rated under 40",price_max,0,40,USD,4.5,excellent,rating,desc
-"worst rated above 90",price_min,90,,USD,,,poor,rating,asc
-"highly rated budget items under 20",price_max,0,20,USD,4.5,good,,
-"decently rated premium products above 200",price_min,200,,USD,3.5,decent,,
-"stuff with price less than 600 and rating more than 4.4",price_max,0,600,USD,4.4,,,
-"items under 2500 NPR with at least 4.5 rating",price_max,0,2500,NPR,4.5,,,
-"cheapest items with rating above 4.6",combined,,,,4.6,,price,asc
-"best value with good rating under 45",price_max,0,45,USD,4.0,good,rating,desc
-"show me products under 35 dollars with good reviews",price_max,0,35,USD,4.0,good,,
-"find cheapest stuff with high rating",combined,,,,4.5,good,price,asc
-"products between 80 and 140 dollars with excellent rating",price_range,80,140,USD,4.8,excellent,,
-"i want the most expensive items with decent quality",price_min,400,,USD,3.5,decent,price,desc
-"show me items with max price 22 and rating above 4.1",price_max,0,22,USD,4.1,,,
-"products with min price 180 and good rating",price_min,180,,USD,4.0,good,,
-"budget friendly things under 32 dollars with excellent rating",price_max,0,32,USD,4.8,excellent,,
-"premium items above 700 dollars with at least 4.6 rating",price_min,700,,USD,4.6,,,
-"affordable things less than 16 dollars with good rating",price_max,0,16,USD,4.0,good,,
-"luxury items above 1800 with excellent rating",price_min,1800,,USD,4.8,excellent,,
-"show me products under rs 1500 with rating above 4.3",price_max,0,1500,NPR,4.3,,,
-"cheapest items under 12000 NPR with good rating",price_max,0,12000,NPR,4.0,good,price,asc
-"products between rs 800 and rs 2000 with excellent rating",price_range,800,2000,NPR,4.8,excellent,,
-"most expensive items above rs 40000 with decent rating",price_min,40000,,NPR,3.5,decent,price,desc
-"products with maximum price of rs 900 and rating at least 4.4",price_max,0,900,NPR,4.4,,,
-"minimum price 2000 rupees with good rating",price_min,2000,,NPR,4.0,good,,
-"show me things under 10 dollars",price_max,0,10,USD,,,,,
-"find inexpensive items",price_sort,,,,,,,price,asc
-"products between 400 and 700 dollars",price_range,400,700,USD,,,,,
-"i want the priciest things",price_sort,,,,,,,price,desc
-"show me items with max price 90",price_max,0,90,USD,,,,,
-"products with min price 800",price_min,800,,USD,,,,,
-"economical stuff under 8 dollars",price_max,0,8,USD,,,,,
-"high-end items over 3000 dollars",price_min,3000,,USD,,,,,
-"cheap things less than 5 dollars",price_max,0,5,USD,,,,,
-"upscale goods above 8000",price_min,8000,,USD,,,,,
-"show me products under rs 400",price_max,0,400,NPR,,,,,
-"cheapest items under 3000 NPR",price_max,0,3000,NPR,,,,"price",asc
-"products between rs 1000 and rs 3000",price_range,1000,3000,NPR,,,,,
-"most expensive items above rs 30000",price_min,30000,,NPR,,,,"price",desc
-"products with maximum price of rs 600",price_max,0,600,NPR,,,,,
-"minimum price 1500 rupees",price_min,1500,,NPR,,,,,
-"products rated above 4.1",rating_min,,,,,4.1,,,
-"show me items with rating at least 4.4",rating_min,,,,,4.4,,,
-"highest rated products",rating_sort,,,,,,,rating,desc
-"products with rating below 2",rating_max,,,,,2.0,,,
-"minimum rating 3.2",rating_min,,,,,3.2,,,
-"poorest rated items",rating_sort,,,,,,,rating,asc
-"at least 4.2 star rating",rating_min,,,,,4.2,,,
-"rating above 4.0",rating_min,,,,,4.0,,,
-"products with 4.2 stars and above",rating_min,,,,,4.2,,,
-"well-reviewed stuff",rating_min,,,,,4.5,good,,
-"quality rated items",rating_min,,,,,4.0,good,,
-"superbly rated goods",rating_min,,,,,4.8,excellent,,
-"terribly rated products",rating_max,,,,,1.5,poor,,
-"mediocre quality things",rating_min,,,,,3.0,average,,
-"satisfactory rating items",rating_min,,,,,3.5,decent,,
-"cheapest items with satisfactory rating",combined,,,,3.5,decent,price,asc
-"best products under 60",price_max,0,60,USD,4.5,excellent,,
-"least expensive but well-rated",combined,,,,4.0,good,price,asc
-"most expensive with superb quality",combined,,,,4.8,excellent,price,desc
-"budget friendly with great reviews",combined,,,,4.5,good,price,asc
-"affordable and well-reviewed",combined,,,,4.5,good,price,asc
-"premium stuff with top reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 12 with 4+ stars",price_max,0,12,USD,4.0,good,price,asc
-"items under 45 dollars with rating above 4.2",price_max,0,45,USD,4.2,,,
-"stuff under 15000 NPR with excellent rating",price_max,0,15000,NPR,4.8,excellent,,
-"best rated items under 10",price_max,0,10,USD,4.5,excellent,rating,desc
-"worst rated expensive stuff above 300",price_min,300,,USD,,,poor,rating,asc
-"cheapest with minimum 3.9 rating under 80",price_max,0,80,USD,3.9,,price,asc
-"most expensive with satisfactory quality above 250",price_min,250,,USD,3.5,decent,price,desc
-"top rated budget stuff under 25",price_max,0,25,USD,4.5,excellent,rating,desc
-"highly rated premium goods above 200",price_min,200,,USD,4.7,excellent,,
-"stuff with price less than 400 and rating more than 4.3",price_max,0,400,USD,4.3,,,
-"items above 30 with minimum rating 4.2",price_min,30,,USD,4.2,,,
-"cheapest items with at least 4.0 star rating",combined,,,,4.0,,price,asc
-"best value for money under 18",price_max,0,18,USD,4.3,good,rating,desc
-"show me the cheapest stuff under 120 dollars",price_sort,,,,,,,price,asc
-"i want the most expensive items with rating above 4.5",price_min,400,,USD,4.5,,price,desc
-"find me affordable goods with good rating under 15",price_max,0,15,USD,4.0,good,,
-"show premium stuff with excellent reviews above 90",price_min,90,,USD,4.7,excellent,,
-"items between 20 and 50 with rating at least 4.2",price_range,20,50,USD,4.2,,,
-"budget items under 5000 NPR with high rating",price_max,0,5000,NPR,4.5,good,,
-"luxury goods above 2000 dollars with best rating",price_min,2000,,USD,4.8,excellent,,
-"cheapest products with rating above 4.0",price_min,,,,,4.0,,price,asc
-"most expensive with good rating above 350",price_min,350,,USD,4.0,good,price,desc
-"under 12 with excellent rating",price_max,0,12,USD,4.8,excellent,,
-"above 90 with decent rating",price_min,90,,USD,3.5,decent,,
-"between 25 and 55 with rating above 4.3",price_range,25,55,USD,4.3,,,
-"cheapest items with at least 4.1 rating under 250",combined,,,,4.1,,price,asc
-"most expensive items with good reviews above 500",price_min,500,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 35",price_max,0,35,USD,4.5,good,,
-"premium quality with excellent rating above 200",price_min,200,,USD,4.8,excellent,,
-"items under 14 with rating above 3.8",price_max,0,14,USD,3.8,,,
-"items above 120 with minimum 4.4 rating",price_min,120,,USD,4.4,,,
-"affordable stuff between 400 and 1000 NPR with good rating",price_range,400,1000,NPR,4.0,good,,
-"cheapest products with excellent rating under 100",price_max,0,100,USD,4.8,excellent,price,asc
-"most expensive with at least 4.0 rating above 180",price_min,180,,USD,4.0,,price,desc
-"best rated under 25",price_max,0,25,USD,4.5,excellent,rating,desc
-"worst rated above 60",price_min,60,,USD,,,poor,rating,asc
-"highly rated budget items under 12",price_max,0,12,USD,4.5,good,,
-"decently rated premium products above 150",price_min,150,,USD,3.5,decent,,
-"stuff with price less than 300 and rating more than 4.2",price_max,0,300,USD,4.2,,,
-"items under 1500 NPR with at least 4.3 rating",price_max,0,1500,NPR,4.3,,,
-"cheapest items with rating above 4.4",combined,,,,4.4,,price,asc
-"best value with good rating under 28",price_max,0,28,USD,4.0,good,rating,desc
-"show me products under 150 dollars with great reviews",price_max,0,150,USD,4.5,excellent,,
-"find cheapest items with excellent rating",combined,,,,4.8,excellent,price,asc
-"products between 60 and 120 dollars with good rating",price_range,60,120,USD,4.0,good,,
-"i want the most expensive items with average rating",price_min,600,,USD,3.0,average,price,desc
-"show me items with max price 18 and rating above 4.0",price_max,0,18,USD,4.0,,,
-"products with min price 120 and good rating",price_min,120,,USD,4.0,good,,
-"budget friendly things under 24 dollars with excellent rating",price_max,0,24,USD,4.8,excellent,,
-"premium items above 400 dollars with at least 4.5 rating",price_min,400,,USD,4.5,,,
-"affordable things less than 9 dollars with good rating",price_max,0,9,USD,4.0,good,,
-"luxury items above 1200 with excellent rating",price_min,1200,,USD,4.8,excellent,,
-"show me products under rs 600 with rating above 4.2",price_max,0,600,NPR,4.2,,,
-"cheapest items under 8000 NPR with good rating",price_max,0,8000,NPR,4.0,good,price,asc
-"products between rs 500 and rs 1200 with excellent rating",price_range,500,1200,NPR,4.8,excellent,,
-"most expensive items above rs 25000 with decent rating",price_min,25000,,NPR,3.5,decent,price,desc
-"products with maximum price of rs 700 and rating at least 4.2",price_max,0,700,NPR,4.2,,,
-"minimum price 1200 rupees with good rating",price_min,1200,,NPR,4.0,good,,
-"show me things under 3 dollars",price_max,0,3,USD,,,,,
-"find low-cost items",price_sort,,,,,,,price,asc
-"products between 600 and 900 dollars",price_range,600,900,USD,,,,,
-"i want the costliest things",price_sort,,,,,,,price,desc
-"show me items with max price 150",price_max,0,150,USD,,,,,
-"products with min price 1200",price_min,1200,,USD,,,,,
-"value stuff under 7 dollars",price_max,0,7,USD,,,,,
-"deluxe items over 5000 dollars",price_min,5000,,USD,,,,,
-"inexpensive things less than 4 dollars",price_max,0,4,USD,,,,,
-"high-end goods above 10000",price_min,10000,,USD,,,,,
-"show me products under rs 200",price_max,0,200,NPR,,,,,
-"cheapest items under 2000 NPR",price_max,0,2000,NPR,,,,"price",asc
-"products between Rs 400 and Rs 800",price_range,400,800,NPR,,,,,
-"most expensive items above Rs 15000",price_min,15000,,NPR,,,,"price",desc
-"products with maximum price of Rs 400",price_max,0,400,NPR,,,,,
-"minimum price 800 rupees",price_min,800,,NPR,,,,,
-"products rated above 3.8",rating_min,,,,,3.8,,,
-"show me items with rating at least 4.1",rating_min,,,,,4.1,,,
-"top-ranked products",rating_sort,,,,,,,rating,desc
-"products with rating below 1.5",rating_max,,,,,1.5,,,
-"minimum rating 3.0",rating_min,,,,,3.0,,,
-"bottom rated items",rating_sort,,,,,,,rating,asc
-"at least 3.8 star rating",rating_min,,,,,3.8,,,
-"rating above 3.5",rating_min,,,,,3.5,,,
-"products with 3.2 stars and above",rating_min,,,,,3.2,,,
-"popular rated stuff",rating_min,,,,,4.0,good,,
-"nice rated items",rating_min,,,,,4.0,good,,
-"fantastic rated goods",rating_min,,,,,4.8,excellent,,
-"horribly rated products",rating_max,,,,,1.0,poor,,
-"so-so quality things",rating_min,,,,,3.0,average,,
-"okay rating items",rating_min,,,,,3.5,decent,,
-"cheapest items with okay rating",combined,,,,3.5,decent,price,asc
-"best products under 30",price_max,0,30,USD,4.5,excellent,,
-"least expensive but okay rated",combined,,,,3.5,decent,price,asc
-"most expensive with fantastic quality",combined,,,,4.8,excellent,price,desc
-"budget friendly with popular rating",combined,,,,4.0,good,price,asc
-"affordable and popular rated",combined,,,,4.0,good,price,asc
-"premium stuff with fantastic reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 8 with 4+ stars",price_max,0,8,USD,4.0,good,price,asc
-"items under 25 dollars with rating above 3.9",price_max,0,25,USD,3.9,,,
-"stuff under 10000 NPR with excellent rating",price_max,0,10000,NPR,4.8,excellent,,
-"best rated items under 8",price_max,0,8,USD,4.5,excellent,rating,desc
-"worst rated expensive stuff above 200",price_min,200,,USD,,,poor,rating,asc
-"cheapest with minimum 3.5 rating under 50",price_max,0,50,USD,3.5,,price,asc
-"most expensive with okay quality above 150",price_min,150,,USD,3.5,decent,price,desc
-"top rated budget stuff under 15",price_max,0,15,USD,4.5,excellent,rating,desc
-"highly rated premium goods above 120",price_min,120,,USD,4.7,excellent,,
-"stuff with price less than 200 and rating more than 4.0",price_max,0,200,USD,4.0,,,
-"items above 20 with minimum rating 3.9",price_min,20,,USD,3.9,,,
-"cheapest items with at least 3.8 star rating",combined,,,,3.8,,price,asc
-"best value for money under 12",price_max,0,12,USD,4.3,good,rating,desc
-"show me the cheapest stuff under 80 dollars",price_sort,,,,,,,price,asc
-"i want the most expensive items with rating above 4.2",price_min,300,,USD,4.2,,price,desc
-"find me affordable goods with good rating under 10",price_max,0,10,USD,4.0,good,,
-"show premium stuff with excellent reviews above 60",price_min,60,,USD,4.7,excellent,,
-"items between 12 and 30 with rating at least 4.0",price_range,12,30,USD,4.0,,,
-"budget items under 3000 NPR with high rating",price_max,0,3000,NPR,4.5,good,,
-"luxury goods above 1200 dollars with best rating",price_min,1200,,USD,4.8,excellent,,
-"cheapest products with rating above 3.8",price_min,,,,,3.8,,price,asc
-"most expensive with good rating above 200",price_min,200,,USD,4.0,good,price,desc
-"under 8 with excellent rating",price_max,0,8,USD,4.8,excellent,,
-"above 60 with decent rating",price_min,60,,USD,3.5,decent,,
-"between 15 and 35 with rating above 4.1",price_range,15,35,USD,4.1,,,
-"cheapest items with at least 3.9 rating under 150",combined,,,,3.9,,price,asc
-"most expensive items with good reviews above 300",price_min,300,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 20",price_max,0,20,USD,4.5,good,,
-"premium quality with excellent rating above 120",price_min,120,,USD,4.8,excellent,,
-"items under 9 with rating above 3.5",price_max,0,9,USD,3.5,,,
-"items above 80 with minimum 4.2 rating",price_min,80,,USD,4.2,,,
-"affordable stuff between 200 and 500 NPR with good rating",price_range,200,500,NPR,4.0,good,,
-"cheapest products with excellent rating under 60",price_max,0,60,USD,4.8,excellent,price,asc
-"most expensive with at least 3.8 rating above 100",price_min,100,,USD,3.8,,price,desc
-"best rated under 16",price_max,0,16,USD,4.5,excellent,rating,desc
-"worst rated above 40",price_min,40,,USD,,,poor,rating,asc
-"highly rated budget items under 8",price_max,0,8,USD,4.5,good,,
-"decently rated premium products above 90",price_min,90,,USD,3.5,decent,,
-"stuff with price less than 150 and rating more than 3.9",price_max,0,150,USD,3.9,,,
-"items under 800 NPR with at least 4.0 rating",price_max,0,800,NPR,4.0,,,
-"cheapest items with rating above 4.1",combined,,,,4.1,,price,asc
-"best value with good rating under 16",price_max,0,16,USD,4.0,good,rating,desc
-"show me products under 200 dollars with nice reviews",price_max,0,200,USD,4.0,good,,
-"find cheapest items with fantastic rating",combined,,,,4.8,excellent,price,asc
-"products between 40 and 80 dollars with nice rating",price_range,40,80,USD,4.0,good,,
-"i want the most expensive items with so-so rating",price_min,500,,USD,3.0,average,price,desc
-"show me items with max price 12 and rating above 3.8",price_max,0,12,USD,3.8,,,
-"products with min price 80 and nice rating",price_min,80,,USD,4.0,good,,
-"budget friendly things under 15 dollars with fantastic rating",price_max,0,15,USD,4.8,excellent,,
-"premium items above 250 dollars with at least 4.3 rating",price_min,250,,USD,4.3,,,
-"affordable things less than 6 dollars with nice rating",price_max,0,6,USD,4.0,good,,
-"luxury items above 800 with fantastic rating",price_min,800,,USD,4.8,excellent,,
-"show me products under Rs 300 with rating above 4.0",price_max,0,300,NPR,4.0,,,
-"cheapest items under 4000 NPR with nice rating",price_max,0,4000,NPR,4.0,good,price,asc
-"products between Rs 300 and Rs 700 with fantastic rating",price_range,300,700,NPR,4.8,excellent,,
-"most expensive items above Rs 12000 with okay rating",price_min,12000,,NPR,3.5,decent,price,desc
-"products with maximum price of Rs 350 and rating at least 4.0",price_max,0,350,NPR,4.0,,,
-"minimum price 600 rupees with nice rating",price_min,600,,NPR,4.0,good,,
-"show me things under 2 dollars",price_max,0,2,USD,,,,,
-"find budget items",price_sort,,,,,,,price,asc
-"products between 800 and 1200 dollars",price_range,800,1200,USD,,,,,
-"i want the priciest stuff",price_sort,,,,,,,price,desc
-"show me items with max price 200",price_max,0,200,USD,,,,,
-"products with min price 1500",price_min,1500,,USD,,,,,
-"economical stuff under 6 dollars",price_max,0,6,USD,,,,,
-"prestige items over 6000 dollars",price_min,6000,,USD,,,,,
-"cheap things less than 3 dollars",price_max,0,3,USD,,,,,
-"exclusive goods above 12000",price_min,12000,,USD,,,,,
-"show me products under Rs 150",price_max,0,150,NPR,,,,,
-"cheapest items under 1500 NPR",price_max,0,1500,NPR,,,,"price",asc
-"products between Rs 200 and Rs 500",price_range,200,500,NPR,,,,,
-"most expensive items above Rs 10000",price_min,10000,,NPR,,,,"price",desc
-"products with maximum price of Rs 250",price_max,0,250,NPR,,,,,
-"minimum price 500 rupees",price_min,500,,NPR,,,,,
-"products rated above 3.5",rating_min,,,,,3.5,,,
-"show me items with rating at least 3.9",rating_min,,,,,3.9,,,
-"highest-rated products",rating_sort,,,,,,,rating,desc
-"products with rating below 1",rating_max,,,,,1.0,,,
-"minimum rating 2.5",rating_min,,,,,2.5,,,
-"lowest-rated items",rating_sort,,,,,,,rating,asc
-"at least 3.5 star rating",rating_min,,,,,3.5,,,
-"rating above 3.2",rating_min,,,,,3.2,,,
-"products with 3.0 stars and above",rating_min,,,,,3.0,,,
-"well-liked stuff",rating_min,,,,,4.0,good,,
-"solid rated items",rating_min,,,,,4.0,good,,
-"outstanding rated goods",rating_min,,,,,4.8,excellent,,
-"dreadfully rated products",rating_max,,,,,1.0,poor,,
-"medium quality things",rating_min,,,,,3.0,average,,
-"acceptable rating items",rating_min,,,,,3.5,decent,,
-"cheapest items with acceptable rating",combined,,,,3.5,decent,price,asc
-"best products under 20",price_max,0,20,USD,4.5,excellent,,
-"least expensive but acceptable rated",combined,,,,3.5,decent,price,asc
-"most expensive with outstanding quality",combined,,,,4.8,excellent,price,desc
-"budget friendly with solid rating",combined,,,,4.0,good,price,asc
-"affordable and solid rated",combined,,,,4.0,good,price,asc
-"premium stuff with outstanding reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 5 with 4+ stars",price_max,0,5,USD,4.0,good,price,asc
-"items under 15 dollars with rating above 3.7",price_max,0,15,USD,3.7,,,
-"stuff under 5000 NPR with excellent rating",price_max,0,5000,NPR,4.8,excellent,,
-"best rated items under 5",price_max,0,5,USD,4.5,excellent,rating,desc
-"worst rated expensive stuff above 150",price_min,150,,USD,,,poor,rating,asc
-"cheapest with minimum 3.2 rating under 30",price_max,0,30,USD,3.2,,price,asc
-"most expensive with acceptable quality above 100",price_min,100,,USD,3.5,decent,price,desc
-"top rated budget stuff under 10",price_max,0,10,USD,4.5,excellent,rating,desc
-"highly rated premium goods above 80",price_min,80,,USD,4.7,excellent,,
-"stuff with price less than 100 and rating more than 3.8",price_max,0,100,USD,3.8,,,
-"items above 15 with minimum rating 3.7",price_min,15,,USD,3.7,,,
-"cheapest items with at least 3.5 star rating",combined,,,,3.5,,price,asc
-"best value for money under 8",price_max,0,8,USD,4.3,good,rating,desc
-"show me the cheapest stuff under 50 dollars",price_sort,,,,,,,price,asc
-"i want the most expensive items with rating above 4.0",price_min,200,,USD,4.0,,price,desc
-"find me affordable goods with solid rating under 8",price_max,0,8,USD,4.0,good,,
-"show premium stuff with outstanding reviews above 40",price_min,40,,USD,4.7,excellent,,
-"items between 8 and 20 with rating at least 3.8",price_range,8,20,USD,3.8,,,
-"budget items under 2000 NPR with high rating",price_max,0,2000,NPR,4.5,good,,
-"luxury goods above 800 dollars with best rating",price_min,800,,USD,4.8,excellent,,
-"cheapest products with rating above 3.5",price_min,,,,,3.5,,price,asc
-"most expensive with solid rating above 150",price_min,150,,USD,4.0,good,price,desc
-"under 5 with excellent rating",price_max,0,5,USD,4.8,excellent,,
-"above 40 with decent rating",price_min,40,,USD,3.5,decent,,
-"between 10 and 25 with rating above 3.9",price_range,10,25,USD,3.9,,,
-"cheapest items with at least 3.6 rating under 100",combined,,,,3.6,,price,asc
-"most expensive items with solid reviews above 200",price_min,200,,USD,4.0,good,price,desc
-"budget friendly and highly rated under 12",price_max,0,12,USD,4.5,good,,
-"premium quality with excellent rating above 80",price_min,80,,USD,4.8,excellent,,
-"items under 6 with rating above 3.2",price_max,0,6,USD,3.2,,,
-"items above 50 with minimum 4.0 rating",price_min,50,,USD,4.0,,,
-"affordable stuff between 100 and 300 NPR with good rating",price_range,100,300,NPR,4.0,good,,
-"cheapest products with excellent rating under 40",price_max,0,40,USD,4.8,excellent,price,asc
-"most expensive with at least 3.5 rating above 70",price_min,70,,USD,3.5,,price,desc
-"best rated under 10",price_max,0,10,USD,4.5,excellent,rating,desc
-"worst rated above 30",price_min,30,,USD,,,poor,rating,asc
-"highly rated budget items under 5",price_max,0,5,USD,4.5,good,,
-"decently rated premium products above 60",price_min,60,,USD,3.5,decent,,
-"stuff with price less than 80 and rating more than 3.6",price_max,0,80,USD,3.6,,,
-"items under 500 NPR with at least 3.8 rating",price_max,0,500,NPR,3.8,,,
-"cheapest items with rating above 3.9",combined,,,,3.9,,price,asc
-"best value with solid rating under 10",price_max,0,10,USD,4.0,good,rating,desc
-"show me products under 500 dollars with great reviews",price_max,0,500,USD,4.5,excellent,,
-"find cheapest items with outstanding rating",combined,,,,4.8,excellent,price,asc
-"products between 20 and 50 dollars with solid rating",price_range,20,50,USD,4.0,good,,
-"i want the most expensive items with medium rating",price_min,400,,USD,3.0,average,price,desc
-"show me items with max price 8 and rating above 3.5",price_max,0,8,USD,3.5,,,
-"products with min price 50 and solid rating",price_min,50,,USD,4.0,good,,
-"budget friendly things under 10 dollars with outstanding rating",price_max,0,10,USD,4.8,excellent,,
-"premium items above 150 dollars with at least 4.1 rating",price_min,150,,USD,4.1,,,
-"affordable things less than 4 dollars with solid rating",price_max,0,4,USD,4.0,good,,
-"luxury items above 500 with outstanding rating",price_min,500,,USD,4.8,excellent,,
-"show me products under Rs 200 with rating above 3.8",price_max,0,200,NPR,3.8,,,
-"cheapest items under 2500 NPR with solid rating",price_max,0,2500,NPR,4.0,good,price,asc
-"products between Rs 150 and Rs 400 with outstanding rating",price_range,150,400,NPR,4.8,excellent,,
-"most expensive items above Rs 8000 with acceptable rating",price_min,8000,,NPR,3.5,decent,price,desc
-"products with maximum price of Rs 200 and rating at least 3.8",price_max,0,200,NPR,3.8,,,
-"minimum price 400 rupees with solid rating",price_min,400,,NPR,4.0,good,,
-"show me things under 1 dollar",price_max,0,1,USD,,,,,
-"find value items",price_sort,,,,,,,price,asc
-"products between 1000 and 1500 dollars",price_range,1000,1500,USD,,,,,
-"i want the premium stuff",price_sort,,,,,,,price,desc
-"show me items with max price 300",price_max,0,300,USD,,,,,
-"products with min price 2000",price_min,2000,,USD,,,,,
-"value-oriented stuff under 5 dollars",price_max,0,5,USD,,,,,
-"elite items over 8000 dollars",price_min,8000,,USD,,,,,
-"economy things less than 2 dollars",price_max,0,2,USD,,,,,
-"top-tier goods above 15000",price_min,15000,,USD,,,,,
-"show me products under Rs 100",price_max,0,100,NPR,,,,,
-"cheapest items under 1000 NPR",price_max,0,1000,NPR,,,,"price",asc
-"products between Rs 100 and Rs 300",price_range,100,300,NPR,,,,,
-"most expensive items above Rs 5000",price_min,5000,,NPR,,,,"price",desc
-"products with maximum price of Rs 150",price_max,0,150,NPR,,,,,
-"minimum price 300 rupees",price_min,300,,NPR,,,,,
-"products rated above 3.2",rating_min,,,,,3.2,,,
-"show me items with rating at least 3.5",rating_min,,,,,3.5,,,
-"top-performing products",rating_sort,,,,,,,rating,desc
-"products with rating below 0.5",rating_max,,,,,0.5,,,
-"minimum rating 2.0",rating_min,,,,,2.0,,,
-"bottom-performing items",rating_sort,,,,,,,rating,asc
-"at least 3.0 star rating",rating_min,,,,,3.0,,,
-"rating above 2.8",rating_min,,,,,2.8,,,
-"products with 2.5 stars and above",rating_min,,,,,2.5,,,
-"customer favorites",rating_min,,,,,4.0,good,,
-"decently rated",rating_min,,,,,4.0,good,,
-"spectacular rated",rating_min,,,,,4.8,excellent,,
-"terribly rated",rating_max,,,,,1.0,poor,,
-"mid-range quality",rating_min,,,,,3.0,average,,
-"fair rating",rating_min,,,,,3.5,decent,,
-"cheapest items with fair rating",combined,,,,3.5,decent,price,asc
-"best products under 15",price_max,0,15,USD,4.5,excellent,,
-"least expensive but fair rated",combined,,,,3.5,decent,price,asc
-"most expensive with spectacular quality",combined,,,,4.8,excellent,price,desc
-"budget friendly with customer favorite",combined,,,,4.0,good,price,asc
-"affordable and customer favorite",combined,,,,4.0,good,price,asc
-"premium stuff with spectacular reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 3 with 4+ stars",price_max,0,3,USD,4.0,good,price,asc
-"items under 10 dollars with rating above 3.5",price_max,0,10,USD,3.5,,,
-"stuff under 2000 NPR with spectacular rating",price_max,0,2000,NPR,4.8,excellent,,
-"best rated items under 3",price_max,0,3,USD,4.5,excellent,rating,desc
-"worst rated expensive stuff above 100",price_min,100,,USD,,,poor,rating,asc
-"cheapest with minimum 3.0 rating under 20",price_max,0,20,USD,3.0,,price,asc
-"most expensive with fair quality above 80",price_min,80,,USD,3.5,decent,price,desc
-"top rated budget stuff under 6",price_max,0,6,USD,4.5,excellent,rating,desc
-"highly rated premium goods above 50",price_min,50,,USD,4.7,excellent,,
-"stuff with price less than 50 and rating more than 3.5",price_max,0,50,USD,3.5,,,
-"items above 10 with minimum rating 3.4",price_min,10,,USD,3.4,,,
-"cheapest items with at least 3.2 star rating",combined,,,,3.2,,price,asc
-"best value for money under 5",price_max,0,5,USD,4.3,good,rating,desc
-"show me the cheapest stuff under 30 dollars",price_sort,,,,,,,price,asc
-"i want the most expensive items with rating above 3.8",price_min,150,,USD,3.8,,price,desc
-"find me affordable goods with fair rating under 6",price_max,0,6,USD,3.5,decent,,
-"show premium stuff with spectacular reviews above 30",price_min,30,,USD,4.7,excellent,,
-"items between 5 and 15 with rating at least 3.5",price_range,5,15,USD,3.5,,,
-"budget items under 1000 NPR with high rating",price_max,0,1000,NPR,4.5,good,,
-"luxury goods above 500 dollars with best rating",price_min,500,,USD,4.8,excellent,,
-"cheapest products with rating above 3.2",price_min,,,,,3.2,,price,asc
-"most expensive with fair rating above 100",price_min,100,,USD,3.5,decent,price,desc
-"under 4 with excellent rating",price_max,0,4,USD,4.8,excellent,,
-"above 30 with decent rating",price_min,30,,USD,3.5,decent,,
-"between 8 and 18 with rating above 3.6",price_range,8,18,USD,3.6,,,
-"cheapest items with at least 3.3 rating under 80",combined,,,,3.3,,price,asc
-"most expensive items with fair reviews above 120",price_min,120,,USD,3.5,decent,price,desc
-"budget friendly and highly rated under 8",price_max,0,8,USD,4.5,good,,
-"premium quality with excellent rating above 60",price_min,60,,USD,4.8,excellent,,
-"items under 4 with rating above 3.0",price_max,0,4,USD,3.0,,,
-"items above 40 with minimum 3.8 rating",price_min,40,,USD,3.8,,,
-"affordable stuff between 50 and 150 NPR with good rating",price_range,50,150,NPR,4.0,good,,
-"cheapest products with excellent rating under 30",price_max,0,30,USD,4.8,excellent,price,asc
-"most expensive with at least 3.2 rating above 50",price_min,50,,USD,3.2,,price,desc
-"best rated under 6",price_max,0,6,USD,4.5,excellent,rating,desc
-"worst rated above 20",price_min,20,,USD,,,poor,rating,asc
-"highly rated budget items under 4",price_max,0,4,USD,4.5,good,,
-"decently rated premium products above 40",price_min,40,,USD,3.5,decent,,
-"stuff with price less than 40 and rating more than 3.2",price_max,0,40,USD,3.2,,,
-"items under 300 NPR with at least 3.5 rating",price_max,0,300,NPR,3.5,,,
-"cheapest items with rating above 3.6",combined,,,,3.6,,price,asc
-"best value with fair rating under 6",price_max,0,6,USD,3.5,decent,rating,desc
-"show me products under 50 dollars with acceptable reviews",price_max,0,50,USD,3.5,decent,,
-"find cheapest items with spectacular rating",combined,,,,4.8,excellent,price,asc
-"products between 10 and 25 dollars with acceptable rating",price_range,10,25,USD,3.5,decent,,
-"i want the most expensive items with mid-range rating",price_min,200,,USD,3.0,average,price,desc
-"show me items with max price 5 and rating above 3.2",price_max,0,5,USD,3.2,,,
-"products with min price 30 and acceptable rating",price_min,30,,USD,3.5,decent,,
-"budget friendly things under 8 dollars with spectacular rating",price_max,0,8,USD,4.8,excellent,,
-"premium items above 100 dollars with at least 3.9 rating",price_min,100,,USD,3.9,,,
-"affordable things less than 3 dollars with acceptable rating",price_max,0,3,USD,3.5,decent,,
-"luxury items above 400 with spectacular rating",price_min,400,,USD,4.8,excellent,,
-"show me products under Rs 150 with rating above 3.5",price_max,0,150,NPR,3.5,,,
-"cheapest items under 1500 NPR with acceptable rating",price_max,0,1500,NPR,3.5,decent,price,asc
-"products between Rs 100 and Rs 250 with spectacular rating",price_range,100,250,NPR,4.8,excellent,,
-"most expensive items above Rs 5000 with fair rating",price_min,5000,,NPR,3.5,decent,price,desc
-"products with maximum price of Rs 120 and rating at least 3.5",price_max,0,120,NPR,3.5,,,
-"minimum price 200 rupees with acceptable rating",price_min,200,,NPR,3.5,decent,,
-"show me stuff under 7 dollars",price_max,0,7,USD,,,,,
-"find cheapest merchandise",price_sort,,,,,,,price,asc
-"products between 50 and 90 dollars",price_range,50,90,USD,,,,,
-"i want the priciest merchandise",price_sort,,,,,,,price,desc
-"show me goods with max price 12",price_max,0,12,USD,,,,,
-"products with min price 45",price_min,45,,USD,,,,,
-"economical stuff under 4 dollars",price_max,0,4,USD,,,,,
-"deluxe items over 400 dollars",price_min,400,,USD,,,,,
-"inexpensive things less than 3 dollars",price_max,0,3,USD,,,,,
-"high-end merchandise above 2000",price_min,2000,,USD,,,,,
-"show me products under Rs 50",price_max,0,50,NPR,,,,,
-"cheapest goods under 800 NPR",price_max,0,800,NPR,,,,"price",asc
-"products between Rs 80 and Rs 200",price_range,80,200,NPR,,,,,
-"most expensive merchandise above Rs 5000",price_min,5000,,NPR,,,,"price",desc
-"products with maximum price of Rs 60",price_max,0,60,NPR,,,,,
-"minimum price 100 rupees",price_min,100,,NPR,,,,,
-"products rated above 2.5",rating_min,,,,,2.5,,,
-"show me goods with rating at least 3.0",rating_min,,,,,3.0,,,
-"top-performing merchandise",rating_sort,,,,,,,rating,desc
-"products with rating below 0.8",rating_max,,,,,0.8,,,
-"minimum rating 1.5",rating_min,,,,,1.5,,,
-"worst-performing items",rating_sort,,,,,,,rating,asc
-"at least 2.0 star rating",rating_min,,,,,2.0,,,
-"rating above 1.8",rating_min,,,,,1.8,,,
-"products with 2.2 stars and above",rating_min,,,,,2.2,,,
-"customer approved",rating_min,,,,,4.0,good,,
-"properly rated",rating_min,,,,,4.0,good,,
-"magnificent rated",rating_min,,,,,4.8,excellent,,
-"awfully rated",rating_max,,,,,1.0,poor,,
-"middle-ground quality",rating_min,,,,,3.0,average,,
-"reasonable rating",rating_min,,,,,3.5,decent,,
-"cheapest with reasonable rating",combined,,,,3.5,decent,price,asc
-"best under 8",price_max,0,8,USD,4.5,excellent,,
-"least expensive but reasonable",combined,,,,3.5,decent,price,asc
-"most expensive with magnificent quality",combined,,,,4.8,excellent,price,desc
-"budget friendly with customer approved",combined,,,,4.0,good,price,asc
-"affordable and customer approved",combined,,,,4.0,good,price,asc
-"premium with magnificent reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 2 with 4 stars",price_max,0,2,USD,4.0,good,price,asc
-"items under 6 dollars with rating above 3.0",price_max,0,6,USD,3.0,,,
-"stuff under 1000 NPR with magnificent rating",price_max,0,1000,NPR,4.8,excellent,,
-"best rated under 2",price_max,0,2,USD,4.5,excellent,rating,desc
-"worst rated expensive above 80",price_min,80,,USD,,,poor,rating,asc
-"cheapest with minimum 2.5 rating under 12",price_max,0,12,USD,2.5,,price,asc
-"most expensive with reasonable quality above 60",price_min,60,,USD,3.5,decent,price,desc
-"top rated budget under 4",price_max,0,4,USD,4.5,excellent,rating,desc
-"highly rated premium above 30",price_min,30,,USD,4.7,excellent,,
-"stuff with price less than 25 and rating above 3.2",price_max,0,25,USD,3.2,,,
-"items above 8 with minimum rating 3.0",price_min,8,,USD,3.0,,,
-"cheapest with at least 2.8 star rating",combined,,,,2.8,,price,asc
-"best value under 3",price_max,0,3,USD,4.3,good,rating,desc
-"show me cheapest under 20",price_sort,,,,,,,price,asc
-"i want most expensive with rating above 3.5",price_min,100,,USD,3.5,,price,desc
-"find affordable with proper rating under 4",price_max,0,4,USD,4.0,good,,
-"show premium with magnificent reviews above 20",price_min,20,,USD,4.7,excellent,,
-"items between 3 and 10 with rating at least 3.2",price_range,3,10,USD,3.2,,,
-"budget under 600 NPR with high rating",price_max,0,600,NPR,4.5,good,,
-"luxury above 300 dollars with best rating",price_min,300,,USD,4.8,excellent,,
-"cheapest with rating above 2.5",price_min,,,,,2.5,,price,asc
-"most expensive with proper rating above 80",price_min,80,,USD,4.0,good,price,desc
-"under 3 with excellent rating",price_max,0,3,USD,4.8,excellent,,
-"above 25 with decent rating",price_min,25,,USD,3.5,decent,,
-"between 4 and 12 with rating above 3.3",price_range,4,12,USD,3.3,,,
-"cheapest with at least 2.9 rating under 40",combined,,,,2.9,,price,asc
-"most expensive with proper reviews above 90",price_min,90,,USD,4.0,good,price,desc
-"budget friendly highly rated under 6",price_max,0,6,USD,4.5,good,,
-"premium quality excellent rating above 40",price_min,40,,USD,4.8,excellent,,
-"items under 3 with rating above 2.5",price_max,0,3,USD,2.5,,,
-"items above 25 with minimum 3.5 rating",price_min,25,,USD,3.5,,,
-"affordable between 30 and 80 NPR with good rating",price_range,30,80,NPR,4.0,good,,
-"cheapest with excellent under 15",price_max,0,15,USD,4.8,excellent,price,asc
-"most expensive with at least 2.8 rating above 30",price_min,30,,USD,2.8,,price,desc
-"best rated under 4",price_max,0,4,USD,4.5,excellent,rating,desc
-"worst rated above 12",price_min,12,,USD,,,poor,rating,asc
-"highly rated budget under 3",price_max,0,3,USD,4.5,good,,
-"decently rated premium above 25",price_min,25,,USD,3.5,decent,,
-"stuff with price less than 20 and rating more than 2.8",price_max,0,20,USD,2.8,,,
-"items under 150 NPR with at least 3.0 rating",price_max,0,150,NPR,3.0,,,
-"cheapest with rating above 3.2",combined,,,,3.2,,price,asc
-"best value proper rating under 4",price_max,0,4,USD,4.0,good,rating,desc
-"show me under 30 dollars with decent reviews",price_max,0,30,USD,3.5,decent,,
-"find cheapest with magnificent rating",combined,,,,4.8,excellent,price,asc
-"products between 5 and 15 with decent rating",price_range,5,15,USD,3.5,decent,,
-"i want most expensive with average rating",price_min,150,,USD,3.0,average,price,desc
-"show me max price 3 and rating above 2.5",price_max,0,3,USD,2.5,,,
-"products with min price 15 and decent rating",price_min,15,,USD,3.5,decent,,
-"budget friendly under 5 with magnificent rating",price_max,0,5,USD,4.8,excellent,,
-"premium above 60 with at least 3.6 rating",price_min,60,,USD,3.6,,,
-"affordable less than 2 with decent rating",price_max,0,2,USD,3.5,decent,,
-"luxury above 200 with magnificent rating",price_min,200,,USD,4.8,excellent,,
-"show me under Rs 80 with rating above 3.0",price_max,0,80,NPR,3.0,,,
-"cheapest under 800 NPR with decent rating",price_max,0,800,NPR,3.5,decent,price,asc
-"products between Rs 40 and Rs 100 with magnificent rating",price_range,40,100,NPR,4.8,excellent,,
-"most expensive above Rs 2000 with reasonable rating",price_min,2000,,NPR,3.5,decent,price,desc
-"products with max price Rs 50 and rating at least 3.0",price_max,0,50,NPR,3.0,,,
-"minimum price 80 rupees with decent rating",price_min,80,,NPR,3.5,decent,,
-"show me under 0.5 dollars",price_max,0,0.5,USD,,,,,
-"find value merchandise",price_sort,,,,,,,price,asc
-"products between 20 and 40 dollars",price_range,20,40,USD,,,,,
-"i want premium merchandise",price_sort,,,,,,,price,desc
-"show me with max price 8",price_max,0,8,USD,,,,,
-"products with min price 12",price_min,12,,USD,,,,,
-"value-oriented under 2",price_max,0,2,USD,,,,,
-"elite over 300",price_min,300,,USD,,,,,
-"economy under 1",price_max,0,1,USD,,,,,
-"top-tier above 500",price_min,500,,USD,,,,,
-"show me under Rs 30",price_max,0,30,NPR,,,,,
-"cheapest under 300 NPR",price_max,0,300,NPR,,,,"price",asc
-"products between Rs 20 and Rs 60",price_range,20,60,NPR,,,,,
-"most expensive above Rs 2000",price_min,2000,,NPR,,,,"price",desc
-"products with max price Rs 25",price_max,0,25,NPR,,,,,
-"minimum price 50 rupees",price_min,50,,NPR,,,,,
-"rated above 2.0",rating_min,,,,,2.0,,,
-"with rating at least 2.5",rating_min,,,,,2.5,,,
-"top-rated",rating_sort,,,,,,,rating,desc
-"with rating below 0.3",rating_max,,,,,0.3,,,
-"minimum rating 1.0",rating_min,,,,,1.0,,,
-"bottom-rated",rating_sort,,,,,,,rating,asc
-"at least 2.2 stars",rating_min,,,,,2.2,,,
-"above 1.5",rating_min,,,,,1.5,,,
-"with 1.8 stars and above",rating_min,,,,,1.8,,,
-"crowd pleasers",rating_min,,,,,4.0,good,,
-"adequately rated",rating_min,,,,,4.0,good,,
-"phenomenal rated",rating_min,,,,,4.8,excellent,,
-"dismally rated",rating_max,,,,,1.0,poor,,
-"mid-level quality",rating_min,,,,,3.0,average,,
-"passable rating",rating_min,,,,,3.5,decent,,
-"cheapest with passable rating",combined,,,,3.5,decent,price,asc
-"best under 5",price_max,0,5,USD,4.5,excellent,,
-"least expensive but passable",combined,,,,3.5,decent,price,asc
-"most expensive with phenomenal quality",combined,,,,4.8,excellent,price,desc
-"budget friendly crowd pleaser",combined,,,,4.0,good,price,asc
-"affordable crowd pleaser",combined,,,,4.0,good,price,asc
-"premium with phenomenal reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 1.5 with 4 stars",price_max,0,1.5,USD,4.0,good,price,asc
-"items under 4 with above 2.8",price_max,0,4,USD,2.8,,,
-"stuff under 400 NPR with phenomenal",price_max,0,400,NPR,4.8,excellent,,
-"best rated under 1.5",price_max,0,1.5,USD,4.5,excellent,rating,desc
-"worst rated expensive above 40",price_min,40,,USD,,,poor,rating,asc
-"cheapest with minimum 2.2 under 8",price_max,0,8,USD,2.2,,price,asc
-"most expensive with passable above 30",price_min,30,,USD,3.5,decent,price,desc
-"top rated budget under 3",price_max,0,3,USD,4.5,excellent,rating,desc
-"highly rated premium above 20",price_min,20,,USD,4.7,excellent,,
-"stuff with price less than 12 and rating above 2.5",price_max,0,12,USD,2.5,,,
-"items above 5 with minimum 2.2",price_min,5,,USD,2.2,,,
-"cheapest with at least 2.0 stars",combined,,,,2.0,,price,asc
-"best value under 2",price_max,0,2,USD,4.3,good,rating,desc
-"show me cheapest under 12",price_sort,,,,,,,price,asc
-"i want most expensive with rating above 3.0",price_min,50,,USD,3.0,,price,desc
-"find affordable with adequate under 3",price_max,0,3,USD,4.0,good,,
-"show premium with phenomenal above 15",price_min,15,,USD,4.7,excellent,,
-"items between 2 and 7 with at least 2.8",price_range,2,7,USD,2.8,,,
-"budget under 200 NPR with high rating",price_max,0,200,NPR,4.5,good,,
-"luxury above 150 with best rating",price_min,150,,USD,4.8,excellent,,
-"cheapest with rating above 2.2",price_min,,,,,2.2,,price,asc
-"most expensive with adequate above 40",price_min,40,,USD,4.0,good,price,desc
-"under 2 with excellent",price_max,0,2,USD,4.8,excellent,,
-"above 15 with decent",price_min,15,,USD,3.5,decent,,
-"between 3 and 8 with above 2.9",price_range,3,8,USD,2.9,,,
-"cheapest with at least 2.3 under 20",combined,,,,2.3,,price,asc
-"most expensive with adequate reviews above 50",price_min,50,,USD,4.0,good,price,desc
-"budget friendly highly rated under 4",price_max,0,4,USD,4.5,good,,
-"premium quality excellent above 25",price_min,25,,USD,4.8,excellent,,
-"items under 2 with rating above 2.0",price_max,0,2,USD,2.0,,,
-"items above 12 with minimum 3.0",price_min,12,,USD,3.0,,,
-"affordable between 15 and 40 NPR with good",price_range,15,40,NPR,4.0,good,,
-"cheapest with excellent under 8",price_max,0,8,USD,4.8,excellent,price,asc
-"most expensive with at least 2.2 above 18",price_min,18,,USD,2.2,,price,desc
-"best rated under 2.5",price_max,0,2.5,USD,4.5,excellent,rating,desc
-"worst rated above 8",price_min,8,,USD,,,poor,rating,asc
-"highly rated budget under 2",price_max,0,2,USD,4.5,good,,
-"decently rated premium above 15",price_min,15,,USD,3.5,decent,,
-"stuff with price less than 10 and rating more than 2.2",price_max,0,10,USD,2.2,,,
-"items under 80 NPR with at least 2.8",price_max,0,80,NPR,2.8,,,
-"cheapest with rating above 2.8",combined,,,,2.8,,price,asc
-"best value adequate under 3",price_max,0,3,USD,4.0,good,rating,desc
-"show me under 15 with passable",price_max,0,15,USD,3.5,decent,,
-"find cheapest with phenomenal",combined,,,,4.8,excellent,price,asc
-"products between 3 and 8 with passable",price_range,3,8,USD,3.5,decent,,
-"i want most expensive with mid",price_min,80,,USD,3.0,average,price,desc
-"show me max price 2 and above 2.2",price_max,0,2,USD,2.2,,,
-"products with min price 8 and passable",price_min,8,,USD,3.5,decent,,
-"budget friendly under 4 with phenomenal",price_max,0,4,USD,4.8,excellent,,
-"premium above 30 with at least 3.2",price_min,30,,USD,3.2,,,
-"affordable less than 1.5 with passable",price_max,0,1.5,USD,3.5,decent,,
-"luxury above 100 with phenomenal",price_min,100,,USD,4.8,excellent,,
-"show me under Rs 40 with above 2.5",price_max,0,40,NPR,2.5,,,
-"cheapest under 300 NPR with passable",price_max,0,300,NPR,3.5,decent,price,asc
-"products between Rs 15 and Rs 45 with phenomenal",price_range,15,45,NPR,4.8,excellent,,
-"most expensive above Rs 800 with reasonable",price_min,800,,NPR,3.5,decent,price,desc
-"products with max price Rs 20 and at least 2.5",price_max,0,20,NPR,2.5,,,
-"minimum price 30 rupees with passable",price_min,30,,NPR,3.5,decent,,
-"show me under 0.3 dollars",price_max,0,0.3,USD,,,,,
-"find value stuff",price_sort,,,,,,,price,asc
-"products between 8 and 18 dollars",price_range,8,18,USD,,,,,
-"i want high-end stuff",price_sort,,,,,,,price,desc
-"show me with max price 4",price_max,0,4,USD,,,,,
-"products with min price 6",price_min,6,,USD,,,,,
-"value-oriented under 1",price_max,0,1,USD,,,,,
-"premium over 150",price_min,150,,USD,,,,,
-"economy under 0.5",price_max,0,0.5,USD,,,,,
-"luxury above 250",price_min,250,,USD,,,,,
-"show me under Rs 15",price_max,0,15,NPR,,,,,
-"cheapest under 150 NPR",price_max,0,150,NPR,,,,"price",asc
-"products between RS 8 and RS 25",price_range,8,25,NPR,,,,,
-"most expensive above RS 800",price_min,800,,NPR,,,,"price",desc
-"products with max price RS 10",price_max,0,10,NPR,,,,,
-"minimum price 20 rupees",price_min,20,,NPR,,,,,
-"rated above 1.5",rating_min,,,,,1.5,,,
-"with rating at least 2.0",rating_min,,,,,2.0,,,
-"highest scoring",rating_sort,,,,,,,rating,desc
-"with rating below 0.2",rating_max,,,,,0.2,,,
-"minimum rating 0.8",rating_min,,,,,0.8,,,
-"lowest scoring",rating_sort,,,,,,,rating,asc
-"at least 1.8 stars",rating_min,,,,,1.8,,,
-"above 1.2",rating_min,,,,,1.2,,,
-"with 1.5 stars and above",rating_min,,,,,1.5,,,
-"audience favorites",rating_min,,,,,4.0,good,,
-"satisfactory rated",rating_min,,,,,4.0,good,,
-"extraordinary rated",rating_min,,,,,4.8,excellent,,
-"poorly scored",rating_max,,,,,1.0,poor,,
-"intermediate quality",rating_min,,,,,3.0,average,,
-"tolerable rating",rating_min,,,,,3.5,decent,,
-"cheapest with tolerable rating",combined,,,,3.5,decent,price,asc
-"best under 3",price_max,0,3,USD,4.5,excellent,,
-"least expensive but tolerable",combined,,,,3.5,decent,price,asc
-"most expensive with extraordinary",combined,,,,4.8,excellent,price,desc
-"budget friendly audience favorite",combined,,,,4.0,good,price,asc
-"affordable audience favorite",combined,,,,4.0,good,price,asc
-"premium with extraordinary reviews",combined,,,,4.8,excellent,price,desc
-"cheapest under 1 with 4 stars",price_max,0,1,USD,4.0,good,price,asc
-"items under 2.5 with above 2.2",price_max,0,2.5,USD,2.2,,,
-"stuff under 200 NPR with extraordinary",price_max,0,200,NPR,4.8,excellent,,
-"best rated under 1",price_max,0,1,USD,4.5,excellent,rating,desc
-"worst rated expensive above 20",price_min,20,,USD,,,poor,rating,asc
-"cheapest with minimum 1.8 under 5",price_max,0,5,USD,1.8,,price,asc
-"most expensive with tolerable above 15",price_min,15,,USD,3.5,decent,price,desc
-"top rated budget under 2",price_max,0,2,USD,4.5,excellent,rating,desc
-"highly rated premium above 12",price_min,12,,USD,4.7,excellent,,
-"stuff with price less than 6 and rating above 2.0",price_max,0,6,USD,2.0,,,
-"items above 3 with minimum 1.8",price_min,3,,USD,1.8,,,
-"cheapest with at least 1.5 stars",combined,,,,1.5,,price,asc
-"best value under 1.5",price_max,0,1.5,USD,4.3,good,rating,desc
-"show me cheapest under 6",price_sort,,,,,,,price,asc
-"i want most expensive with rating above 2.5",price_min,25,,USD,2.5,,price,desc
-"find affordable with satisfactory under 2",price_max,0,2,USD,4.0,good,,
-"show premium with extraordinary above 8",price_min,8,,USD,4.7,excellent,,
-"items between 1.5 and 4 with at least 2.2",price_range,1.5,4,USD,2.2,,,
-"budget under 80 NPR with high rating",price_max,0,80,NPR,4.5,good,,
-"luxury above 60 with best rating",price_min,60,,USD,4.8,excellent,,
-"cheapest with rating above 1.8",price_min,,,,,1.8,,price,asc
-"most expensive with satisfactory above 18",price_min,18,,USD,4.0,good,price,desc
-"under 1.2 with excellent",price_max,0,1.2,USD,4.8,excellent,,
-"above 8 with decent",price_min,8,,USD,3.5,decent,,
-"between 2 and 5 with above 2.3",price_range,2,5,USD,2.3,,,
-"cheapest with at least 1.9 under 10",combined,,,,1.9,,price,asc
-"most expensive with satisfactory reviews above 20",price_min,20,,USD,4.0,good,price,desc
+query,price_min,price_max,price_currency,rating_min,rating_max,category,sort_type,sort_direction
+need something decent for everyday wear under 35,,35,USD,,,,price,asc
+show me stuff that people actually love,,,,4.5,,rating,desc,
+anything good around 50 bucks,,50,USD,,,,price,asc
+I want the cheapest thing you have,,,,,,price,asc,
+looking for something rated 4 or above,,,,4.0,,rating,desc,
+got a budget of about 80,,80,USD,,,,price,asc
+want something people rave about,,,,4.7,,rating,desc,
+not spending more than 120 today,,120,USD,,,,price,asc
+show me the most popular stuff first,,,,4.0,,rating,desc,
+just browsing no filters needed,,,,,,,,
+something around 25 dollars or so,,25,USD,,,,price,asc
+I want highly rated options only,,,,4.5,,rating,desc,
+give me everything under 15,,15,USD,,,,price,asc
+need a solid pick not too cheap not too expensive,40.0,150,USD,,,,price,asc
+anything top rated and reasonably priced,,80,USD,4.3,,combined,asc,
+show me what people love buying,,,,4.0,,rating,desc,
+my budget is tight so keep it under 20,,20,USD,,,,price,asc
+want something good but not insanely expensive,,200,USD,4.0,,combined,asc,
+what are the most loved products right now,,,,4.5,,rating,desc,
+looking for a bargain around 10 to 15 bucks,10.0,15,USD,,,,price,asc
+I don't care about price just show best rated,,,,5.0,,rating,desc,
+got roughly 60 dollars to spend,,60,USD,,,,price,asc
+need something decent quality for under 40,,40,USD,4.0,,combined,asc,
+show me low cost options first,,,,,,price,asc,
+anything with great reviews and won't break the bank,,70,USD,4.2,,combined,asc,
+I want the priciest things first,,,,,,price,desc,
+my limit is 300 dollars,,300,USD,,,,price,asc
+show me what has the best ratings overall,,,,4.8,,rating,desc,
+something in the 200 to 400 range please,200.0,400,USD,,,,price,asc
+want affordable and well reviewed options,,50,USD,4.0,,combined,asc,
+got around 500 to spend,500.0,USD,,,,price,asc,
+nothing over 25 please,,25,USD,,,,price,asc
+show me top rated things first,,,,4.7,,rating,desc,
+want the absolute best money can buy,,,,5.0,,rating,desc,
+need something around 90 dollars or less,,90,USD,,,,price,asc
+any good options under 8 bucks,,8,USD,,,,price,asc
+I want to see high end expensive stuff,500.0,,USD,,,,price,desc
+affordable but still good quality,,60,USD,4.1,,combined,asc,
+price doesn't matter just show best first,,,,4.9,,rating,desc,
+want something not too expensive maybe 150 or so,,150,USD,,,,price,asc
+got a flexible budget around 250,250.0,USD,,,,price,asc,
+show me cheap things with solid reviews,,30,USD,4.0,,combined,asc,
+just want the cheapest available,,,,,,price,asc,
+top quality regardless of cost,,,,4.8,,rating,desc,
+need something around 50 with good reviews,,50,USD,4.0,,combined,asc,
+anything premium above 800,800.0,,USD,,,,price,desc
+nothing too expensive keep it around 45,,45,USD,,,,price,asc
+show me what other buyers love most,,,,4.5,,rating,desc,
+want good value somewhere between 30 and 100,30.0,100,USD,,,,price,asc
+my total budget is around 175 dollars,,175,USD,,,,price,asc
+need something reliable under 55,,55,USD,4.0,,combined,asc,
+show best sellers first,,,,4.3,,rating,desc,
+looking for premium picks over 600,600.0,,USD,,,,price,desc
+anything well reviewed around 65 to 80 dollars,65.0,80,USD,4.0,,combined,price,asc
+just show me everything no filters,,,,,,,,
+need something under 12 bucks,,12,USD,,,,price,asc
+want highly acclaimed products,,,,4.6,,rating,desc,
+budget is 350 dollars,350.0,USD,,,,price,asc,
+looking for excellent quality with great feedback,,,,4.8,,rating,desc,
+anything between 100 and 200 dollars,100.0,200,USD,,,,price,asc
+want something people consistently rate high,,,,4.4,,rating,desc,
+show me options not exceeding 95,,95,USD,,,,price,asc
+need quality stuff around 500 to 700,500.0,700,USD,4.5,,combined,price,asc
+anything a customer would love under 40,,40,USD,4.3,,combined,asc,
+show me the priciest first,,,,,,price,desc,
+want something great but keep cost below 250,,250,USD,4.0,,combined,asc,
+looking for budget friendly things around 18,,18,USD,,,,price,asc
+give me well-rated items only,,,,4.5,,rating,desc,
+got around 1000 dollars willing to spend,1000.0,USD,,,,price,asc,
+need something cheap and cheerful under 7,,7,USD,,,,price,asc
+want stuff that reviewers consistently praise,,,,4.6,,rating,desc,
+looking for mid range options around 200,200.0,USD,,,,price,asc,
+nothing under 50 show me better options,50.0,,USD,,,,price,asc
+show me what has near perfect ratings,,,,4.9,,rating,desc,
+need a good value option somewhere near 85,,85,USD,,,,price,asc
+want the most reviewed and loved items,,,,4.5,,rating,desc,
+anything around 400 to 600 dollars,400.0,600,USD,,,,price,asc
+need cheap options not more than 22,,22,USD,,,,price,asc
+just show high quality stuff regardless of price,,,,4.7,,rating,desc,
+want something affordable below 35 but decent rated,,35,USD,4.0,,combined,asc,
+show me luxurious expensive items,1000.0,,USD,,,,price,desc
+got a small budget around 30 dollars,,30,USD,,,,price,asc
+need a reliable pick under 65,,65,USD,4.2,,combined,asc,
+show me things with the highest reviews,,,,5.0,,rating,desc,
+want something between 50 and 150 good quality,50.0,150,USD,4.0,,combined,price,asc
+looking for a steal under 5 dollars,,5,USD,,,,price,asc
+want something worth buying around 300,300.0,USD,4.5,,combined,price,asc,
+anything with reviews above 4.5 stars,,,,4.5,,rating,desc,
+need the cheapest options available,,,,,,price,asc,
+around 700 dollars budget,700.0,USD,,,,price,asc,
+show me things people love under 90,,90,USD,4.0,,combined,asc,
+looking for options around 20 to 50 dollars,20.0,50,USD,,,,price,asc
+want something spectacular above 1200,1200.0,,USD,,,,price,desc
+price around 110 to 160 please,110.0,160,USD,,,,price,asc
+show me well rated stuff around 75,,75,USD,4.2,,combined,asc,
+nothing over 180 today,,180,USD,,,,price,asc
+want the highest rating possible,,,,5.0,,rating,desc,
+looking for deals under 28,,28,USD,,,,price,asc
+show me reliable quality items,,,,4.3,,rating,desc,
+got about 450 to spend,,450,USD,,,,price,asc
+need good quality but affordable around 55,,55,USD,4.0,,combined,asc,
+show me what people consistently recommend,,,,4.4,,rating,desc,
+want something in the 600 to 900 range,600.0,900,USD,,,,price,asc
+need inexpensive options not over 16,,16,USD,,,,price,asc
+best quality I can get for 200,,200,USD,4.0,,combined,price,desc
+show highly recommended products,,,,4.6,,rating,desc,
+looking for cheap finds under 9,,9,USD,,,,price,asc
+want something solid around 125,,125,USD,4.0,,combined,price,asc
+my maximum is 80 dollars,,80,USD,,,,price,asc
+show me top performing products,,,,4.7,,rating,desc,
+need something that won't disappoint under 150,,150,USD,4.2,,combined,asc,
+want affordable options around 35 to 60,35.0,60,USD,,,,price,asc
+show me things worth splurging on,500.0,,USD,4.5,,combined,price,desc
+need something under 100 with great feedback,,100,USD,4.3,,combined,asc,
+looking for premium stuff above 400,400.0,,USD,4.5,,combined,price,desc
+want something around 200 to 350 decent quality,200.0,350,USD,4.0,,combined,price,asc
+need something real cheap under 6,,6,USD,,,,price,asc
+show me products people are obsessed with,,,,4.8,,rating,desc,
+got around 550 dollars to work with,,550,USD,,,,price,asc
+need a well loved pick under 45,,45,USD,4.1,,combined,asc,
+show me options that wont hurt my wallet,,40,USD,,,,price,asc
+want near perfect reviews,,,,4.8,,rating,desc,
+looking for bargains around 10,,10,USD,,,,price,asc
+need something quality around 230,,230,USD,4.3,,combined,price,asc
+show me super affordable stuff,,25,USD,,,,price,asc
+want highly satisfying products,,,,4.5,,rating,desc,
+my budget cap is 500,,500,USD,,,,price,asc
+need decent picks around 70 to 100,70.0,100,USD,4.0,,combined,price,asc
+show me the most expensive things first,,,,,,price,desc,
+want everything under 50 with above average reviews,,50,USD,4.0,,combined,asc,
+need something around 800 for quality,800.0,USD,4.5,,combined,price,asc,
+show me items people rate above 4.4 stars,,,,4.4,,rating,desc,
+not spending over 160,,160,USD,,,,price,asc
+want quality picks somewhere between 150 and 300,150.0,300,USD,4.2,,combined,price,asc
+need something really cheap like under 4,,4,USD,,,,price,asc
+show me everything people love around 80,,80,USD,4.0,,combined,asc,
+want options anywhere from 50 to 250,50.0,250,USD,,,,price,asc
+need a solid buy under 110,,110,USD,4.1,,combined,asc,
+show items with reviews near 5 stars,,,,4.9,,rating,desc,
+want value for money around 90,,90,USD,4.2,,combined,price,asc
+need affordable under 33,,33,USD,,,,price,asc
+show me what experts and users both love,,,,4.7,,rating,desc,
+looking for mid-priced options around 300 to 500,300.0,500,USD,,,,price,asc
+need something under 195 that is well reviewed,,195,USD,4.0,,combined,asc,
+show me things with incredible ratings,,,,4.8,,rating,desc,
+want the best my 600 dollars can get me,,600,USD,4.5,,combined,price,desc
+need something around 140 not too fancy,,140,USD,,,,price,asc
+show me products that are popular and loved,,,,4.3,,rating,desc,
+want something between 400 and 700 worth the price,400.0,700,USD,4.0,,combined,price,asc
+need cheap but effective under 17,,17,USD,4.0,,combined,asc,
+show me luxury tier products,800.0,,USD,,,,price,desc
+want something around 260 well reviewed,,260,USD,4.3,,combined,price,asc
+need inexpensive stuff nothing over 23,,23,USD,,,,price,asc
+show me top tier picks regardless of price,,,,5.0,,rating,desc,
+want something reliable under 320,,320,USD,4.0,,combined,asc,
+need the best rated under 200,,200,USD,4.5,,combined,rating,desc
+show me products starting from the cheapest,,,,,,price,asc,
+want to find something under 48,,48,USD,,,,price,asc
+need something from 75 to 200 range,75.0,200,USD,,,,price,asc
+show me what gets five star reviews,,,,5.0,,rating,desc,
+want good stuff under 500 that people love,,500,USD,4.2,,combined,asc,
+need options around 380,,380,USD,,,,price,asc
+show me the best reviewed products in any price,,,,4.6,,rating,desc,
+want a great find under 42,,42,USD,4.2,,combined,asc,
+need something around 275 worth buying,,275,USD,4.0,,combined,price,asc
+show me fan favorites,,,,4.5,,rating,desc,
+want anything under 130 with solid user scores,,130,USD,4.0,,combined,asc,
+need cheap good quality under 36,,36,USD,4.0,,combined,asc,
+show me what has the most positive reviews,,,,4.4,,rating,desc,
+want something between 90 and 200 that works well,90.0,200,USD,4.1,,combined,price,asc
+need something around 580,,580,USD,,,,price,asc
+show me picks that people really trust,,,,4.6,,rating,desc,
+want affordable everyday options,,50,USD,,,,price,asc
+need something below 25 but still decent,,25,USD,3.8,,combined,asc,
+show me the most consistent performers,,,,4.4,,rating,desc,
+want picks around 800 dollars that are loved,800.0,USD,4.5,,combined,price,asc,
+need very cheap stuff under 3,,3,USD,,,,price,asc
+show me what's worth the price,,,,4.5,,rating,desc,
+want something in the 350 to 550 range,350.0,550,USD,,,,price,asc
+need items under 165 that customers love,,165,USD,4.0,,combined,asc,
+show me extremely well rated items,,,,4.8,,rating,desc,
+want something around 445,,445,USD,,,,price,asc
+need cheap daily use items under 13,,13,USD,,,,price,asc
+show me crowd favorites from any price range,,,,4.5,,rating,desc,
+want something between 220 and 420,220.0,420,USD,,,,price,asc
+need affordable quality around 62,,62,USD,4.0,,combined,asc,
+show me products that never disappoint,,,,4.7,,rating,desc,
+want under 500 with near perfect reviews,,500,USD,4.7,,combined,rating,desc
+need something around 185,,185,USD,,,,price,asc
+show me the best of the best,,,,4.9,,rating,desc,
+want a bargain under 19,,19,USD,,,,price,asc
+need solid quality somewhere around 330,,330,USD,4.0,,combined,price,asc
+show me what buyers recommend most,,,,4.5,,rating,desc,
+want options between 10 and 30,10.0,30,USD,,,,price,asc
+need something premium above 900,900.0,,USD,4.6,,combined,price,desc
+show me top picks under 75 that people love,,75,USD,4.2,,combined,asc,
+want something decent for about 55,,55,USD,,,,price,asc
+need best rated item within 400,,400,USD,4.5,,combined,rating,desc
+show me products worth every dollar,,,,4.6,,rating,desc,
+want something around 620,,620,USD,,,,price,asc
+need an affordable gem under 29,,29,USD,4.1,,combined,asc,
+show me stuff people absolutely love,,,,4.7,,rating,desc,
+want options between 140 and 280,140.0,280,USD,,,,price,asc
+need something excellent under 85,,85,USD,4.4,,combined,asc,
+show me picks that have rave reviews,,,,4.8,,rating,desc,
+want something around 490,,490,USD,,,,price,asc
+need cheap picks around 11 dollars,,11,USD,,,,price,asc
+show me what the reviews say is best,,,,4.5,,rating,desc,
+want reasonable pricing between 60 and 120,60.0,120,USD,,,,price,asc
+need something trusted under 230,,230,USD,4.1,,combined,asc,
+show me consistently excellent products,,,,4.6,,rating,desc,
+want options not exceeding 750,,750,USD,,,,price,asc
+need something around 38 dollars,,38,USD,,,,price,asc
+show me top community picks,,,,4.4,,rating,desc,
+want something between 25 and 75,25.0,75,USD,,,,price,asc
+need quality picks under 420,,420,USD,4.3,,combined,asc,
+show me items almost everyone loves,,,,4.7,,rating,desc,
+want something around 155 with good scores,,155,USD,4.0,,combined,price,asc
+need the best available under 50,,50,USD,4.5,,combined,rating,desc
+show me premium options above 700,700.0,,USD,4.5,,combined,price,desc
+want something around 280 that's reliable,,280,USD,4.0,,combined,price,asc
+need cheap stuff not over 14,,14,USD,,,,price,asc
+show me best sellers by rating,,,,4.6,,rating,desc,
+want something between 190 and 360,190.0,360,USD,,,,price,asc
+need something around 68 with solid reviews,,68,USD,4.0,,combined,asc,
+show me the gold standard products,,,,4.9,,rating,desc,
+want affordable well loved picks,,60,USD,4.3,,combined,asc,
+need something not over 560,,560,USD,,,,price,asc
+show me options anyone would be happy with,,,,4.3,,rating,desc,
+want something around 310 to 450,310.0,450,USD,,,,price,asc
+need an inexpensive daily pick under 21,,21,USD,,,,price,asc
+show me what has the most trust from customers,,,,4.5,,rating,desc,
+want something around 92,,92,USD,,,,price,asc
+need quality for a price under 350,,350,USD,4.2,,combined,asc,
+show me exceptional products,,,,4.8,,rating,desc,
+want to spend about 425,,425,USD,,,,price,asc
+need something affordable and loved under 47,,47,USD,4.1,,combined,asc,
+show me what people buy again and again,,,,4.6,,rating,desc,
+want something between 500 and 800,500.0,800,USD,,,,price,asc
+need a good deal under 32,,32,USD,4.0,,combined,asc,
+show me only the finest quality,,,,4.8,,rating,desc,
+want options around 145 or so,,145,USD,,,,price,asc
+need something under 78 worth buying,,78,USD,4.1,,combined,asc,
+show me what shoppers rave about,,,,4.5,,rating,desc,
+want something between 250 and 400 with quality,250.0,400,USD,4.0,,combined,price,asc
+need low cost options under 26,,26,USD,,,,price,asc
+show me best in class products,,,,4.7,,rating,desc,
+want to find something around 195,,195,USD,,,,price,asc
+need something really good under 115,,115,USD,4.3,,combined,asc,
+show me what earns the most stars,,,,4.6,,rating,desc,
+want something between 80 and 160,80.0,160,USD,,,,price,asc
+need cheap items under 24,,24,USD,,,,price,asc
+show me products people stand behind,,,,4.4,,rating,desc,
+want something around 530,,530,USD,,,,price,asc
+need affordable and reliable around 43,,43,USD,4.0,,combined,asc,
+show me near perfect rated options,,,,4.9,,rating,desc,
+want something between 170 and 290,170.0,290,USD,,,,price,asc
+need the cheapest thing that's still decent,,30,USD,3.8,,combined,price,asc
+show me highest scored items first,,,,4.8,,rating,desc,
+want something around 660,,660,USD,,,,price,asc
+need solid options not over 52,,52,USD,4.0,,combined,asc,
+show me community approved products,,,,4.5,,rating,desc,
+want picks anywhere from 35 to 90,35.0,90,USD,,,,price,asc
+need something around 410 that reviewers love,,410,USD,4.3,,combined,price,asc
+show me anything with outstanding reviews,,,,4.7,,rating,desc,
+want cheap picks around 16 to 28,16.0,28,USD,,,,price,asc
+need something comfortable to buy under 175,,175,USD,,,,price,asc
+show me what customers love most in any budget,,,,4.5,,rating,desc,
+want something around 590,,590,USD,,,,price,asc
+need a reliable option under 340,,340,USD,4.0,,combined,asc,
+show me products worth more than they cost,,,,4.6,,rating,desc,
+want something between 45 and 110,45.0,110,USD,,,,price,asc
+need super cheap picks under 5,,5,USD,,,,price,asc
+show me five star dreams,,,,5.0,,rating,desc,
+want something around 370,,370,USD,,,,price,asc
+need solid value under 220,,220,USD,4.1,,combined,asc,
+show me what gets the highest marks,,,,4.8,,rating,desc,
+want options between 125 and 250,125.0,250,USD,,,,price,asc
+need something around 72,,72,USD,,,,price,asc
+show me well loved items at any price,,,,4.4,,rating,desc,
+want something that won't let me down under 67,,67,USD,4.2,,combined,asc,
+need premium picks not under 650,650.0,,USD,,,,price,desc
+show me standout products,,,,4.7,,rating,desc,
+want something around 215 that's excellent,,215,USD,4.3,,combined,price,asc
+need very low cost stuff under 8,,8,USD,,,,price,asc
+show me products most highly regarded by buyers,,,,4.6,,rating,desc,
+want something in budget around 135,,135,USD,,,,price,asc
+need something around 88 with great scores,,88,USD,4.2,,combined,asc,
+show me options that blow customers away,,,,4.8,,rating,desc,
+want something between 320 and 480,320.0,480,USD,,,,price,asc
+need cheap but loved options under 31,,31,USD,4.0,,combined,asc,
+show me what buyers call outstanding,,,,4.7,,rating,desc,
+want something around 760,,760,USD,,,,price,asc
+need options around 57 to 82,57.0,82,USD,,,,price,asc
+show me remarkable quality items,,,,4.9,,rating,desc,
+want something not over 290 with good reviews,,290,USD,4.0,,combined,asc,
+need something around 24,,24,USD,,,,price,asc
+show me things that never get bad reviews,,,,4.5,,rating,desc,
+want something between 430 and 680,430.0,680,USD,,,,price,asc
+need trusted picks under 46,,46,USD,4.1,,combined,asc,
+show me absolute top rated things,,,,5.0,,rating,desc,
+want something around 165,,165,USD,,,,price,asc
+need affordable excellent quality under 73,,73,USD,4.4,,combined,asc,
+show me products with brilliant reviews,,,,4.7,,rating,desc,
+want something between 55 and 130,55.0,130,USD,,,,price,asc
+need something cheap around 13 dollars,,13,USD,,,,price,asc
+show me what makes buyers happy,,,,4.5,,rating,desc,
+want something around 840,,840,USD,,,,price,asc
+need something solid under 195,,195,USD,4.0,,combined,asc,
+show me the most trusted products,,,,4.6,,rating,desc,
+want to spend somewhere between 300 and 600,300.0,600,USD,,,,price,asc
+need amazing quality under 380,,380,USD,4.5,,combined,asc,
+show me what consistently gets top marks,,,,4.8,,rating,desc,
+want something around 48,,48,USD,,,,price,asc
+need great value under 156,,156,USD,4.2,,combined,asc,
+show me products that stand out,,,,4.7,,rating,desc,
+want something between 670 and 990,670.0,990,USD,,,,price,asc
+need extremely affordable things under 10,,10,USD,,,,price,asc
+show me what people are most satisfied with,,,,4.5,,rating,desc,
+want something around 490 that's highly rated,,490,USD,4.4,,combined,price,asc
+need something under 108 with good word of mouth,,108,USD,4.0,,combined,asc,
+show me elite quality products,,,,4.9,,rating,desc,
+want something between 35 and 85,35.0,85,USD,,,,price,asc
+need solid reliable around 265,,265,USD,4.0,,combined,price,asc
+show me what buyers recommend without hesitation,,,,4.6,,rating,desc,
+want options under 68 with excellent scores,,68,USD,4.3,,combined,asc,
+need something around 920,,920,USD,,,,price,asc
+show me highly satisfying products,,,,4.7,,rating,desc,
+want something between 105 and 210,105.0,210,USD,,,,price,asc
+need a budget pick under 37,,37,USD,,,,price,asc
+show me what earns loyalty from customers,,,,4.5,,rating,desc,
+want something around 575 well reviewed,,575,USD,4.3,,combined,price,asc
+need great but cheap under 44,,44,USD,4.0,,combined,asc,
+show me products universally praised,,,,4.8,,rating,desc,
+want options between 240 and 390,240.0,390,USD,,,,price,asc
+need something around 82 that's worth it,,82,USD,4.1,,combined,asc,
+show me what shoppers never regret buying,,,,4.6,,rating,desc,
+want cheap picks that are still excellent,,35,USD,4.2,,combined,asc,
+need options around 715,,715,USD,,,,price,asc
+show me best quality within any budget,,,,4.7,,rating,desc,
+want something between 160 and 310,160.0,310,USD,,,,price,asc
+need something under 27 but not garbage quality,,27,USD,3.9,,combined,asc,
+show me products that genuinely impress,,,,4.8,,rating,desc,
+want around 480 dollars to get something great,,480,USD,4.3,,combined,price,asc
+need super low budget under 6,,6,USD,,,,price,asc
+show me five star rated items only,,,,5.0,,rating,desc,
+want something between 95 and 185,95.0,185,USD,,,,price,asc
+need affordable pick around 53,,53,USD,,,,price,asc
+show me the most respected products,,,,4.6,,rating,desc,
+want something around 345 that's excellent,,345,USD,4.4,,combined,price,asc
+need something very affordable not over 18,,18,USD,,,,price,asc
+show me what everyone rates highly,,,,4.5,,rating,desc,
+want options between 200 and 500,200.0,500,USD,,,,price,asc
+need a great find under 65,,65,USD,4.3,,combined,asc,
+show me products worth writing home about,,,,4.7,,rating,desc,
+want something around 870,,870,USD,,,,price,asc
+need something around 34 with decent reviews,,34,USD,4.0,,combined,asc,
+show me what always makes buyers smile,,,,4.6,,rating,desc,
+want something in the 125 to 225 range,125.0,225,USD,,,,price,asc
+need cheap options around 15,,15,USD,,,,price,asc
+show me highly admired products,,,,4.7,,rating,desc,
+want something not over 425,,425,USD,,,,price,asc
+need amazing value under 95,,95,USD,4.3,,combined,asc,
+show me what buyers call the best,,,,4.8,,rating,desc,
+want something between 55 and 105,55.0,105,USD,,,,price,asc
+need something reliable around 49,,49,USD,4.0,,combined,asc,
+show me options that consistently wow people,,,,4.9,,rating,desc,
+want something around 640,,640,USD,,,,price,asc
+need affordable but quality under 83,,83,USD,4.1,,combined,asc,
+show me top shelf rated products,,,,4.7,,rating,desc,
+want between 175 and 325,175.0,325,USD,,,,price,asc
+need something not too expensive under 41,,41,USD,,,,price,asc
+show me crowd pleasing products,,,,4.5,,rating,desc,
+want something around 510 worth buying,,510,USD,4.2,,combined,price,asc
+need something very low cost around 9,,9,USD,,,,price,asc
+show me excellent quality picks at any cost,,,,4.8,,rating,desc,
+want options between 290 and 450,290.0,450,USD,,,,price,asc
+need a solid deal under 128,,128,USD,4.0,,combined,asc,
+show me all time best reviewed products,,,,4.7,,rating,desc,
+want around 395 dollars worth of quality,,395,USD,4.2,,combined,price,asc
+need cheap picks around 20 to 35,20.0,35,USD,,,,price,asc
+show me what buyers would buy twice,,,,4.6,,rating,desc,
+want something around 745,,745,USD,,,,price,asc
+need excellent under 365,,365,USD,4.4,,combined,asc,
+show me what reviewers call must-have,,,,4.7,,rating,desc,
+want options between 85 and 175,85.0,175,USD,,,,price,asc
+need extremely low cost picks under 11,,11,USD,,,,price,asc
+show me products that exceed expectations,,,,4.8,,rating,desc,
+want something around 430 with great reviews,,430,USD,4.3,,combined,price,asc
+need affordable daily picks under 58,,58,USD,,,,price,asc
+show me what earns five stars consistently,,,,5.0,,rating,desc,
+want something between 230 and 380,230.0,380,USD,,,,price,asc
+need great but inexpensive under 71,,71,USD,4.1,,combined,asc,
+show me what shoppers can't stop praising,,,,4.6,,rating,desc,
+want something around 550 with top reviews,,550,USD,4.4,,combined,price,asc
+need something under 19,,19,USD,,,,price,asc
+show me the most worshipped products,,,,4.9,,rating,desc,
+want options between 120 and 250,120.0,250,USD,,,,price,asc
+need value for money around 77,,77,USD,4.0,,combined,asc,
+show me what buyers call a game changer,,,,4.7,,rating,desc,
+want something around 835,,835,USD,,,,price,asc
+need cheap and loved options under 39,,39,USD,4.1,,combined,asc,
+show me what has unanimous praise,,,,4.8,,rating,desc,
+want something between 460 and 720,460.0,720,USD,,,,price,asc
+need something around 61,,61,USD,,,,price,asc
+show me highly endorsed products,,,,4.6,,rating,desc,
+want something not over 345,,345,USD,,,,price,asc
+need excellent picks under 143,,143,USD,4.2,,combined,asc,
+show me products that make buyers happy,,,,4.5,,rating,desc,
+want something between 25 and 60,25.0,60,USD,,,,price,asc
+need something around 785,,785,USD,,,,price,asc
+show me well scored items under any price,,,,4.4,,rating,desc,
+want something around 290 that scores well,,290,USD,4.2,,combined,price,asc
+need cheap good quality around 27,,27,USD,4.0,,combined,asc,
+show me the cream of the crop,,,,4.9,,rating,desc,
+under 30 please,,30,USD,,,,price,asc
+anything below 50,,50,USD,,,,price,asc
+keep it cheap,,20,USD,,,,price,asc
+top rated only,,,,4.8,,rating,desc,
+budget is 100,,100,USD,,,,price,asc
+highly acclaimed stuff,,,,4.7,,rating,desc,
+below 200,,200,USD,,,,price,asc
+loved by everyone,,,,4.6,,rating,desc,
+not over 75,,75,USD,,,,price,asc
+five stars please,,,,5.0,,rating,desc,
+cap at 150,,150,USD,,,,price,asc
+most praised items,,,,4.5,,rating,desc,
+40 dollars max,,40,USD,,,,price,asc
+people swear by these,,,,4.7,,rating,desc,
+60 bucks or less,,60,USD,,,,price,asc
+whatever gets the best scores,,,,4.8,,rating,desc,
+staying under 90,,90,USD,,,,price,asc
+community favorites,,,,4.5,,rating,desc,
+less than 25,,25,USD,,,,price,asc
+only the finest,,,,4.9,,rating,desc,
+somewhere around 300,300.0,USD,,,,price,asc,
+buyer approved picks,,,,4.6,,rating,desc,
+max 45,,45,USD,,,,price,asc
+stuff reviewers go crazy over,,,,4.7,,rating,desc,
+ceiling of 120,,120,USD,,,,price,asc
+best rated of the bunch,,,,4.8,,rating,desc,
+45 to 80 range,45.0,80,USD,,,,price,asc
+consistently stellar reviews,,,,4.6,,rating,desc,
+absolute cheapest,,,,,,price,asc,
+splurge worthy options,600.0,,USD,4.5,,combined,price,desc
+around 250 dollars,,250,USD,,,,price,asc
+jaw dropping ratings,,,,4.9,,rating,desc,
+roughly 35 bucks,,35,USD,,,,price,asc
+most trusted picks,,,,4.6,,rating,desc,
+price cap 500,,500,USD,,,,price,asc
+glowing reviews only,,,,4.7,,rating,desc,
+70 or under,,70,USD,,,,price,asc
+customer darlings,,,,4.5,,rating,desc,
+15 dollars and below,,15,USD,,,,price,asc
+near flawless ratings,,,,4.8,,rating,desc,
+200 to 400 ballpark,200.0,400,USD,,,,price,asc
+universally loved stuff,,,,4.7,,rating,desc,
+tight budget around 20,,20,USD,,,,price,asc
+gold standard quality,,,,4.9,,rating,desc,
+below 350,,350,USD,,,,price,asc
+repeat buyers love these,,,,4.6,,rating,desc,
+55 at the most,,55,USD,,,,price,asc
+impossible to dislike,,,,4.8,,rating,desc,
+roughly 100 to 200,100.0,200,USD,,,,price,asc
+absolutely raved about,,,,4.7,,rating,desc,
+limit myself to 80,,80,USD,,,,price,asc
+a steal under 12,,12,USD,,,,price,asc
+legendary ratings,,,,5.0,,rating,desc,
+anything from 300 to 600,300.0,600,USD,,,,price,asc
+can't go wrong with these,,,,4.6,,rating,desc,
+no more than 65,,65,USD,,,,price,asc
+platinum tier quality,,,,4.9,,rating,desc,
+hovering around 400,,400,USD,,,,price,asc
+zero complaints kind of products,,,,4.7,,rating,desc,
+tight on cash under 18,,18,USD,,,,price,asc
+most applauded picks,,,,4.8,,rating,desc,
+from 50 up to 130,50.0,130,USD,,,,price,asc
+happiest customers shop here,,,,4.6,,rating,desc,
+100 dollars flat,,100,USD,,,,price,asc
+exceptional scores only,,,,4.8,,rating,desc,
+10 bucks max,,10,USD,,,,price,asc
+obsessively well reviewed,,,,4.7,,rating,desc,
+price around 175,,175,USD,,,,price,asc
+legendary customer satisfaction,,,,4.9,,rating,desc,
+from 150 to 300,150.0,300,USD,,,,price,asc
+can't stop buying these,,,,4.6,,rating,desc,
+max budget 85,,85,USD,,,,price,asc
+reviews that blow your mind,,,,4.8,,rating,desc,
+affordable territory around 30,,30,USD,,,,price,asc
+zero regrets purchases,,,,4.7,,rating,desc,
+from 80 to 180,80.0,180,USD,,,,price,asc
+cult favorite items,,,,4.6,,rating,desc,
+23 dollars or less,,23,USD,,,,price,asc
+highest achievable quality,,,,5.0,,rating,desc,
+within 700,,700,USD,,,,price,asc
+stuff that makes buyers emotional,,,,4.8,,rating,desc,
+capped at 160,,160,USD,,,,price,asc
+everyone gives these top marks,,,,4.7,,rating,desc,
+sub 40,,40,USD,,,,price,asc
+masterclass in quality,,,,4.9,,rating,desc,
+50 to 100 please,50.0,100,USD,,,,price,asc
+reliably excellent,,,,4.6,,rating,desc,
+dirt cheap under 8,,8,USD,,,,price,asc
+loved at first purchase,,,,4.7,,rating,desc,
+within 220,,220,USD,,,,price,asc
+endlessly praised items,,,,4.8,,rating,desc,
+not beyond 110,,110,USD,,,,price,asc
+stuff with no haters,,,,4.6,,rating,desc,
+from 250 to 500,250.0,500,USD,,,,price,asc
+perpetually well rated,,,,4.7,,rating,desc,
+staying below 48,,48,USD,,,,price,asc
+crown jewel of reviews,,,,5.0,,rating,desc,
+around 600 or so,,600,USD,,,,price,asc
+customer satisfaction hall of fame,,,,4.9,,rating,desc,
+below 38,,38,USD,,,,price,asc
+effortlessly top rated,,,,4.7,,rating,desc,
+something between 400 and 700,400.0,700,USD,,,,price,asc
+undeniably excellent,,,,4.8,,rating,desc,
+ceiling 55,,55,USD,,,,price,asc
+perfect storm of ratings,,,,4.9,,rating,desc,
+28 bucks or under,,28,USD,,,,price,asc
+loved from day one,,,,4.6,,rating,desc,
+from 90 to 200,90.0,200,USD,,,,price,asc
+top of the leaderboard reviews,,,,4.8,,rating,desc,
+comfortably under 320,,320,USD,,,,price,asc
+repeat purchases say it all,,,,4.7,,rating,desc,
+up to 14 dollars,,14,USD,,,,price,asc
+almost no one rates these low,,,,4.6,,rating,desc,
+between 600 and 900,600.0,900,USD,,,,price,asc
+satisfaction guaranteed kind of products,,,,4.8,,rating,desc,
+within 42,,42,USD,,,,price,asc
+hallmark of quality,,,,4.9,,rating,desc,
+below 280,,280,USD,,,,price,asc
+word of mouth is electric for these,,,,4.7,,rating,desc,
+13 and under,,13,USD,,,,price,asc
+supremely well regarded,,,,4.8,,rating,desc,
+range of 70 to 140,70.0,140,USD,,,,price,asc
+living up to expectations and beyond,,,,4.7,,rating,desc,
+not exceeding 450,,450,USD,,,,price,asc
+standing ovation ratings,,,,4.9,,rating,desc,
+round about 22 dollars,,22,USD,,,,price,asc
+the crowd goes wild for these,,,,4.6,,rating,desc,
+from 120 to 240,120.0,240,USD,,,,price,asc
+reliably 5 star stuff,,,,5.0,,rating,desc,
+within 58,,58,USD,,,,price,asc
+magnetic reviews draw everyone in,,,,4.7,,rating,desc,
+anywhere below 190,,190,USD,,,,price,asc
+people feel lucky owning these,,,,4.8,,rating,desc,
+pocket friendly around 16,,16,USD,,,,price,asc
+consistently outstanding,,,,4.7,,rating,desc,
+from 350 to 650,350.0,650,USD,,,,price,asc
+not a bad review in sight,,,,4.8,,rating,desc,
+max 33,,33,USD,,,,price,asc
+top tier by every metric,,,,4.9,,rating,desc,
+within 475,,475,USD,,,,price,asc
+the praise never stops,,,,4.6,,rating,desc,
+below 27,,27,USD,,,,price,asc
+perfect review averages,,,,5.0,,rating,desc,
+somewhere in the 200 to 300 bracket,200.0,300,USD,,,,price,asc
+gift-worthy and loved,,,,4.7,,rating,desc,
+capped at 62,,62,USD,,,,price,asc
+practically flawless reputation,,,,4.8,,rating,desc,
+in the 500 to 800 zone,500.0,800,USD,,,,price,asc
+buyers call it life changing,,,,4.9,,rating,desc,
+sub 21,,21,USD,,,,price,asc
+unmatched customer love,,,,4.7,,rating,desc,
+ceiling of 385,,385,USD,,,,price,asc
+legendary customer reviews,,,,4.8,,rating,desc,
+up to 17 dollars,,17,USD,,,,price,asc
+five star club only,,,,5.0,,rating,desc,
+anywhere from 75 to 150,75.0,150,USD,,,,price,asc
+satisfaction that speaks for itself,,,,4.6,,rating,desc,
+not crossing 240,,240,USD,,,,price,asc
+buyers keep recommending to strangers,,,,4.7,,rating,desc,
+capped at 7,,7,USD,,,,price,asc
+holy grail of quality reviews,,,,4.9,,rating,desc,
+between 180 and 360,180.0,360,USD,,,,price,asc
+trusted more than anything else,,,,4.8,,rating,desc,
+below 52,,52,USD,,,,price,asc
+off the charts ratings,,,,4.7,,rating,desc,
+right around 800,,800,USD,,,,price,asc
+buyers never look elsewhere after this,,,,4.8,,rating,desc,
+6 dollars or less,,6,USD,,,,price,asc
+benchmarks of excellence,,,,4.9,,rating,desc,
+up to 425,,425,USD,,,,price,asc
+reviews that speak volumes,,,,4.6,,rating,desc,
+below 36,,36,USD,,,,price,asc
+undisputed fan favorites,,,,4.7,,rating,desc,
+from 140 to 280,140.0,280,USD,,,,price,asc
+bar raising quality,,,,4.8,,rating,desc,
+max 19,,19,USD,,,,price,asc
+near perfect feedback loop,,,,4.7,,rating,desc,
+up to 330,,330,USD,,,,price,asc
+standing ovation from users,,,,4.9,,rating,desc,
+11 dollars maximum,,11,USD,,,,price,asc
+sets the standard for reviews,,,,4.8,,rating,desc,
+ranging from 60 to 120,60.0,120,USD,,,,price,asc
+overwhelming positivity in reviews,,,,4.7,,rating,desc,
+ceiling 280,,280,USD,,,,price,asc
+stuff that converts skeptics,,,,4.6,,rating,desc,
+below 47,,47,USD,,,,price,asc
+reviews that border on religious,,,,4.9,,rating,desc,
+from 400 to 750,400.0,750,USD,,,,price,asc
+customers treat these like treasures,,,,4.8,,rating,desc,
+9 bucks and below,,9,USD,,,,price,asc
+ratings in another league,,,,4.7,,rating,desc,
+capped at 215,,215,USD,,,,price,asc
+review section is pure positivity,,,,4.8,,rating,desc,
+up to 26,,26,USD,,,,price,asc
+hard to find something this good,,,,4.9,,rating,desc,
+between 270 and 520,270.0,520,USD,,,,price,asc
+can do no wrong in buyers eyes,,,,4.7,,rating,desc,
+ceiling 73,,73,USD,,,,price,asc
+reviews glow brighter than most,,,,4.8,,rating,desc,
+sub 43,,43,USD,,,,price,asc
+practically perfect by consensus,,,,4.9,,rating,desc,
+up to 560,,560,USD,,,,price,asc
+buyers would buy it again without hesitation,,,,4.7,,rating,desc,
+below 31,,31,USD,,,,price,asc
+excellent scores across the board,,,,4.8,,rating,desc,
+from 95 to 200,95.0,200,USD,,,,price,asc
+nothing short of brilliant,,,,4.9,,rating,desc,
+spending around 145,,145,USD,,,,price,asc
+review sections full of love,,,,4.6,,rating,desc,
+below 64,,64,USD,,,,price,asc
+impeccable track record with buyers,,,,4.8,,rating,desc,
+from 500 to 900,500.0,900,USD,,,,price,asc
+blind trust in these,,,,4.7,,rating,desc,
+max 37,,37,USD,,,,price,asc
+excellence is the baseline,,,,4.9,,rating,desc,
+up to 255,,255,USD,,,,price,asc
+impossible not to recommend these,,,,4.8,,rating,desc,
+4 dollars or under,,4,USD,,,,price,asc
+ratings make you believe in products again,,,,4.7,,rating,desc,
+from 320 to 580,320.0,580,USD,,,,price,asc
+struck gold with this one,,,,4.8,,rating,desc,
+below 88,,88,USD,,,,price,asc
+nothing bad to say,,,,4.6,,rating,desc,
+total budget 165,,165,USD,,,,price,asc
+stellar in every regard,,,,4.9,,rating,desc,
+cheap but not nasty around 24,,24,USD,4.0,,combined,price,asc
+very well rated under 90,,90,USD,4.3,,combined,asc,
+top picks from 100 to 250,100.0,250,USD,4.5,,combined,price,asc
+beloved and affordable under 55,,55,USD,4.4,,combined,asc,
+five star finds under 120,,120,USD,5.0,,combined,rating,desc
+raved about and under 70,,70,USD,4.6,,combined,asc,
+loved by buyers around 40 bucks,,40,USD,4.2,,combined,asc,
+quality guaranteed under 200,,200,USD,4.5,,combined,asc,
+above 4 stars and below 80,,80,USD,4.0,,combined,asc,
+critics and buyers both love under 150,,150,USD,4.7,,combined,rating,desc
+bargain with brilliant reviews under 35,,35,USD,4.3,,combined,asc,
+highly praised under 500,,500,USD,4.6,,combined,rating,desc
+exceptional and affordable under 60,,60,USD,4.5,,combined,asc,
+near perfect and not pricey under 45,,45,USD,4.8,,combined,rating,desc
+4 star minimum around 110,,110,USD,4.0,,combined,price,asc
+stellar quality under 300,,300,USD,4.7,,combined,rating,desc
+buyers obsessed and price under 85,,85,USD,4.6,,combined,asc,
+highly endorsed and budget friendly under 30,,30,USD,4.3,,combined,asc,
+review gold and price silver under 75,,75,USD,4.5,,combined,asc,
+absolute crowd pleasers under 180,,180,USD,4.6,,combined,rating,desc
+superb and surprisingly cheap under 25,,25,USD,4.4,,combined,asc,
+well loved in the 60 to 130 bracket,60.0,130,USD,4.2,,combined,price,asc
+fantastic reviews below 220,,220,USD,4.5,,combined,rating,desc
+heart and wallet both satisfied under 95,,95,USD,4.4,,combined,asc,
+all star reviews under 400,,400,USD,4.7,,combined,rating,desc
+terrific scores under 50,,50,USD,4.3,,combined,asc,
+review hall of fame under 350,,350,USD,4.8,,combined,rating,desc
+affordable gem under 65 with high rating,,65,USD,4.5,,combined,asc,
+five star reputation below 280,,280,USD,5.0,,combined,rating,desc
+irresistible combo of quality and price under 145,,145,USD,4.6,,combined,asc,
+rave reviews below 1000,,1000,USD,4.8,,combined,rating,desc
+glowing and not expensive under 42,,42,USD,4.4,,combined,asc,
+acclaimed and accessible under 160,,160,USD,4.5,,combined,rating,desc
+loved by real people around 320,,320,USD,4.3,,combined,price,asc
+honest reviews point to these under 78,,78,USD,4.2,,combined,asc,
+standout quality below 230,,230,USD,4.6,,combined,rating,desc
+bargain hunters love these under 32,,32,USD,4.0,,combined,asc,
+critics call it must own under 750,,750,USD,4.7,,combined,rating,desc
+review average never dips below 4 under 55,,55,USD,4.0,,combined,asc,
+gifted over and over under 100,,100,USD,4.5,,combined,asc,
+superb rating and kind price under 48,,48,USD,4.4,,combined,asc,
+quality you can taste below 115,,115,USD,4.6,,combined,rating,desc
+highly rated in the 200 to 450 range,200.0,450,USD,4.5,,combined,price,asc
+unanimous top marks under 68,,68,USD,4.3,,combined,asc,
+trusted completely and under 195,,195,USD,4.5,,combined,asc,
+extraordinary feedback below 390,,390,USD,4.7,,combined,rating,desc
+5 bucks and still well reviewed,,5,USD,4.0,,combined,asc,
+respected by reviewers around 530,,530,USD,4.4,,combined,price,asc
+everyone agrees it's excellent under 135,,135,USD,4.5,,combined,rating,desc
+cheap at 29 and still excellent,,29,USD,4.3,,combined,asc,
+beloved pick between 80 and 160,80.0,160,USD,4.4,,combined,price,asc
+impossible to fault under 275,,275,USD,4.6,,combined,rating,desc
+nothing but glowing reviews left under 44,,44,USD,4.3,,combined,asc,
+legendary feedback below 650,,650,USD,4.8,,combined,rating,desc
+inexpensive and adored under 21,,21,USD,4.2,,combined,asc,
+stellar reviews in the 150 to 300 range,150.0,300,USD,4.5,,combined,price,asc
+trusted by thousands under 105,,105,USD,4.4,,combined,asc,
+practically perfect and not bank breaking under 87,,87,USD,4.7,,combined,rating,desc
+tens across the board under 175,,175,USD,4.8,,combined,rating,desc
+extremely well regarded around 460,,460,USD,4.5,,combined,price,asc
+cheap enough at 15 and reviewed well,,15,USD,4.0,,combined,asc,
+loudest fans for these under 310,,310,USD,4.6,,combined,rating,desc
+flawless reputation below 58,,58,USD,4.5,,combined,asc,
+most loved in 400 to 700 bracket,400.0,700,USD,4.7,,combined,price,asc
+the gushing is justified under 36,,36,USD,4.2,,combined,asc,
+trust is hard earned and these have it under 240,,240,USD,4.6,,combined,rating,desc
+jaw dropping quality for the price under 82,,82,USD,4.5,,combined,asc,
+devotees everywhere under 520,,520,USD,4.7,,combined,rating,desc
+thrilled buyers under 27,,27,USD,4.1,,combined,asc,
+near perfect record under 145,,145,USD,4.8,,combined,rating,desc
+repeat purchase speaks volumes under 63,,63,USD,4.3,,combined,asc,
+coveted and reasonably priced below 380,,380,USD,4.6,,combined,rating,desc
+proud owners everywhere under 52,,52,USD,4.4,,combined,asc,
+from all angles excellent below 290,,290,USD,4.7,,combined,rating,desc
+delighted buyers everywhere under 170,,170,USD,4.5,,combined,asc,
+feels like a luxury under 720,,720,USD,4.7,,combined,rating,desc
+bargain tier but 4 stars solid under 33,,33,USD,4.0,,combined,asc,
+clever pick under 430,,430,USD,4.6,,combined,rating,desc
+frugal and fabulous under 19,,19,USD,4.2,,combined,asc,
+detailed glowing reviews under 560,,560,USD,4.8,,combined,rating,desc
+tiny price big ratings under 11,,11,USD,4.0,,combined,asc,
+word spreads fast under 98,,98,USD,4.4,,combined,asc,
+exceptional buy below 205,,205,USD,4.6,,combined,rating,desc
+one is never enough under 72,,72,USD,4.3,,combined,asc,
+everything points to excellence below 475,,475,USD,4.7,,combined,rating,desc
+affordable winner under 57,,57,USD,4.4,,combined,asc,
+blind trust earned under 330,,330,USD,4.5,,combined,rating,desc
+penny wise but highly rated under 14,,14,USD,4.0,,combined,asc,
+beloved at every price point below 640,,640,USD,4.7,,combined,rating,desc
+worth twice the price under 83,,83,USD,4.5,,combined,asc,
+universal approval below 265,,265,USD,4.6,,combined,rating,desc
+great reviews for not much money under 26,,26,USD,4.1,,combined,asc,
+competes with premium under 430,,430,USD,4.7,,combined,rating,desc
+smart purchase under 47,,47,USD,4.3,,combined,asc,
+jaw dropping value for 185,,185,USD,4.5,,combined,price,asc
+overdelivers massively under 66,,66,USD,4.4,,combined,asc,
+review gold mine below 315,,315,USD,4.6,,combined,rating,desc
+hidden gem under 39,,39,USD,4.2,,combined,asc,
+voted best purchase under 590,,590,USD,4.7,,combined,rating,desc
+surprisingly stellar for the price under 23,,23,USD,4.0,,combined,asc,
+feels like a jackpot under 155,,155,USD,4.5,,combined,rating,desc
+crisp clean reviews under 77,,77,USD,4.3,,combined,asc,
+price seems criminally low under 420,,420,USD,4.6,,combined,rating,desc
+modest price extraordinary reviews under 61,,61,USD,4.4,,combined,asc,
+quality that surprises everyone under 780,,780,USD,4.8,,combined,rating,desc
+value king under 46,,46,USD,4.3,,combined,asc,
+price seems unreal under 127,,127,USD,4.5,,combined,rating,desc
+micro budget massive reviews under 8,,8,USD,4.0,,combined,asc,
+repeat purchases say it all below 345,,345,USD,4.6,,combined,rating,desc
+small spend big smiles under 53,,53,USD,4.2,,combined,asc,
+the one everyone ends up choosing under 620,,620,USD,4.7,,combined,rating,desc
+cheap does not mean bad here under 16,,16,USD,4.1,,combined,asc,
+real satisfaction in the 90 to 180 range,90.0,180,USD,4.4,,combined,price,asc
+fair price stellar rep below 235,,235,USD,4.5,,combined,rating,desc
+every cent justified under 74,,74,USD,4.3,,combined,asc,
+reviewers have zero complaints below 510,,510,USD,4.7,,combined,rating,desc
+absolute value king under 31,,31,USD,4.0,,combined,asc,
+obsession worthy below 155,,155,USD,4.6,,combined,rating,desc
+decent wallet hit great score under 67,,67,USD,4.3,,combined,asc,
+not giving this up for anything below 285,,285,USD,4.5,,combined,rating,desc
+lightweight on price heavyweight in reviews under 41,,41,USD,4.2,,combined,asc,
+fully deserves its rating below 830,,830,USD,4.8,,combined,rating,desc
+solid reviews for a price you'd expect under 93,,93,USD,4.3,,combined,asc,
+discovery feels like winning below 170,,170,USD,4.5,,combined,rating,desc
+ridiculously good for the money under 22,,22,USD,4.1,,combined,asc,
+genuine delight in the 300 to 500 range,300.0,500,USD,4.6,,combined,price,asc
+unfair advantage under 115,,115,USD,4.4,,combined,rating,desc
+low spend high love under 34,,34,USD,4.2,,combined,asc,
+satisfaction radiates from reviews below 455,,455,USD,4.6,,combined,rating,desc
+surprisingly good at 18,,18,USD,4.0,,combined,asc,
+does exactly what it promises under 680,,680,USD,4.7,,combined,rating,desc
+low cost high trust under 28,,28,USD,4.1,,combined,asc,
+adored across the 130 to 260 range,130.0,260,USD,4.4,,combined,price,asc
+reviews match reality perfectly below 340,,340,USD,4.6,,combined,rating,desc
+just browsing,,,,,,,,
+explore everything,,,,,,,,
+show me all of it,,,,,,,,
+no preference just browse,,,,,,,,
+all products please,,,,,,,,
+just looking around,,,,,,,,
+pull up everything you have,,,,,,,,
+everything in stock,,,,,,,,
+let me see it all,,,,,,,,
+no filters,,,,,,,,
+cheapest first please,,,,,,price,asc,
+most expensive at the top,,,,,,price,desc,
+sort by rating highest first,,,,,,rating,desc,
+lowest priced first,,,,,,price,asc,
+best reviewed at the top,,,,,,rating,desc,
+priciest first,,,,,,price,desc,
+worst rated first,,,,,,rating,asc,
+top scoring first,,,,,,rating,desc,
+sort from cheap to expensive,,,,,,price,asc,
+from most loved to least,,,,,,rating,desc,
+highest price first,,,,,,price,desc,
+lowest rating first,,,,,,rating,asc,
+ascending price,,,,,,price,asc,
+descending price,,,,,,price,desc,
+highest rated on top,,,,,,rating,desc,
+price going up,,,,,,price,asc,
+price going down,,,,,,price,desc,
+best first,,,,,,rating,desc,
+cheapest at top,,,,,,price,asc,
+sort worst to best,,,,,,rating,asc,
+most affordable first,,,,,,price,asc,
+premium first,,,,,,price,desc,
+top rated first,,,,,,rating,desc,
+by price low to high,,,,,,price,asc,
+by rating high to low,,,,,,rating,desc,
+organized by price ascending,,,,,,price,asc,
+organized by rating descending,,,,,,rating,desc,
+absolutely must stay under 60,,60,USD,,,,price,asc
+only the 4.8 and above crowd,,,,4.8,,rating,desc,
+rocking a 200 dollar budget,,200,USD,,,,price,asc
+stellar ratings are a must,,,,4.7,,rating,desc,
+can't justify more than 45,,45,USD,,,,price,asc
+perfectly rated picks,,,,5.0,,rating,desc,
+circa 80 bucks,,80,USD,,,,price,asc
+obsessively loved by reviewers,,,,4.6,,rating,desc,
+zero tolerance for over 30,,30,USD,,,,price,asc
+makes you say wow on the score sheet,,,,4.9,,rating,desc,
+hovering at 120,,120,USD,,,,price,asc
+cream rises to the top here,,,,4.8,,rating,desc,
+pretty tight at 25 today,,25,USD,,,,price,asc
+the scores here are hard to ignore,,,,4.7,,rating,desc,
+150 is my absolute ceiling,,150,USD,,,,price,asc
+collectively adored products,,,,4.6,,rating,desc,
+affordable range around 35,,35,USD,,,,price,asc
+relentlessly well reviewed,,,,4.8,,rating,desc,
+price point around 500,,500,USD,,,,price,asc
+satisfaction is guaranteed here,,,,4.7,,rating,desc,
+strapped for cash today under 15,,15,USD,,,,price,asc
+masses have spoken highly,,,,4.6,,rating,desc,
+roughly 300 to work with,,300,USD,,,,price,asc
+excellence on every review page,,,,4.9,,rating,desc,
+tight wallet friendly under 10,,10,USD,,,,price,asc
+perpetually praised stuff,,,,4.7,,rating,desc,
+sitting around 250 budget,,250,USD,,,,price,asc
+feedback sections overflow with praise,,,,4.8,,rating,desc,
+sub 50 is the target,,50,USD,,,,price,asc
+trusted by the majority,,,,4.5,,rating,desc,
+70 is my hard limit,,70,USD,,,,price,asc
+scores are through the roof,,,,4.9,,rating,desc,
+around 400 to play with,,400,USD,,,,price,asc
+loved across all demographics,,,,4.7,,rating,desc,
+90 dollar zone,,90,USD,,,,price,asc
+fans are fiercely loyal to these,,,,4.6,,rating,desc,
+locked in at 20,,20,USD,,,,price,asc
+impossible ratings to dispute,,,,4.8,,rating,desc,
+somewhere in the 600 territory,,600,USD,,,,price,asc
+earned every single star,,,,4.7,,rating,desc,
+keeping it at 40,,40,USD,,,,price,asc
+reviewed into legend status,,,,5.0,,rating,desc,
+cozying up to 175,,175,USD,,,,price,asc
+people voted 4.5 and above,,,,4.5,,rating,desc,
+barely over 5 bucks please,,5,USD,,,,price,asc
+reviewers ran out of superlatives,,,,4.9,,rating,desc,
+budget lands at 350,,350,USD,,,,price,asc
+star ratings that set the bar,,,,4.8,,rating,desc,
+65 dollar sweet spot,,65,USD,,,,price,asc
+a near spotless review record,,,,4.7,,rating,desc,
+in the 750 range,,750,USD,,,,price,asc
+definition of crowd pleasing,,,,4.6,,rating,desc,
+not a rupee over 55,,55,USD,,,,price,asc
+rivals the best out there in ratings,,,,4.8,,rating,desc,
+budget cap is 130,,130,USD,,,,price,asc
+magnetic to positive reviewers,,,,4.7,,rating,desc,
+8 dollar category,,8,USD,,,,price,asc
+quality that converts skeptics,,,,4.6,,rating,desc,
+comfortably at 450,,450,USD,,,,price,asc
+five star consistency,,,,5.0,,rating,desc,
+roughly 22 dollars,,22,USD,,,,price,asc
+public has spoken with top marks,,,,4.7,,rating,desc,
+400 to 650 feels right,400.0,650,USD,,,,price,asc
+something people defend passionately,,,,4.8,,rating,desc,
+under 18 is the mission,,18,USD,,,,price,asc
+average score stays near perfect,,,,4.9,,rating,desc,
+320 price point,,320,USD,,,,price,asc
+adored without exception,,,,4.7,,rating,desc,
+barely touching 12,,12,USD,,,,price,asc
+impossible to fault based on reviews,,,,4.8,,rating,desc,
+in the 200 ballpark,,200,USD,,,,price,asc
+gold standard of ratings,,,,4.9,,rating,desc,
+hard cap at 95,,95,USD,,,,price,asc
+reviewers compete to praise these,,,,4.7,,rating,desc,
+300 to 500 feels comfortable,300.0,500,USD,,,,price,asc
+a review score that earns trust,,,,4.6,,rating,desc,
+staying light at 28,,28,USD,,,,price,asc
+ages like fine wine in the ratings,,,,4.8,,rating,desc,
+480 budget,,480,USD,,,,price,asc
+unanimously applauded,,,,4.7,,rating,desc,
+somewhere just under 38,,38,USD,,,,price,asc
+benchmark of user satisfaction,,,,4.9,,rating,desc,
+160 to 280 bracket,160.0,280,USD,,,,price,asc
+history with reviewers is spotless,,,,4.8,,rating,desc,
+pretty low price around 7,,7,USD,,,,price,asc
+community seal of approval,,,,4.6,,rating,desc,
+around 550 budget,,550,USD,,,,price,asc
+no complaints department,,,,4.7,,rating,desc,
+33 dollar mark,,33,USD,,,,price,asc
+legendary in the review space,,,,4.9,,rating,desc,
+50 to 110 range,50.0,110,USD,,,,price,asc
+track record is immaculate,,,,4.8,,rating,desc,
+barely 16 bucks,,16,USD,,,,price,asc
+reviews paint a perfect picture,,,,4.7,,rating,desc,
+upper limit 260,,260,USD,,,,price,asc
+crowd rarely agrees but they do here,,,,4.8,,rating,desc,
+420 mark,,420,USD,,,,price,asc
+review scores speak louder than ads,,,,4.6,,rating,desc,
+cheap zone under 6,,6,USD,,,,price,asc
+five star faithful,,,,5.0,,rating,desc,
+somewhere between 90 and 180,90.0,180,USD,,,,price,asc
+a review record you can trust,,,,4.7,,rating,desc,
+43 dollar territory,,43,USD,,,,price,asc
+never dips in rating territory,,,,4.8,,rating,desc,
+comfy at 680,,680,USD,,,,price,asc
+praised from every angle,,,,4.7,,rating,desc,
+just below 27,,27,USD,,,,price,asc
+the scores here humble the competition,,,,4.9,,rating,desc,
+370 range,,370,USD,,,,price,asc
+adored by the silent majority,,,,4.6,,rating,desc,
+around 14 dollars,,14,USD,,,,price,asc
+near flawless feedback,,,,4.8,,rating,desc,
+125 to 230 zone,125.0,230,USD,,,,price,asc
+ratings define excellence here,,,,4.7,,rating,desc,
+52 price cap,,52,USD,,,,price,asc
+feedback section reads like a fan club,,,,4.9,,rating,desc,
+around 800,,800,USD,,,,price,asc
+universally celebrated quality,,,,4.8,,rating,desc,
+barely 24 dollars,,24,USD,,,,price,asc
+inspires confidence through its ratings,,,,4.7,,rating,desc,
+from 200 to 380,200.0,380,USD,,,,price,asc
+the scores here make headlines,,,,4.8,,rating,desc,
+77 cap,,77,USD,,,,price,asc
+not a single unhappy reviewer,,,,4.6,,rating,desc,
+around 950,,950,USD,,,,price,asc
+rating is the only filter needed,,,,4.8,,rating,desc,
+31 dollar range,,31,USD,,,,price,asc
+magic in the reviews happens here,,,,4.9,,rating,desc,
+300 to 580 feels right,300.0,580,USD,,,,price,asc
+highest praise consistently,,,,4.7,,rating,desc,
+19 dollar zone,,19,USD,,,,price,asc
+buyers left speechless by quality,,,,4.8,,rating,desc,
+upper end at 240,,240,USD,,,,price,asc
+credibility in reviews is undeniable,,,,4.7,,rating,desc,
+4 dollar category,,4,USD,,,,price,asc
+redefines the category through ratings,,,,4.9,,rating,desc,
+540 budget,,540,USD,,,,price,asc
+a legacy of positive reviews,,,,4.8,,rating,desc,
+barely 37 dollars,,37,USD,,,,price,asc
+review after review says the same thing,,,,4.7,,rating,desc,
+80 to 160 range,80.0,160,USD,,,,price,asc
+these speak for themselves in reviews,,,,4.6,,rating,desc,
+63 ceiling,,63,USD,,,,price,asc
+outlasts trends through consistent ratings,,,,4.8,,rating,desc,
+around 730,,730,USD,,,,price,asc
+praise is the universal currency here,,,,4.7,,rating,desc,
+47 price zone,,47,USD,,,,price,asc
+consistency of reviews is remarkable,,,,4.9,,rating,desc,
+from 140 to 260,140.0,260,USD,,,,price,asc
+no bad eggs in the review batch,,,,4.7,,rating,desc,
+barely touching 9,,9,USD,,,,price,asc
+five star territory,,,,5.0,,rating,desc,
+at 290 or under,,290,USD,,,,price,asc
+most dependable scores,,,,4.8,,rating,desc,
+58 mark,,58,USD,,,,price,asc
+scores that transcend price,,,,4.7,,rating,desc,
+from 450 to 780,450.0,780,USD,,,,price,asc
+the feedback section is unanimously positive,,,,4.8,,rating,desc,
+3 dollar grab,,3,USD,,,,price,asc
+earns lifetime loyalty through ratings,,,,4.9,,rating,desc,
+budget parked at 165,,165,USD,,,,price,asc
+the scores here are hard to fake,,,,4.7,,rating,desc,
+around 41 dollars,,41,USD,,,,price,asc
+endlessly high marks,,,,4.8,,rating,desc,
+from 70 to 150,70.0,150,USD,,,,price,asc
+strong enough to recommend blindly,,,,4.6,,rating,desc,
+84 price point,,84,USD,,,,price,asc
+hall of fame in reviews material,,,,4.9,,rating,desc,
+budget is 620,,620,USD,,,,price,asc
+praised relentlessly and rightfully,,,,4.8,,rating,desc,
+26 dollar limit,,26,USD,,,,price,asc
+justifies every penny through ratings,,,,4.7,,rating,desc,
+around 195 to 340,195.0,340,USD,,,,price,asc
+praise so consistent it becomes boring,,,,4.6,,rating,desc,
+barely 53 bucks,,53,USD,,,,price,asc
+feedback sections that restore faith,,,,4.8,,rating,desc,
+around 870,,870,USD,,,,price,asc
+top of the charts in every review site,,,,4.9,,rating,desc,
+34 dollar territory,,34,USD,,,,price,asc
+ages well in user ratings,,,,4.7,,rating,desc,
+100 to 200 comfortable range,100.0,200,USD,,,,price,asc
+culture of praise loves these,,,,4.8,,rating,desc,
+sub 11 bucks,,11,USD,,,,price,asc
+mythological scores by any measure,,,,4.9,,rating,desc,
+390 budget,,390,USD,,,,price,asc
+every reviewer seems to agree,,,,4.7,,rating,desc,
+68 ceiling,,68,USD,,,,price,asc
+review scores you'd show your parents,,,,4.8,,rating,desc,
+from 250 to 430,250.0,430,USD,,,,price,asc
+a clean sweep of good reviews,,,,4.6,,rating,desc,
+17 dollar maximum,,17,USD,,,,price,asc
+builds a fanbase through ratings,,,,4.7,,rating,desc,
+around 570,,570,USD,,,,price,asc
+track record in reviews so clean it shines,,,,4.8,,rating,desc,
+46 price cap,,46,USD,,,,price,asc
+rave reviews only,,,,4.9,,rating,desc,
+150 to 320 comfortable,150.0,320,USD,,,,price,asc
+quality that reviews are made of,,,,4.7,,rating,desc,
+barely 21 dollars,,21,USD,,,,price,asc
+a mountain of five star reviews,,,,5.0,,rating,desc,
+around 440,,440,USD,,,,price,asc
+review scores people screenshot,,,,4.8,,rating,desc,
+72 price zone,,72,USD,,,,price,asc
+carries real weight in ratings,,,,4.7,,rating,desc,
+from 370 to 650,370.0,650,USD,,,,price,asc
+reputation with reviewers beyond reproach,,,,4.8,,rating,desc,
+13 dollar sweet spot,,13,USD,,,,price,asc
+speaks to real quality through ratings,,,,4.6,,rating,desc,
+at 285 or under,,285,USD,,,,price,asc
+the scores here are genuinely deserved,,,,4.7,,rating,desc,
+59 budget,,59,USD,,,,price,asc
+stratospheric scores,,,,4.9,,rating,desc,
+from 90 to 200,90.0,200,USD,,,,price,asc
+trustworthiness in reviews at its peak,,,,4.8,,rating,desc,
+barely 32 dollars,,32,USD,,,,price,asc
+sets impossible standards in ratings,,,,4.7,,rating,desc,
+around 510,,510,USD,,,,price,asc
+a review profile that inspires trust,,,,4.8,,rating,desc,
+86 price point,,86,USD,,,,price,asc
+attracts devoted fans through ratings,,,,4.9,,rating,desc,
+from 175 to 310,175.0,310,USD,,,,price,asc
+goodness reviewers see that never fades,,,,4.7,,rating,desc,
+barely 48 dollars,,48,USD,,,,price,asc
+highest possible praise,,,,5.0,,rating,desc,
+around 660,,660,USD,,,,price,asc
+the scores here convert browsers,,,,4.8,,rating,desc,
+23 dollar zone,,23,USD,,,,price,asc
+rewards loyalty with consistent quality,,,,4.6,,rating,desc,
+from 430 to 700,430.0,700,USD,,,,price,asc
+review purity at its finest,,,,4.7,,rating,desc,
+61 cap,,61,USD,,,,price,asc
+scores people share everywhere,,,,4.8,,rating,desc,
+around 310,,310,USD,,,,price,asc
+review scores without a single asterisk,,,,4.9,,rating,desc,
+barely 16 bucks,,16,USD,,,,price,asc
+rave after rave after rave,,,,4.7,,rating,desc,
+from 220 to 400,220.0,400,USD,,,,price,asc
+scores here outlast marketing,,,,4.8,,rating,desc,
+74 ceiling,,74,USD,,,,price,asc
+sells itself through ratings,,,,4.7,,rating,desc,
+around 840,,840,USD,,,,price,asc
+stardom earned through reviews fully earned,,,,4.9,,rating,desc,
+29 dollar mark,,29,USD,,,,price,asc
+rare air in the ratings,,,,4.8,,rating,desc,
+from 55 to 130,55.0,130,USD,,,,price,asc
+the scores here outlive hype,,,,4.7,,rating,desc,
+barely touching 44,,44,USD,,,,price,asc
+a review legacy worth trusting,,,,4.6,,rating,desc,
+around 590,,590,USD,,,,price,asc
+five star club members only,,,,5.0,,rating,desc,
+82 budget,,82,USD,,,,price,asc
+survives scrutiny in every rating,,,,4.8,,rating,desc,
+from 340 to 560,340.0,560,USD,,,,price,asc
+review scores worth writing home about,,,,4.7,,rating,desc,
+36 price point,,36,USD,,,,price,asc
+keeps giving in user ratings,,,,4.9,,rating,desc,
+around 145,,145,USD,,,,price,asc
+army of reviewers is huge and happy,,,,4.8,,rating,desc,
+57 cap,,57,USD,,,,price,asc
+humbles competitors through ratings,,,,4.7,,rating,desc,
+from 480 to 750,480.0,750,USD,,,,price,asc
+culture of praise elevates these,,,,4.8,,rating,desc,
+barely 8 bucks,,8,USD,,,,price,asc
+beyond ordinary in user ratings,,,,4.9,,rating,desc,
+at 230 or under,,230,USD,,,,price,asc
+review scores you can bet on,,,,4.7,,rating,desc,
+66 ceiling,,66,USD,,,,price,asc
+defines a generation through ratings,,,,4.8,,rating,desc,
+from 110 to 220,110.0,220,USD,,,,price,asc
+positivity in reviews is overwhelming,,,,4.7,,rating,desc,
+barely 39 dollars,,39,USD,,,,price,asc
+scores are off the scale,,,,4.9,,rating,desc,
+around 460,,460,USD,,,,price,asc
+review scores people tattoo on their hearts,,,,4.8,,rating,desc,
+93 price zone,,93,USD,,,,price,asc
+makes news in the ratings world,,,,4.7,,rating,desc,
+from 270 to 490,270.0,490,USD,,,,price,asc
+confidence from reviewers is total,,,,4.8,,rating,desc,
+barely 42 dollars,,42,USD,,,,price,asc
+trophy-worthy scores,,,,4.9,,rating,desc,
+around 710,,710,USD,,,,price,asc
+the scores here define the category,,,,4.7,,rating,desc,
+54 price limit,,54,USD,,,,price,asc
+never plateaus in user ratings,,,,4.8,,rating,desc,
+from 160 to 290,160.0,290,USD,,,,price,asc
+track record in reviews untouched by negativity,,,,4.6,,rating,desc,
+11 dollar zone,,11,USD,,,,price,asc
+legendary in the eyes of reviewers,,,,4.9,,rating,desc,
+around 390,,390,USD,,,,price,asc
+the scores here prove real worth,,,,4.8,,rating,desc,
+78 ceiling,,78,USD,,,,price,asc
+attracts word of mouth through ratings,,,,4.7,,rating,desc,
+from 520 to 850,520.0,850,USD,,,,price,asc
+quality of feedback rivals the product itself,,,,4.8,,rating,desc,
+26 dollar cap,,26,USD,,,,price,asc
+feels like a warm hug in review form,,,,4.6,,rating,desc,
+around 175,,175,USD,,,,price,asc
+the scores here raise the bar,,,,4.7,,rating,desc,
+49 price point,,49,USD,,,,price,asc
+makes other products jealous with its score,,,,4.9,,rating,desc,
+from 380 to 620,380.0,620,USD,,,,price,asc
+the feedback section is a joy to read,,,,4.8,,rating,desc,
+barely 14 dollars,,14,USD,,,,price,asc
+top rated and under 50,,50,USD,4.5,,combined,rating,desc
+raved about and under 120,,120,USD,4.6,,combined,rating,desc
+highly scored and below 80,,80,USD,4.4,,combined,rating,desc
+great reviews and price cap at 200,,200,USD,4.3,,combined,rating,desc
+acclaimed and under 40,,40,USD,4.5,,combined,asc,
+beloved and not over 300,,300,USD,4.6,,combined,rating,desc
+praised and below 65,,65,USD,4.3,,combined,asc,
+celebrated and under 150,,150,USD,4.7,,combined,rating,desc
+quality confirmed and below 90,,90,USD,4.4,,combined,asc,
+trusted and under 250,,250,USD,4.5,,combined,rating,desc
+adored and price cap 35,,35,USD,4.2,,combined,asc,
+5 star reputation below 400,,400,USD,5.0,,combined,rating,desc
+highly endorsed below 75,,75,USD,4.4,,combined,asc,
+loved and capped at 180,,180,USD,4.6,,combined,rating,desc
+excellent scores below 55,,55,USD,4.3,,combined,asc,
+top tier reviews below 500,,500,USD,4.8,,combined,rating,desc
+praised to the skies under 45,,45,USD,4.5,,combined,asc,
+glowing and not over 160,,160,USD,4.6,,combined,rating,desc
+acclaimed quality under 28,,28,USD,4.1,,combined,asc,
+rave reviews and below 600,,600,USD,4.7,,combined,rating,desc
+stellar and under 62,,62,USD,4.4,,combined,asc,
+five star and below 350,,350,USD,5.0,,combined,rating,desc
+brilliant feedback under 95,,95,USD,4.5,,combined,asc,
+loved by critics and under 230,,230,USD,4.6,,combined,rating,desc
+superb score and price under 48,,48,USD,4.3,,combined,asc,
+flawless reputation under 700,,700,USD,4.8,,combined,rating,desc
+darling of reviewers under 33,,33,USD,4.2,,combined,asc,
+gold standard reviews below 280,,280,USD,4.7,,combined,rating,desc
+praised without reservation under 71,,71,USD,4.4,,combined,asc,
+impeccable ratings below 440,,440,USD,4.6,,combined,rating,desc
+acclaimed and tight budget under 19,,19,USD,4.0,,combined,asc,
+crowd favourite and below 550,,550,USD,4.7,,combined,rating,desc
+exceptional reviews under 83,,83,USD,4.5,,combined,asc,
+near perfect score below 170,,170,USD,4.8,,combined,rating,desc
+sparkling reputation under 37,,37,USD,4.3,,combined,asc,
+hall of fame reviews below 480,,480,USD,4.9,,combined,rating,desc
+lauded and under 106,,106,USD,4.4,,combined,asc,
+extraordinary ratings below 360,,360,USD,4.7,,combined,rating,desc
+treasured and under 22,,22,USD,4.1,,combined,asc,
+stunning review average below 830,,830,USD,4.8,,combined,rating,desc
+cheered on by reviewers under 58,,58,USD,4.3,,combined,asc,
+royalty in the review world below 270,,270,USD,4.6,,combined,rating,desc
+celebrated pick under 44,,44,USD,4.4,,combined,asc,
+one reviewers always choose below 520,,520,USD,4.7,,combined,rating,desc
+raved about under 17,,17,USD,4.0,,combined,asc,
+icon in the review world below 145,,145,USD,4.5,,combined,rating,desc
+lauded by all under 69,,69,USD,4.3,,combined,asc,
+pristine ratings below 390,,390,USD,4.8,,combined,rating,desc
+frugal and four plus stars under 24,,24,USD,4.0,,combined,asc,
+cherished under 660,,660,USD,4.7,,combined,rating,desc
+championed by users under 53,,53,USD,4.4,,combined,asc,
+praised from every corner below 310,,310,USD,4.6,,combined,rating,desc
+a bargain with brilliant reviews under 31,,31,USD,4.2,,combined,asc,
+darling of reviewers below 760,,760,USD,4.8,,combined,rating,desc
+lauded under 87,,87,USD,4.5,,combined,asc,
+royalty in the review world below 215,,215,USD,4.7,,combined,rating,desc
+celebrated and under 13,,13,USD,4.0,,combined,asc,
+masterpiece of user satisfaction below 570,,570,USD,4.9,,combined,rating,desc
+praised without exception under 76,,76,USD,4.4,,combined,asc,
+revered below 425,,425,USD,4.7,,combined,rating,desc
+cheap and cheered under 41,,41,USD,4.1,,combined,asc,
+phenomenon in user ratings below 900,,900,USD,4.8,,combined,rating,desc
+applauded under 64,,64,USD,4.3,,combined,asc,
+gold standard in reviews below 245,,245,USD,4.6,,combined,rating,desc
+budget friendly and brilliant under 29,,29,USD,4.2,,combined,asc,
+trophy level ratings below 680,,680,USD,4.8,,combined,rating,desc
+lauded and light on price under 52,,52,USD,4.4,,combined,asc,
+the reviewed best below 330,,330,USD,4.7,,combined,rating,desc
+acclaimed under 7,,7,USD,4.0,,combined,asc,
+peak user satisfaction below 490,,490,USD,4.9,,combined,rating,desc
+praised daily under 91,,91,USD,4.5,,combined,asc,
+throne of top ratings below 195,,195,USD,4.6,,combined,rating,desc
+tiny price celebrated quality under 18,,18,USD,4.1,,combined,asc,
+supremacy in ratings below 740,,740,USD,4.8,,combined,rating,desc
+all things excellent under 67,,67,USD,4.4,,combined,asc,
+classic pick for reviewers below 280,,280,USD,4.7,,combined,rating,desc
+modest cost great acclaim under 46,,46,USD,4.3,,combined,asc,
+review perfection below 610,,610,USD,4.8,,combined,rating,desc
+low price high praise under 23,,23,USD,4.0,,combined,asc,
+summit of user satisfaction below 365,,365,USD,4.7,,combined,rating,desc
+applauded and affordable under 79,,79,USD,4.4,,combined,asc,
+beacon of top scores below 530,,530,USD,4.9,,combined,rating,desc
+micro price maxi reviews under 5,,5,USD,4.0,,combined,asc,
+zenith of user praise below 180,,180,USD,4.6,,combined,rating,desc
+celebrated under 101,,101,USD,4.5,,combined,asc,
+brilliance confirmed by ratings below 455,,455,USD,4.8,,combined,rating,desc
+inexpensive and immensely praised under 36,,36,USD,4.2,,combined,asc,
+empire of great feedback below 820,,820,USD,4.9,,combined,rating,desc
+lauded under 57,,57,USD,4.3,,combined,asc,
+stardom earned through reviews below 265,,265,USD,4.7,,combined,rating,desc
+tight budget big stars under 21,,21,USD,4.0,,combined,asc,
+constellation of top scores below 595,,595,USD,4.8,,combined,rating,desc
+acclaimed under 88,,88,USD,4.5,,combined,asc,
+firmament of five stars below 345,,345,USD,4.7,,combined,rating,desc
+cheap and universally loved under 15,,15,USD,4.1,,combined,asc,
+hall of praise below 710,,710,USD,4.8,,combined,rating,desc
+celebrated under 73,,73,USD,4.4,,combined,asc,
+crown jewel of ratings below 230,,230,USD,4.6,,combined,rating,desc
+price under 43 and people love it,,43,USD,4.3,,combined,asc,
+palace of user ratings below 470,,470,USD,4.9,,combined,rating,desc
+lauded and frugal under 27,,27,USD,4.0,,combined,asc,
+temple of user approval below 155,,155,USD,4.5,,combined,rating,desc
+cheap and celebrated under 62,,62,USD,4.4,,combined,asc,
+cathedral of five stars below 540,,540,USD,4.8,,combined,rating,desc
+highly praised under 34,,34,USD,4.2,,combined,asc,
+legend among reviewers below 395,,395,USD,4.7,,combined,rating,desc
+praised and light on cash under 49,,49,USD,4.3,,combined,asc,
+dynasty of great reviews below 660,,660,USD,4.8,,combined,rating,desc
+super cheap yet acclaimed under 9,,9,USD,4.0,,combined,asc,
+utopia for satisfied buyers below 315,,315,USD,4.7,,combined,rating,desc
+lauded under 82,,82,USD,4.5,,combined,asc,
+monument to quality below 580,,580,USD,4.9,,combined,rating,desc
+inexpensive and celebrated under 55,,55,USD,4.4,,combined,asc,
+oasis of positive feedback below 250,,250,USD,4.6,,combined,rating,desc
+micro spend maxi love under 11,,11,USD,4.0,,combined,asc,
+panorama of positive feedback below 770,,770,USD,4.8,,combined,rating,desc
+acclaimed under 66,,66,USD,4.3,,combined,asc,
+victory in user ratings below 430,,430,USD,4.7,,combined,rating,desc
+cost under 38 and loved by all,,38,USD,4.2,,combined,asc,
+triumph in user feedback below 195,,195,USD,4.5,,combined,rating,desc
+cheap and revered under 84,,84,USD,4.4,,combined,asc,
+fortress of five star ratings below 625,,625,USD,4.8,,combined,rating,desc
+barely costs anything and beloved under 6,,6,USD,4.0,,combined,asc,
+horizon of great scores below 290,,290,USD,4.6,,combined,rating,desc
+praised under 107,,107,USD,4.5,,combined,asc,
+epoch of great feedback below 500,,500,USD,4.9,,combined,rating,desc
+modest price incredible acclaim under 72,,72,USD,4.4,,combined,asc,
+panorama of positive feedback below 375,,375,USD,4.7,,combined,rating,desc
+cheap and cheered under 25,,25,USD,4.1,,combined,asc,
+era of strong scores below 690,,690,USD,4.8,,combined,rating,desc
+acclaimed under 59,,59,USD,4.3,,combined,asc,
+heritage of excellence in scores below 235,,235,USD,4.6,,combined,rating,desc
+tiny budget enormous praise under 16,,16,USD,4.0,,combined,asc,
+legacy of strong scores below 555,,555,USD,4.8,,combined,rating,desc
+lauded under 93,,93,USD,4.5,,combined,asc,
+authority in user ratings below 415,,415,USD,4.7,,combined,rating,desc
+price gentle and review fierce under 47,,47,USD,4.3,,combined,asc,
+prestige in user scores below 780,,780,USD,4.9,,combined,rating,desc
+praised and penny friendly under 32,,32,USD,4.2,,combined,asc,
+excellence in user feedback below 170,,170,USD,4.6,,combined,rating,desc
+cheap and adored under 71,,71,USD,4.4,,combined,asc,
+supremacy in ratings below 340,,340,USD,4.7,,combined,rating,desc
+tiny price tag massive approval under 8,,8,USD,4.0,,combined,asc,
+nirvana for quality seekers below 610,,610,USD,4.8,,combined,rating,desc
+acclaimed under 96,,96,USD,4.5,,combined,asc,
+paradise for great scores below 280,,280,USD,4.7,,combined,rating,desc
+inexpensive yet revered under 54,,54,USD,4.3,,combined,asc,
+apex of user ratings below 490,,490,USD,4.9,,combined,rating,desc
+cost under 20 and highly praised,,20,USD,4.1,,combined,asc,
+pinnacle of user scores below 745,,745,USD,4.8,,combined,rating,desc
+celebrated under 77,,77,USD,4.4,,combined,asc,
+zenith of user praise below 325,,325,USD,4.7,,combined,rating,desc
+affordable and applauded under 61,,61,USD,4.3,,combined,asc,
+summit of user satisfaction below 565,,565,USD,4.8,,combined,rating,desc
+micro budget stellar reception under 4,,4,USD,4.0,,combined,asc,
+acme of user satisfaction below 215,,215,USD,4.6,,combined,rating,desc
+praised under 85,,85,USD,4.5,,combined,asc,
+crest of user approval below 445,,445,USD,4.7,,combined,rating,desc
+just browsing around,,,,,,,,
+no idea what i want show everything,,,,,,,,
+let me scroll through,,,,,,,,
+open to anything really,,,,,,,,
+exploring the full catalogue,,,,,,,,
+hit me with everything,,,,,,,,
+no clue just show me options,,,,,,,,
+browsing mode,,,,,,,,
+throw everything at me,,,,,,,,
+what have you got,,,,,,,,
+sorted cheapest at top,,,,,,price,asc,
+most expensive leads,,,,,,price,desc,
+ratings descending please,,,,,,rating,desc,
+put the cheapest first,,,,,,price,asc,
+highest rated leads,,,,,,rating,desc,
+price from low to high,,,,,,price,asc,
+price from high to low,,,,,,price,desc,
+sort ratings best first,,,,,,rating,desc,
+flip it so cheapest is first,,,,,,price,asc,
+order by review score high to low,,,,,,rating,desc,
+rank by price ascending,,,,,,price,asc,
+rank by price descending,,,,,,price,desc,
+rank by rating descending,,,,,,rating,desc,
+arrange from most affordable,,,,,,price,asc,
+arrange from most expensive,,,,,,price,desc,
+order best reviewed first,,,,,,rating,desc,
+sequence from lowest price,,,,,,price,asc,
+sequence from highest price,,,,,,price,desc,
+put top rated at front,,,,,,rating,desc,
+flip sort to cheapest first,,,,,,price,asc,
+office chairs 100 to 500,100.0,500.0,USD,,,none,price,asc
+i want skin care products,,,,,,none,none,none
+dumbbells below 400,,400.0,USD,,,none,price,asc
+smartphones below 500,,500.0,USD,,,none,price,asc
+laptops with rating 4 to 4.8,,,,4.0,4.8,rating,rating,desc
+serum under 25,,25.0,USD,,,none,price,asc
+gaming consoles 200 to 450,200.0,450.0,USD,,,none,price,asc
+i want to buy jackets,,,,,,none,none,none
+highly rated laptops below 1000,,1000.0,USD,4.5,,combined,price,asc
+affordable highly rated headphones,,200.0,USD,4.0,,combined,price,asc
+top rated jackets under 100,,100.0,USD,4.0,,combined,price,asc
+deodorant below 10,,10.0,USD,,,none,price,asc
+tshirts below 25,,25.0,USD,,,none,price,asc
+laptop below 1000,,1000.0,USD,,,none,price,asc
+jeans below 80,,80.0,USD,,,none,price,asc
+best lipstick by reviews,,,,4.0,,rating,rating,desc
+shampoo below 20,,20.0,USD,,,none,price,asc
+lipstick under 15,,15.0,USD,,,none,price,asc
+highly rated smartwatches,,,,4.0,,rating,rating,desc
+smartphones above 500,500.0,,USD,,,none,price,asc
+personal care items,,,,,,none,none,none
+most popular first,,,,,,none,rating,desc
+show me phones in budget 200 to 500,200.0,500.0,USD,,,none,price,asc
+smartwatches below 300,,300.0,USD,,,none,price,asc
+i want headphones,,,,,,none,none,none
+top cameras under 800,,800.0,USD,4.5,,combined,price,asc
+things rated 4 to 4.5 stars,,,,4.0,4.5,rating,rating,desc
+affordable well reviewed shoes under 80,,80.0,USD,4.0,,combined,price,asc
+need a smartphone within 250,,250.0,USD,,,none,price,asc
+headphones 80 to 200,80.0,200.0,USD,,,none,price,asc
+sort by highest rated,,,,,,none,rating,desc
+hair oil below 15,,15.0,USD,,,none,price,asc
+vacuum cleaner below 400,,400.0,USD,,,none,price,asc
+i want a tv that costs less than 600,,600.0,USD,,,none,price,asc
+best reviewed fitness equipment,,,,4.0,,rating,rating,desc
+affordable laptops under 700,,700.0,USD,,,none,price,asc
+minimum budget is 500,500.0,,USD,,,none,price,asc
+high quality laptops between 600 and 1500 above 4.5 stars,600.0,1500.0,USD,4.5,,combined,price,asc
+kids clothes under 30,,30.0,USD,,,none,price,asc
+jackets below 150,,150.0,USD,,,none,price,asc
+cameras under 500,,500.0,USD,,,none,price,asc
+show the most expensive first,,,,,,none,price,desc
+t-shirts under 20,,20.0,USD,,,none,price,asc
+bluetooth speaker below 80,,80.0,USD,,,none,price,asc
+monitors above 200,200.0,,USD,,,none,price,asc
+smartphones 300 to 600,300.0,600.0,USD,,,none,price,asc
+personal care under 10,,10.0,USD,,,none,price,asc
+show me gaming accessories,,,,,,none,none,none
+ipad under 700,,700.0,USD,,,none,price,asc
+cheap but good tablets under 400,,400.0,USD,3.5,,combined,price,asc
+televisions below 800,,800.0,USD,,,none,price,asc
+jeans in the range 40 to 80,40.0,80.0,USD,,,none,price,asc
+find me a tv in the 400 to 700 range,400.0,700.0,USD,,,none,price,asc
+products starting from 200,200.0,,USD,,,none,price,asc
+top reviewed makeup,,,,4.0,,rating,rating,desc
+looking for shoes,,,,,,none,none,none
+hair care under 20,,20.0,USD,,,none,price,asc
+order by best rating,,,,,,none,rating,desc
+jeans under 60,,60.0,USD,,,none,price,asc
+show me jeans under 70,,70.0,USD,,,none,price,asc
+show lowest price first,,,,,,none,price,asc
+standing desk below 400,,400.0,USD,,,none,price,asc
+best speakers with good reviews,,,,4.0,,rating,rating,desc
+highly rated tablets,,,,4.0,,rating,rating,desc
+best cameras by star rating,,,,4.5,,rating,rating,desc
+keyboard between 50 and 150,50.0,150.0,USD,,,none,price,asc
+iphone under 800,,800.0,USD,,,none,price,asc
+makeup products from 8 to 25,8.0,25.0,USD,,,none,price,asc
+show me everything available,,,,,,none,none,none
+best reviewed jeans,,,,4.0,,rating,rating,desc
+show me headphones not more than 150,,150.0,USD,,,none,price,asc
+skin care rated 4 to 4.5,,,,4.0,4.5,rating,rating,desc
+skin care 10 to 30,10.0,30.0,USD,,,none,price,asc
+looking for shoes not exceeding 90,,90.0,USD,,,none,price,asc
+budget phones up to 300,,300.0,USD,,,none,price,asc
+top rated tv below 700,,700.0,USD,4.5,,combined,price,asc
+premium skin care above 20,20.0,,USD,,,none,price,asc
+good tablets under 500,,500.0,USD,4.0,,combined,price,asc
+gaming keyboard under 120 rated 4 plus,,120.0,USD,4.0,,combined,price,asc
+show me things people love,,,,4.0,,rating,rating,desc
+jackets above 100,100.0,,USD,,,none,price,asc
+speakers under 100 with great ratings,,100.0,USD,4.5,,combined,price,asc
+makeup under 20,,20.0,USD,,,none,price,asc
+dash cam below 100,,100.0,USD,,,none,price,asc
+security camera below 200,,200.0,USD,,,none,price,asc
+top rated jeans under 70,,70.0,USD,4.0,,combined,price,asc
+i only buy things above 300,300.0,,USD,,,none,price,asc
+quality skin care under 25 and well rated,,25.0,USD,4.0,,combined,price,asc
+i need a laptop,,,,,,none,none,none
+monitor under 300,,300.0,USD,,,none,price,asc
+jackets between 50 and 150,50.0,150.0,USD,,,none,price,asc
+router under 200,,200.0,USD,,,none,price,asc
+keyboard under 80,,80.0,USD,,,none,price,asc
+phones rated 4 to 5 stars,,,,4.0,5.0,rating,rating,desc
+show me televisions,,,,,,none,none,none
+cameras please,,,,,,none,none,none
+show me t-shirts,,,,,,none,none,none
+show me average stuff 2.5 to 3.5,,,,2.5,3.5,rating,rating,asc
+best rated face wash,,,,4.0,,rating,rating,desc
+show me smartphones,,,,,,none,none,none
+show me stuff rated above 4.5,,,,4.5,,rating,rating,desc
+top rated office chairs,,,,4.5,,rating,rating,desc
+samsung phone below 700,,700.0,USD,,,none,price,asc
+fitness equipment above 200,200.0,,USD,,,none,price,asc
+dresses below 100,,100.0,USD,,,none,price,asc
+just browsing,,,,,,none,none,none
+boots below 150,,150.0,USD,,,none,price,asc
+jackets under 100,,100.0,USD,,,none,price,asc
+monitors between 200 and 500,200.0,500.0,USD,,,none,price,asc
+shirts under 50,,50.0,USD,,,none,price,asc
+between 3 and 5 star reviews,,,,3.0,5.0,rating,rating,desc
+routers,,,,,,none,none,none
+speakers from 50 to 200,50.0,200.0,USD,,,none,price,asc
+cameras 200 to 800,200.0,800.0,USD,,,none,price,asc
+rating between 4.2 and 4.8,,,,4.2,4.8,rating,rating,desc
+ethnic wear between 50 and 150,50.0,150.0,USD,,,none,price,asc
+cheap smartphones below 200,,200.0,USD,,,none,price,asc
+monitors between 200 and 400 top rated,200.0,400.0,USD,4.5,,combined,price,asc
+phones under 400,,400.0,USD,,,none,price,asc
+luxury dresses above 100,100.0,,USD,,,none,price,desc
+foundation below 25,,25.0,USD,,,none,price,asc
+t-shirts 15 to 35,15.0,35.0,USD,,,none,price,asc
+find me laptops that cost under 700,,700.0,USD,,,none,price,asc
+office chair under 500,,500.0,USD,,,none,price,asc
+highly rated shampoo,,,,4.3,,rating,rating,desc
+highly rated dresses,,,,4.5,,rating,rating,desc
+rating range 3 to 4,,,,3.0,4.0,rating,rating,desc
+sort from cheapest to most expensive,,,,,,none,price,asc
+headphones below 200,,200.0,USD,,,none,price,asc
+i want laptops priced 600 to 1200,600.0,1200.0,USD,,,none,price,asc
+best reviewed laptops,,,,4.5,,rating,rating,desc
+tablets from 300 to 600,300.0,600.0,USD,,,none,price,asc
+top rated t-shirts,,,,4.0,,rating,rating,desc
+show me makeup,,,,,,none,none,none
+best tv above 4 stars,,,,4.0,,rating,rating,desc
+best gaming console under 450,,450.0,USD,4.5,,combined,price,asc
+gaming mouse below 100,,100.0,USD,,,none,price,asc
+sunscreen under 20,,20.0,USD,,,none,price,asc
+top shampoo under 20,,20.0,USD,4.0,,combined,price,asc
+i want a smartwatch,,,,,,none,none,none
+show me all products,,,,,,none,none,none
+best value fitness equipment under 400,,400.0,USD,4.0,,combined,price,asc
+only show me products with 4+ stars,,,,4.0,,rating,rating,desc
+find me tablets,,,,,,none,none,none
+expensive options above 1500,1500.0,,USD,,,none,price,desc
+i need a monitor,,,,,,none,none,none
+ethnic wear,,,,,,none,none,none
+i want jeans,,,,,,none,none,none
+show me t-shirts under 30,,30.0,USD,,,none,price,asc
+anything above 50,50.0,,USD,,,none,price,asc
+office chairs above 300,300.0,,USD,,,none,price,asc
+best smartphones under 400,,400.0,USD,4.0,,combined,price,asc
+i want jackets priced below 150,,150.0,USD,,,none,price,asc
+tablet below 500,,500.0,USD,,,none,price,asc
+ethnic wear under 100,,100.0,USD,,,none,price,asc
+footwear under 100,,100.0,USD,,,none,price,asc
+sort by cheapest first,,,,,,none,price,asc
+smartphones under 300,,300.0,USD,,,none,price,asc
+soap under 5,,5.0,USD,,,none,price,asc
+top rated headphones,,,,4.5,,rating,rating,desc
+keyboards,,,,,,none,none,none
+show me dresses,,,,,,none,none,none
+show me dresses under 60,,60.0,USD,,,none,price,asc
+rated between 4 and 5,,,,4.0,5.0,rating,rating,desc
+top gaming consoles rated above 4,,,,4.0,,rating,rating,desc
+top rated security cameras,,,,4.0,,rating,rating,desc
+good smartwatches below 300,,300.0,USD,4.0,,combined,price,asc
+high end phones above 800,800.0,,USD,,,none,price,desc
+hair care products,,,,,,none,none,none
+skincare products below 15,,15.0,USD,,,none,price,asc
+top 5 star products,,,,4.5,,rating,rating,desc
+shoes between 50 and 120,50.0,120.0,USD,,,none,price,asc
+i want shirts below 40,,40.0,USD,,,none,price,asc
+highly rated monitors,,,,4.5,,rating,rating,desc
+jacket,,,,,,none,none,none
+show me items over 100,100.0,,USD,,,none,price,asc
+dresses from 40 to 100,40.0,100.0,USD,,,none,price,asc
+home appliances under 300,,300.0,USD,,,none,price,asc
+gaming consoles above 300,300.0,,USD,,,none,price,asc
+show me speakers,,,,,,none,none,none
+best reviewed home appliances,,,,4.5,,rating,rating,desc
+top rated shoes,,,,4.0,,rating,rating,desc
+browse all items,,,,,,none,none,none
+sort products by price high to low,,,,,,none,price,desc
+at least 150 dollars,150.0,,USD,,,none,price,asc
+laptops between 500 and 1000,500.0,1000.0,USD,,,none,price,asc
+headphones between 4 and 5 stars,,,,4.0,5.0,rating,rating,desc
+office chairs,,,,,,none,none,none
+fitness equipment 100 to 400,100.0,400.0,USD,,,none,price,asc
+find 4 to 5 star rated items,,,,4.0,5.0,rating,rating,desc
+laptop under 600,,600.0,USD,,,none,price,asc
+smartwatches between 150 and 400,150.0,400.0,USD,,,none,price,asc
+kurta sets,,,,,,none,none,none
+skin care under 20,,20.0,USD,,,none,price,asc
+show me everything sorted by price,,,,,,none,price,asc
+moisturizer under 20,,20.0,USD,,,none,price,asc
+items rated between 3 and 4 stars,,,,3.0,4.0,rating,rating,desc
+macbook under 1500,,1500.0,USD,,,none,price,asc
+laptops under 800,,800.0,USD,,,none,price,asc
+office chairs above 200 and well reviewed,200.0,,USD,4.5,,combined,price,asc
+show me gaming consoles,,,,,,none,none,none
+shoes above 50,50.0,,USD,,,none,price,asc
+best gaming mouse,,,,4.0,,rating,rating,desc
+home appliances,,,,,,none,none,none
+show me everything,,,,,,none,none,none
+display from highest to lowest price,,,,,,none,price,desc
+good face wash under 15 highly rated,,15.0,USD,4.0,,combined,price,asc
+premium laptops above 1000,1000.0,,USD,,,none,price,desc
+tablets under 400,,400.0,USD,,,none,price,asc
+headphones above 100,100.0,,USD,,,none,price,asc
+dont show me anything under 80,80.0,,USD,,,none,price,asc
+fitness equipment under 400,,400.0,USD,,,none,price,asc
+macbook pro under 3000,,3000.0,USD,,,none,price,asc
+premium laptops under 2500,,2500.0,USD,,,none,price,asc
+laptops between 1000 and 2000,1000.0,2000.0,USD,,,none,price,asc
+high end laptops above 1500,1500.0,,USD,,,none,price,desc
+best laptops above 2000,2000.0,,USD,4.5,,combined,price,desc
+professional cameras under 2000,,2000.0,USD,,,none,price,asc
+cameras between 1000 and 2000,1000.0,2000.0,USD,,,none,price,asc
+top rated cameras under 1800,,1800.0,USD,4.5,,combined,price,asc
+oled tv under 1500,,1500.0,USD,,,none,price,asc
+premium tv between 800 and 1500,800.0,1500.0,USD,,,none,price,asc
+peloton bike under 2000,,2000.0,USD,,,none,price,asc
+fitness equipment under 2000,,2000.0,USD,,,none,price,asc
+herman miller chair under 1200,,1200.0,USD,,,none,price,asc

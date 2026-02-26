@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { sendMessageToAPI } from '../api/chat'
 import { getAccessToken } from '../utils/storage'
 
-export default function useChat() {
+export default function useChat(user, onPlaceOrder) {
   const [messages, setMessages] = useState([])
 
   const sendMessage = async (text) => {
@@ -27,6 +27,27 @@ export default function useChat() {
           ? [{ role: 'products', products: data.products }]
           : []),
       ])
+
+      // ❌ Auto‑order disabled – user must click "Buy Now"
+      // if (data.products && data.products.length > 0) {
+      //   const buyMatch = text.match(/\b(buy|purchase|order)\s+(.+)/i);
+      //   if (buyMatch) {
+      //     const productQuery = buyMatch[2].trim().toLowerCase();
+      //     const matchedProduct = data.products.find(p =>
+      //       p.name.toLowerCase().includes(productQuery) ||
+      //       productQuery.includes(p.name.toLowerCase())
+      //     );
+      //     if (matchedProduct && user) {
+      //       onPlaceOrder(matchedProduct.name, {
+      //         name: user.name || '',
+      //         email: user.email,
+      //         password: '',
+      //         phone: user.phone || '',
+      //         address: user.address || ''
+      //       });
+      //     }
+      //   }
+      // }
     } catch (error) {
       console.error('Error sending message:', error)
       setMessages(prev => [

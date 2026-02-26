@@ -1,20 +1,17 @@
+"""
+text_normalizer.py  — v2
+Lightweight, dependency-minimal normalizer.
+Uses spaCy for lemmatization only; inflect for singular safety.
+"""
+
 import re
 import inflect
 import spacy
-from spacy.lang.en.stop_words import STOP_WORDS
+
 
 class TextNormalizer:
-    """
-    Normalizes text for search:
-    - lowercases
-    - removes punctuation
-    - removes stopwords (optional, for semantic search)
-    - lemmatizes using spaCy
-    - converts plural to singular (extra safety)
-    """
     def __init__(self):
         try:
-            # Load small English model – disable parser/ner for speed
             self.nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
         except OSError:
             raise RuntimeError(
@@ -24,10 +21,6 @@ class TextNormalizer:
         self.inflect_engine = inflect.engine()
 
     def normalize(self, text: str, for_semantic: bool = True) -> str:
-        """
-        for_semantic=True: remove stopwords (for search queries)
-        for_semantic=False: keep stopwords (for constraint extraction)
-        """
         if not isinstance(text, str) or not text.strip():
             return ""
         doc = self.nlp(text.lower())
@@ -37,16 +30,14 @@ class TextNormalizer:
                 continue
             if for_semantic and token.is_stop:
                 continue
-            # Lemmatize (spaCy lemmatizer handles plural→singular well)
             lemma = token.lemma_
-            # Additional safety: use inflect to singularize if needed
             singular = self.inflect_engine.singular_noun(lemma)
             tokens.append(singular if singular else lemma)
         return " ".join(tokens)
 
     def singularize(self, word: str) -> str:
-        """Convert a single word to singular form."""
-        if not word:
-            return word
-        singular = self.inflect_engine.singular_noun(word.lower())
-        return singular if singular else word.lower()
+        if not word or not isinstance(word, str):
+            return ""
+        word_lower = word.lower().strip()
+        singular = self.inflect_engine.singular_noun(word_lower)
+        return singular if singular else word_lower

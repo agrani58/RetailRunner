@@ -4,7 +4,7 @@ import logging
 import traceback
 import asyncio
 from contextlib import asynccontextmanager
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 from fastapi import FastAPI, HTTPException, Depends, status
@@ -14,7 +14,7 @@ from pydantic import BaseModel
 import database
 import auth
 from schemas import UserCreate, LoginRequest, TokenResponse, SimpleResponse, UserResponse, RefreshTokenRequest
-from config import JWT_CONFIG, DB_CONFIG  # also imports chatbot config via from config import config
+from config import JWT_CONFIG, DB_CONFIG, config as app_config
 
 # Import chatbot modules
 from catalog_loader import load_products, refresh_catalog_periodically
@@ -23,7 +23,19 @@ from ner_model import MLNERModel
 from text_normalizer import TextNormalizer
 from query_processor import QueryProcessor
 from search_engine import SearchEngine
+from order_bot import place_order_bot
+from config import config, STORE_FRONTEND_MAP, STORE_NAMES
+from recommendation_model import RecommendationModel
 
+import logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("transformers").setLevel(logging.ERROR)
 logger = logging.getLogger("main")
 
 # ---------- Chatbot app state ----------
@@ -34,26 +46,8 @@ app_state = {
     "ner_model": None,
     "query_processor": None,
     "normalizer": TextNormalizer(),
+    "recommendation_model": None,
 }
-
-# Product keywords (unchanged)
-# Product keywords (unchanged)
-PRODUCT_KEYWORDS = [
-    "laptop", "laptops", "phone", "phones", "smartphone", "smartphones",
-    "headphone", "headphones", "earbud", "earbuds", "headset",
-    "tablet", "tablets", "ipad", "camera", "cameras",
-    "watch", "watches", "smartwatch", "smartwatches",
-    "shoe", "shoes", "sneaker", "sneakers", "boot", "boots",
-    "tv", "television", "monitor", "mouse", "keyboard",
-    "gaming", "console", "playstation", "xbox", "nintendo",
-    "price", "cost", "under", "over", "above", "below",
-    "cheapest", "expensive", "budget", "affordable",
-    "rating", "rated", "reviews", "stars", "best", "top",
-    "jeans", "jacket", "shirt", "dress", "kurta", "saree",
-    "jeenz",  # misspelling
-    "sweater", "sweaters",  # added
-    "all products", "everything",  # added to force product search
-]
 
 # Chitchat responses
 CHITCHAT_RESPONSES = [
@@ -61,7 +55,20 @@ CHITCHAT_RESPONSES = [
     "Hello! I'm here to assist with your shopping needs. What are you looking for?",
     "Hey! Ready to explore some amazing products? Just tell me what you're interested in.",
 ]
-# ---------- Lifespan: init both DB and chatbot models ----------
+
+# Known product terms to override low‑confidence chitchat
+PRODUCT_TERMS_FOR_OVERRIDE = {
+    "laptop", "laptops", "phone", "phones", "smartphone", "smartphones",
+    "tv", "television", "televisions", "shoes", "footwear", "headphones",
+    "watch", "smartwatch", "smartwatches", "tablet", "tablets", "camera",
+    "cameras", "monitor", "monitors", "jeans", "dress", "dresses", "jacket",
+    "jackets", "tshirt", "t-shirt", "t-shirts", "tees", "shirt", "shirts",
+    "kurta", "ethnic", "gown", "gowns", "makeup", "foundation", "lipstick",
+    "cream", "moisturizer", "sunscreen", "facewash", "face wash", "body lotion",
+    "lotion", "serum", "mask", "cleanser", "toner"
+}
+
+# ---------- Lifespan: init DB and all models ----------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 1. Initialize database
@@ -72,38 +79,54 @@ async def lifespan(app: FastAPI):
         logger.error(f"❌ Database initialization failed: {e}")
         raise
 
-    # 2. Load chatbot models and products
-    logger.info("🔄 Loading products...")
-    products_data = await load_products(force_refresh=False)
+    # 2. Load products from APIs
+    logger.info("🔄 Loading products from APIs...")
+    products_data = await load_products()
     app_state["products_data"] = products_data
     logger.info(f"✅ Loaded {len(products_data)} products")
 
+    # 3. Load intent model
     logger.info("🧠 Loading intent model...")
     intent_model = get_intent_model()
+    if intent_model is None:
+        raise RuntimeError("❌ Intent model failed to load – aborting")
     app_state["intent_model"] = intent_model
 
+    # 4. Load NER model
     logger.info("🔍 Loading NER model...")
     try:
-        ner_model = MLNERModel(os.getenv("NER_MODEL_PATH", "models/spacy_product_ner"))
+        ner_model = MLNERModel(app_config.NER_MODEL_PATH)
         app_state["ner_model"] = ner_model
         logger.info("✅ NER model ready")
     except Exception as e:
         logger.error(f"❌ NER model failed: {e}")
         raise
 
+    # 5. Load recommendation model
+    logger.info("💰 Loading recommendation model (price/rating)...")
+    try:
+        rec_model = RecommendationModel(app_config.PRICE_RATING_MODEL_PATH, device=app_config.DEVICE)
+        app_state["recommendation_model"] = rec_model
+        logger.info("✅ Recommendation model ready")
+    except Exception as e:
+        logger.error(f"❌ Recommendation model failed: {e}")
+        raise
+
+    # 6. Initialise search engine
     logger.info("🔧 Initialising search engine...")
     search_engine = SearchEngine(products_data)
     app_state["search_engine"] = search_engine
 
-    query_processor = QueryProcessor(ner_model, products_data)
+    # 7. Initialise query processor
+    query_processor = QueryProcessor(ner_model, products_data, rec_model)
     app_state["query_processor"] = query_processor
 
-    # 3. Start background catalog refresh if APIs configured
-    if os.getenv("ECOMMERCE_API_URLS"):
+    # 8. Start background catalog refresh if APIs configured
+    if app_config.ECOMMERCE_API_URLS:
         refresh_task = asyncio.create_task(
-            refresh_catalog_periodically(app_state, int(os.getenv("REFRESH_INTERVAL", 2500)))
+            refresh_catalog_periodically(app_state, app_config.REFRESH_INTERVAL)
         )
-        logger.info(f"⏰ Background refresh every {os.getenv('REFRESH_INTERVAL')}s")
+        logger.info(f"⏰ Background refresh every {app_config.REFRESH_INTERVAL}s")
         yield
         refresh_task.cancel()
     else:
@@ -117,13 +140,13 @@ app = FastAPI(title="Conversational Commerce + Auth API", lifespan=lifespan)
 # CORS – allow frontend origins (adjust for production)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # Vite and CRA default ports
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ---------- Auth routes ----------
+# ---------- Auth routes (unchanged) ----------
 @app.post("/signup", response_model=SimpleResponse)
 def signup(user_data: UserCreate):
     try:
@@ -158,7 +181,7 @@ def login(login_data: LoginRequest):
 
 @app.post("/refresh", response_model=TokenResponse)
 def refresh_token(refresh_data: RefreshTokenRequest):
-    user_id = auth.verify_refresh_token(refresh_data.refresh_token)  # you need to implement this in auth.py
+    user_id = auth.verify_refresh_token(refresh_data.refresh_token)
     user = database.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -212,9 +235,13 @@ def auth_health():
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
 
-# ---------- Chatbot routes (unchanged) ----------
+# ---------- Chatbot routes ----------
 class ChatRequest(BaseModel):
     query: str
+
+class PlaceOrderRequest(BaseModel):
+    product_name: str
+    user_info: Dict[str, str]   # name, email, password, phone, address
 
 class ProductResponse(BaseModel):
     id: str
@@ -235,23 +262,37 @@ class ChatResponse(BaseModel):
     products: List[ProductResponse]
     query: str
 
+
 def get_intent(query: str) -> dict:
-    q_lower = query.lower()
-    if any(keyword in q_lower for keyword in PRODUCT_KEYWORDS):
-        logger.info(f"🎯 Product keyword detected, forcing product_search")
-        return {"label": "product_search", "confidence": 0.95}
+    """
+    Determine intent using ML model, with rule‑based override for low‑confidence product terms.
+    """
     intent_model = app_state.get("intent_model")
-    if intent_model:
-        try:
-            result = intent_model.predict(query)
-            return {"label": result["intent"], "confidence": result["confidence"]}
-        except Exception as e:
-            logger.error(f"Intent model error: {e}")
-    if any(greet in q_lower for greet in ["hi", "hello", "hey", "greetings"]):
-        return {"label": "chitchat", "confidence": 0.9}
-    return {"label": "product_search", "confidence": 0.8}
+    if not intent_model:
+        raise HTTPException(status_code=503, detail="Intent model not loaded")
+
+    try:
+        result = intent_model.predict(query)
+        logger.info(f"🤖 Intent model used – result: {result}")
+        intent = result["intent"]
+        confidence = result["confidence"]
+
+        # Rule‑based override: if confidence < 0.8 and query contains a known product term, force product_search
+        if confidence < 0.8 and intent == "chitchat":
+            query_lower = query.lower()
+            if any(term in query_lower for term in PRODUCT_TERMS_FOR_OVERRIDE):
+                logger.info(f"⚡ Overriding chitchat (conf={confidence:.2f}) to product_search because query contains product term")
+                intent = "product_search"
+                confidence = 1.0  # set high confidence for product search
+
+        return {"label": intent, "confidence": confidence}
+    except Exception as e:
+        logger.error(f"Intent model error: {e}")
+        raise HTTPException(status_code=503, detail="Intent model unavailable")
+
 
 def format_products(products: list) -> List[ProductResponse]:
+    """Deduplicate and format products, set store name from mapping."""
     seen = set()
     unique_products = []
     for p in products:
@@ -259,9 +300,23 @@ def format_products(products: list) -> List[ProductResponse]:
         if key not in seen:
             seen.add(key)
             unique_products.append(p)
+
     formatted = []
     for p in unique_products[:8]:
         price = p.get("price", 0)
+
+        # Determine store name
+        store = p.get("store")  # if already present (e.g., from static)
+        if not store:
+            source = p.get("source", "")
+            # Look up friendly name using full source URL
+            store = STORE_NAMES.get(source)
+            if not store and source:
+                # Fallback: extract host
+                if "://" in source:
+                    source = source.split("://")[1].split("/")[0]
+                store = source or "Unknown Store"
+
         formatted.append(ProductResponse(
             id=str(p.get("id", "")),
             name=p.get("name", "Unknown"),
@@ -270,18 +325,22 @@ def format_products(products: list) -> List[ProductResponse]:
             rating=float(p.get("rating")) if p.get("rating") else None,
             description=p.get("description", ""),
             image_url=p.get("image_url") or p.get("image"),
-            store=p.get("store", "Unknown Store"),
+            store=store,
             tags=p.get("tags", []),
             relevance_score=p.get("relevance_score"),
         ))
     return formatted
 
-def generate_response(query: str, products: list) -> str:
+
+def generate_response(query: str, products: list, search_category: str = None) -> str:
     if not products:
+        if search_category:
+            return f"Sorry, we currently don't have any {search_category} in our catalog. Try a different category or check back later."
         return f"Sorry, I couldn't find anything for '{query}'. Try different words?"
     if len(products) == 1:
         return f"I found the perfect match: {products[0].name}"
     return f"I found {len(products)} great options for '{query}'. Here are the top picks:"
+
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
@@ -290,8 +349,10 @@ async def chat(request: ChatRequest):
         if not query:
             raise HTTPException(status_code=400, detail="Empty query")
         logger.info(f"💬 Query: '{query}'")
+
         intent = get_intent(query)
         logger.info(f"🎯 Intent: {intent['label']} ({intent['confidence']:.2f})")
+
         if intent["label"] == "chitchat":
             return ChatResponse(
                 response=random.choice(CHITCHAT_RESPONSES),
@@ -300,31 +361,47 @@ async def chat(request: ChatRequest):
                 products=[],
                 query=query,
             )
+
         qp = app_state.get("query_processor")
         if not qp:
             raise HTTPException(status_code=503, detail="Query processor not ready")
+
         analysis = qp.process(query)
         logger.info(f"🔍 Query analysis: {analysis}")
+
+        skip_entity_filter = analysis.get('skip_entity_filter', False)
+
         search_query = query
         brand = analysis.get('brand')
         search_category = analysis.get('search_category')
         subcategory_keywords = analysis.get('subcategory_keywords', [])
         constraints = analysis.get('constraints', {})
-        logger.info(f"🔍 Search params: brand={brand}, category={search_category}, subcategory={subcategory_keywords}, constraints={constraints}")
+        product_entities = analysis.get('product_entities', [])
+
+        logger.info(f"🔍 Search params: brand={brand}, category={search_category}, "
+                    f"subcategory={subcategory_keywords}, constraints={constraints}, "
+                    f"entities={product_entities}, skip_entity_filter={skip_entity_filter}")
+
         search_engine = app_state.get("search_engine")
         if not search_engine:
             raise HTTPException(status_code=503, detail="Search engine not ready")
+
         results = search_engine.search(
             query=search_query,
+            product_entities=product_entities,
             brand=brand,
             constraints=constraints,
             search_category=search_category,
             subcategory_keywords=subcategory_keywords,
+            exclude_terms=analysis.get('exclude_terms', []),
+            skip_entity_filter=skip_entity_filter,
             top_k=10,
         )
         logger.info(f"🔎 Search engine returned {len(results)} raw results")
+
         formatted = format_products(results)
-        response_text = generate_response(query, formatted)
+        response_text = generate_response(query, formatted, search_category)
+
         logger.info(f"✅ Returning {len(formatted)} products")
         return ChatResponse(
             response=response_text,
@@ -337,6 +414,74 @@ async def chat(request: ChatRequest):
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.post("/place-order")
+async def place_order(request: PlaceOrderRequest):
+    """
+    Starts a Playwright bot to place an order for the given product using user profile data.
+    """
+    try:
+        product_name = request.product_name
+        user_info = request.user_info
+
+        logger.info(f"📦 Place-order request: product='{product_name}', user_info={user_info}")
+
+        products = app_state.get("products_data", [])
+        found_product = None
+        for p in products:
+            p_name = p.get("name", "")
+            if p_name.lower() == product_name.lower():
+                found_product = p
+                logger.info(f"✅ Exact match: '{p_name}'")
+                break
+
+        if not found_product:
+            for p in products:
+                p_name = p.get("name", "")
+                if product_name.lower() in p_name.lower() or p_name.lower() in product_name.lower():
+                    found_product = p
+                    logger.info(f"✅ Partial match: '{p_name}'")
+                    break
+
+        if not found_product:
+            logger.error(f"Product '{product_name}' not found in catalog")
+            raise HTTPException(status_code=404, detail=f"Product '{product_name}' not found in catalog")
+
+        source_api = found_product.get("source")
+        logger.info(f"🔍 Product source: '{source_api}'")
+
+        if not source_api:
+            raise HTTPException(status_code=400, detail="Product has no source information")
+
+        # Handle products from static file
+        if source_api == "static":
+            logger.warning("Product from static file cannot be ordered via bot.")
+            return {
+                "message": "This product is from a static catalog and cannot be ordered automatically. Please visit the store website.",
+                "product_name": product_name
+            }
+
+        frontend_url = STORE_FRONTEND_MAP.get(source_api)
+        if not frontend_url:
+            logger.error(f"No frontend mapping for source: {source_api}")
+            raise HTTPException(status_code=400, detail=f"No frontend mapping for source: {source_api}")
+
+        logger.info(f"✅ Found frontend URL: {frontend_url}")
+
+        asyncio.create_task(place_order_bot(frontend_url, user_info, product_name))
+        logger.info(f"✅ Order bot started for '{product_name}' on {frontend_url}")
+
+        return {
+            "message": f"🤖 Order bot started for '{product_name}'. A browser window should open shortly.",
+            "frontend_url": frontend_url
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Unexpected error in /place-order: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/health")
 def health():
     return {
@@ -344,17 +489,19 @@ def health():
         "products": len(app_state.get("products_data", [])),
         "intent_model": app_state.get("intent_model") is not None,
         "ner_model": app_state.get("ner_model") is not None,
+        "recommendation_model": app_state.get("recommendation_model") is not None,
         "search_engine": app_state.get("search_engine") is not None,
     }
+
 
 @app.get("/")
 def root():
     return {
         "message": "Conversational Commerce + Auth API",
-        "catalog_source": "APIs" if os.getenv("ECOMMERCE_API_URLS") else "static file",
+        "catalog_source": "APIs" if app_config.ECOMMERCE_API_URLS else "static file",
     }
 
-# ---------- Run ----------
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host=os.getenv("API_HOST", "0.0.0.0"), port=int(os.getenv("API_PORT", 8000)))
+    uvicorn.run(app, host=app_config.API_HOST, port=app_config.API_PORT)

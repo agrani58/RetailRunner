@@ -6,10 +6,10 @@ import Signup from './components/Signup'
 import AuthenticatedLayout from './components/AuthenticatedLayout'
 import Home from './components/Home'
 import ProfilePage from './components/ProfilePage'
-import Toast from './components/Toast'
+import MandatoryProfileModal from './components/MandatoryProfileModal' // <-- new
 
 function App() {
-  const { isAuthenticated, loading, toast, hideToast } = useAuth()
+  const { isAuthenticated, loading, showProfileModal } = useAuth()
 
   if (loading) return null
 
@@ -19,13 +19,9 @@ function App() {
 
   return (
     <>
-      {toast.visible && (
-        <Toast
-          message={toast.message}
-          onConfirm={hideToast}
-          onDismiss={hideToast}
-        />
-      )}
+      {/* Mandatory profile modal – shown when user needs to complete profile */}
+      {showProfileModal && <MandatoryProfileModal />}
+
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

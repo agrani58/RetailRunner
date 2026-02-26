@@ -1,14 +1,14 @@
+// frontend/src/components/ProductCard.jsx
 import React, { useState } from "react";
 import "../styles/ProductCard.css";
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onBuyNow }) => {  // ← add onBuyNow prop
   const [imageError, setImageError] = useState(false);
   
   if (!product) return null;
 
   // Get the best possible image URL from product data
   const getImageUrl = () => {
-    // Try multiple possible image fields in order
     const possibleUrls = [
       product.image_url,
       product.image,
@@ -17,11 +17,15 @@ const ProductCard = ({ product }) => {
       product.photo
     ].filter(url => url && typeof url === "string" && url.trim() !== "");
     
-    // Return first valid URL
     return possibleUrls.length > 0 ? possibleUrls[0] : null;
   };
 
   const imageUrl = getImageUrl();
+
+  const handleBuyClick = (e) => {
+    e.stopPropagation(); // prevent card click if you have one
+    onBuyNow(product);
+  };
 
   return (
     <div className="product-card-simple">
@@ -34,17 +38,9 @@ const ProductCard = ({ product }) => {
               alt={product.name || "Product image"}
               className={`product-image-simple ${imageError ? 'image-error' : ''}`}
               loading="lazy"
-              onError={() => {
-                console.error(`Failed to load image: ${imageUrl}`);
-                setImageError(true);
-              }}
-              onLoad={() => {
-                console.log(`Successfully loaded image: ${imageUrl}`);
-                setImageError(false);
-              }}
+              onError={() => setImageError(true)}
+              onLoad={() => setImageError(false)}
             />
-            
-            {/* STORE BADGE ONLY - NO MATCH PERCENTAGE */}
             <div className="store-badge-simple">
               {product.store || "Store"}
             </div>
@@ -85,6 +81,14 @@ const ProductCard = ({ product }) => {
             ⭐ {product.rating || "0.0"} ({product.reviews || 0})
           </div>
         </div>
+
+        {/* NEW: BUY NOW BUTTON */}
+        <button 
+          className="buy-now-btn"
+          onClick={handleBuyClick}
+        >
+          Buy Now
+        </button>
       </div>
     </div>
   );
