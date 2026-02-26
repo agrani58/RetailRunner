@@ -91,3 +91,26 @@ async def get_current_user(authorization: str = Header(None)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authorization header"
         )
+
+async def get_current_user_optional(authorization: str = Header(None)):
+    """Extract user from token if present, return None otherwise."""
+    if not authorization:
+        return None
+    try:
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            return None
+        user_id = verify_access_token(token)
+        user = database.get_user_by_id(user_id)
+        return user
+    except:
+        return None
+
+async def get_user_from_token(token: str):
+    """Verify token and return user dict or None."""
+    try:
+        user_id = verify_access_token(token)
+        user = database.get_user_by_id(user_id)
+        return user
+    except:
+        return None

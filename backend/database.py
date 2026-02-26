@@ -36,7 +36,7 @@ def init_db():
             )
         """)
         
-        # Refresh tokens table with UNIQUE constraint on user_id
+        # Refresh tokens table
         cur.execute("""
             CREATE TABLE IF NOT EXISTS refresh_tokens (
                 token_id SERIAL PRIMARY KEY,
@@ -48,9 +48,25 @@ def init_db():
             )
         """)
         
-        # Create indexes
+        # Order confirmations table (for offline delivery)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS order_confirmations (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+                product_name VARCHAR(255) NOT NULL,
+                delivery_date VARCHAR(100),
+                order_id VARCHAR(100),
+                message TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                delivered BOOLEAN DEFAULT FALSE
+            )
+        """)
+        
+        # Indexes
         cur.execute("CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires ON refresh_tokens(expires_at)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_order_confirmations_user ON order_confirmations(user_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_order_confirmations_delivered ON order_confirmations(delivered)")
         
         conn.commit()
         print("Database tables initialized successfully")
@@ -59,6 +75,66 @@ def init_db():
         print(f"Database initialization error: {e}")
         conn.rollback()
         raise
+    finally:
+        cur.close()
+        conn.close()
+
+def store_order_confirmation(user_id: int, product_name: str, delivery_date: str, order_id: str = None) -> bool:
+    """Store an undelivered order confirmation message."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    message = f"✅ Order confirmed for '{product_name}'. Expected delivery: {delivery_date}." + (f" Order ID: {order_id}" if order_id else "")
+    try:
+        cur.execute("""
+            INSERT INTO order_confirmations (user_id, product_name, delivery_date, order_id, message)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, product_name, delivery_date, order_id, message))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Error storing order confirmation: {e}")
+        return False
+    finally:
+        cur.close()
+        conn.close()
+
+def get_undelivered_confirmations(user_id: int) -> list:
+    """Retrieve all undelivered confirmations for a user."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT id, product_name, delivery_date, order_id, message
+            FROM order_confirmations
+            WHERE user_id = %s AND delivered = FALSE
+            ORDER BY created_at ASC
+        """, (user_id,))
+        rows = cur.fetchall()
+        return [dict(row) for row in rows] if rows else []
+    except Exception as e:
+        print(f"Error fetching undelivered confirmations: {e}")
+        return []
+    finally:
+        cur.close()
+        conn.close()
+
+def mark_confirmations_delivered(user_id: int, confirmation_ids: list):
+    """Mark specific confirmations as delivered."""
+    if not confirmation_ids:
+        return
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE order_confirmations
+            SET delivered = TRUE
+            WHERE user_id = %s AND id = ANY(%s)
+        """, (user_id, confirmation_ids))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        print(f"Error marking confirmations delivered: {e}")
     finally:
         cur.close()
         conn.close()
@@ -82,15 +158,12 @@ def create_user(email: str, password: str):
     cur = conn.cursor()
     
     try:
-        # Check if user already exists
         cur.execute("SELECT user_id FROM users WHERE email = %s", (email,))
         if cur.fetchone():
             raise ValueError("Email already exists")
         
-        # Hash password
         password_hash = hash_password(password)
         
-        # Create user
         cur.execute("""
             INSERT INTO users (email, password_hash)
             VALUES (%s, %s)
@@ -173,7 +246,6 @@ def verify_user_credentials(email: str, password: str):
         user_dict = dict(user)
         
         if verify_password(password, user_dict['password_hash']):
-            # Remove password hash from response
             del user_dict['password_hash']
             return user_dict
         
