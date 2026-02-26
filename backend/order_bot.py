@@ -3,56 +3,95 @@ import asyncio
 import time
 import os
 import logging
-from playwright.async_api import async_playwright
+import re
+import httpx
+from datetime import datetime, timedelta
+from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError
 
 logger = logging.getLogger(__name__)
 
-async def place_order_bot(frontend_url: str, user_info: dict, product_name: str):
+async def place_order_bot(
+    frontend_url: str,
+    user_info: dict,
+    product_name: str,
+    user_id: int = None,
+    notify_callback=None  # async function(message) to send WebSocket updates
+):
     """
     Launches a visible Playwright browser and automates order placement.
-    - frontend_url: e.g. "http://localhost:3000" or "http://44.219.130.221"
+    - frontend_url: e.g. "http://localhost:3000"
     - user_info: dict with keys: name, email, password, phone, address
     - product_name: exact product name to order
+    - user_id: for notifications (optional)
+    - notify_callback: async function(message) to send WebSocket updates
     """
     screenshots_dir = "order_screenshots"
     if not os.path.exists(screenshots_dir):
         os.makedirs(screenshots_dir)
-    
+
+    async def notify(msg):
+        if notify_callback:
+            try:
+                await notify_callback(msg)
+            except Exception as e:
+                print(f"⚠️ Failed to send notification: {e}")
+
     def log_step(step_num, description):
         print(f"\n{'='*60}")
         print(f"STEP {step_num}: {description}")
         print('='*60)
-    
+
     async def take_screenshot(page, step_name):
         timestamp = time.strftime("%H%M%S")
         filename = f"{screenshots_dir}/{step_name}_{timestamp}.png"
-        await page.screenshot(path=filename, full_page=True)
-        print(f"📸 Screenshot: {filename}")
+        try:
+            await page.screenshot(path=filename, full_page=True, timeout=10000)
+            print(f" Screenshot: {filename}")
+        except Exception as e:
+            print(f"⚠️ Screenshot failed: {e}")
         return filename
 
-    async def wait_and_fill(page, selector, value, description, timeout=5000):
-        try:
-            await page.wait_for_selector(selector, state="visible", timeout=timeout)
-            await page.fill(selector, value)
-            print(f"✅ Filled {description}: '{value}'")
-            return True
-        except Exception as e:
-            print(f"❌ Failed to fill {description}: {e}")
-            return False
+    # Helper to fill a field by label text or placeholder
+    async def fill_field(page, label_patterns, placeholder_patterns, value, field_desc):
+        # Try by label (visible text)
+        for pattern in label_patterns:
+            try:
+                locator = page.get_by_label(pattern, exact=False)
+                if await locator.count() > 0:
+                    await locator.fill(value)
+                    print(f" Filled {field_desc} via label '{pattern}'")
+                    return True
+            except:
+                pass
+        # Then by placeholder
+        for pattern in placeholder_patterns:
+            try:
+                locator = page.get_by_placeholder(pattern)
+                if await locator.count() > 0:
+                    await locator.fill(value)
+                    print(f" Filled {field_desc} via placeholder '{pattern}'")
+                    return True
+            except:
+                pass
+        # Fallback: try common input selectors
+        for selector in [f'input[name="{pattern}"]' for pattern in label_patterns] + \
+                        [f'input[type="{pattern}"]' for pattern in label_patterns] + \
+                        ['input[type="text"]', 'input[type="email"]', 'input[type="tel"]']:
+            try:
+                locator = page.locator(selector).first
+                if await locator.count() > 0:
+                    await locator.fill(value)
+                    print(f" Filled {field_desc} via selector '{selector}'")
+                    return True
+            except:
+                pass
+        print(f"⚠️ Could not fill {field_desc}")
+        return False
 
-    async def wait_and_click(page, selector, description, timeout=5000):
-        try:
-            await page.wait_for_selector(selector, state="visible", timeout=timeout)
-            await page.click(selector)
-            print(f"✅ Clicked: {description}")
-            return True
-        except Exception as e:
-            print(f"❌ Failed to click {description}: {e}")
-            return False
-
-    print(f"\n🚀 Starting order bot for '{product_name}' on {frontend_url}")
-    print(f"👤 User: {user_info['email']}")
-    print("📱 Browser will open in a few seconds...\n")
+    print(f"\n Starting order bot for '{product_name}' on {frontend_url}")
+    print(f" User: {user_info['email']}")
+    print(" Browser will open in a few seconds...\n")
+    await notify(" Order bot started – browser opening...")
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(
@@ -71,10 +110,12 @@ async def place_order_bot(frontend_url: str, user_info: dict, product_name: str)
             await page.wait_for_timeout(2000)
             await take_screenshot(page, "01_login_page")
 
-            await page.fill('input[type="email"]', user_info["email"])
-            await page.fill('input[type="password"]', user_info["password"])
-            await page.click('button[type="submit"], button:has-text("Login")')
-            await page.wait_for_timeout(3000)
+            await fill_field(page, ["email", "e-mail"], ["Email", "E-mail"], user_info["email"], "email")
+            await fill_field(page, ["password"], ["Password"], user_info["password"], "password")
+
+            async with page.expect_navigation(wait_until="domcontentloaded", timeout=15000):
+                await page.click('button[type="submit"], button:has-text("Login")')
+            await page.wait_for_timeout(2000)
             await take_screenshot(page, "02_after_login_click")
 
             # Check for login error
@@ -83,7 +124,7 @@ async def place_order_bot(frontend_url: str, user_info: dict, product_name: str)
             )
             if error:
                 error_text = await error.text_content()
-                print(f"⚠️ Login failed: {error_text}")
+                print(f" Login failed: {error_text}")
 
                 # ----- STEP 2: REGISTER NEW USER -----
                 log_step(2, "Registering New User")
@@ -91,26 +132,25 @@ async def place_order_bot(frontend_url: str, user_info: dict, product_name: str)
                 await page.wait_for_timeout(2000)
                 await take_screenshot(page, "03_register_page")
 
-                # Fill registration form (assumes order: name, email, password, confirm password)
-                inputs = await page.query_selector_all('input')
-                values = [user_info["name"], user_info["email"], user_info["password"], user_info["password"]]
-                for i in range(min(len(inputs), 4)):
-                    await inputs[i].fill(values[i])
-                    print(f"✅ Filled field {i+1}")
+                await fill_field(page, ["name", "full name"], ["Name", "Full Name"], user_info["name"], "name")
+                await fill_field(page, ["email", "e-mail"], ["Email", "E-mail"], user_info["email"], "email")
+                await fill_field(page, ["password"], ["Password"], user_info["password"], "password")
+                await fill_field(page, ["confirm password", "password confirmation"], ["Confirm Password"], user_info["password"], "confirm password")
 
-                await page.click('button[type="submit"], button:has-text("Register")')
-                print("✅ Registration form submitted")
+                async with page.expect_navigation(wait_until="domcontentloaded", timeout=15000):
+                    await page.click('button[type="submit"], button:has-text("Register")')
+                print(" Registration form submitted")
                 await page.wait_for_timeout(3000)
                 await take_screenshot(page, "04_after_registration")
 
-                # If still on login/register page, attempt login again
                 if "login" in page.url.lower() or "register" in page.url.lower():
-                    print("🔑 Registration successful, logging in...")
+                    print(" Registration successful, logging in...")
                     await page.goto(f"{frontend_url}/login")
                     await page.wait_for_timeout(2000)
-                    await page.fill('input[type="email"]', user_info["email"])
-                    await page.fill('input[type="password"]', user_info["password"])
-                    await page.click('button[type="submit"], button:has-text("Login")')
+                    await fill_field(page, ["email", "e-mail"], ["Email", "E-mail"], user_info["email"], "email")
+                    await fill_field(page, ["password"], ["Password"], user_info["password"], "password")
+                    async with page.expect_navigation(wait_until="domcontentloaded", timeout=15000):
+                        await page.click('button[type="submit"], button:has-text("Login")')
                     await page.wait_for_timeout(3000)
                     await take_screenshot(page, "05_after_login")
                 else:
@@ -118,7 +158,7 @@ async def place_order_bot(frontend_url: str, user_info: dict, product_name: str)
 
             # Ensure we are on products page
             if "products" not in page.url:
-                await page.goto(f"{frontend_url}/products")
+                await page.goto(f"{frontend_url}/products", wait_until="domcontentloaded")
                 await page.wait_for_timeout(2000)
             await take_screenshot(page, "06_products_page")
 
@@ -146,16 +186,15 @@ async def place_order_bot(frontend_url: str, user_info: dict, product_name: str)
                 await page.wait_for_selector(f'text={product_name}', timeout=3000)
                 await page.click(f'text={product_name}')
                 product_clicked = True
-                print(f"✅ Clicked on '{product_name}'")
+                print(f" Clicked on '{product_name}'")
             except:
-                # Try partial text
                 elements = await page.query_selector_all('h2, h3, h4, .product-title, .product-name')
                 for elem in elements:
                     text = await elem.text_content()
                     if text and product_name.lower() in text.lower():
                         await elem.click()
                         product_clicked = True
-                        print(f"✅ Clicked on element containing '{product_name}'")
+                        print(f" Clicked on element containing '{product_name}'")
                         break
             if not product_clicked:
                 print("⚠️ Could not find product, clicking first product")
@@ -210,10 +249,10 @@ async def place_order_bot(frontend_url: str, user_info: dict, product_name: str)
                     continue
             if not cart_clicked:
                 print("⚠️ Going to /cart directly")
-                await page.goto(f"{frontend_url}/cart")
+                await page.goto(f"{frontend_url}/cart", wait_until="domcontentloaded")
             await take_screenshot(page, "10_cart_page")
 
-            # ---------------- STEP 6: CHECKOUT ----------------
+            # ---------------- STEP 6: PROCEED TO CHECKOUT ----------------
             log_step(6, "Proceeding to Checkout")
             checkout_clicked = False
             checkout_selectors = [
@@ -234,57 +273,148 @@ async def place_order_bot(frontend_url: str, user_info: dict, product_name: str)
                     continue
             if not checkout_clicked:
                 print("⚠️ Going to /checkout directly")
-                await page.goto(f"{frontend_url}/checkout")
+                await page.goto(f"{frontend_url}/checkout", wait_until="domcontentloaded")
             await take_screenshot(page, "11_checkout_page")
 
-            # ---------------- STEP 7: FILL SHIPPING INFO ----------------
-            log_step(7, "Filling Shipping Info")
-            all_inputs = await page.query_selector_all('input, textarea, select')
-            for field in all_inputs:
-                field_name = (await field.get_attribute('name') or '').lower()
-                field_placeholder = (await field.get_attribute('placeholder') or '').lower()
-                if any(k in field_name for k in ['name']) or any(k in field_placeholder for k in ['name']):
-                    await field.fill(user_info["name"])
-                    print("✅ Filled name")
-                elif any(k in field_name for k in ['email']) or any(k in field_placeholder for k in ['email']):
-                    await field.fill(user_info["email"])
-                    print("✅ Filled email")
-                elif any(k in field_name for k in ['phone', 'tel']) or any(k in field_placeholder for k in ['phone', 'tel']):
-                    await field.fill(user_info["phone"])
-                    print("✅ Filled phone")
-                elif any(k in field_name for k in ['address']) or any(k in field_placeholder for k in ['address']):
-                    await field.fill(user_info["address"])
-                    print("✅ Filled address")
-            await take_screenshot(page, "12_shipping_filled")
+            # ---------------- STEP 7: AUTO‑FILL PROFILE FIELDS (name, email, phone) ----------------
+            log_step(7, "Auto‑filling Profile Info (Name, Email, Phone)")
+            await fill_field(page, ["name", "full name"], ["Name", "Full Name"], user_info["name"], "shipping name")
+            await fill_field(page, ["email", "e-mail"], ["Email", "E-mail"], user_info["email"], "shipping email")
+            await fill_field(page, ["phone", "tel"], ["Phone", "Telephone", "Tel"], user_info["phone"], "phone")
+            # Address is intentionally NOT filled – user must enter it manually.
+            await take_screenshot(page, "12_profile_filled")
 
-            # ---------------- STEP 8: CONTINUE ----------------
-            log_step(8, "Continue to Payment")
-            continue_btn = await page.query_selector('button[type="submit"], button:has-text("Continue"), button:has-text("Place Order")')
-            if continue_btn:
-                await continue_btn.click()
-                print("✅ Clicked continue")
-                await page.wait_for_timeout(2000)
-            await take_screenshot(page, "13_payment_page")
+            print("\n✅ Name, Email, and Phone have been auto‑filled.")
+            print(" Please enter your shipping address and payment details manually.")
+            print(" After filling, click the final confirm button (e.g., 'Place Order', 'Pay Now').")
+            print(" The bot will detect the order confirmation page automatically.\n")
+            await notify(" Profile info filled – please complete address & payment, then confirm.")
 
-            # ---------------- STEP 9: MANUAL PAYMENT ----------------
-            log_step(9, "Manual Payment Required")
+            # ---------------- STEP 8: WAIT FOR ORDER CONFIRMATION PAGE ----------------
+            log_step(8, "Waiting for Order Confirmation")
+            confirmation_selectors = [
+                'text="Order Confirmed"',
+                'text="Order Confirmation"',
+                'text="Thank you for your purchase"',
+                '.order-confirmation',
+                '.order-details',
+                'h1:has-text("Order")',
+                '.order-id',
+                '.order-number',
+                'text="Order #"'
+            ]
+
+            confirmed = False
+            start_time = time.time()
+            timeout = 300  # 5 minutes
+
+            while not confirmed and (time.time() - start_time) < timeout:
+                for selector in confirmation_selectors:
+                    try:
+                        await page.wait_for_selector(selector, timeout=2000)
+                        confirmed = True
+                        break
+                    except:
+                        continue
+                if not confirmed:
+                    print(" Still waiting for confirmation page... (check your browser)")
+                    await page.wait_for_timeout(2000)
+
+            if not confirmed:
+                print("⚠️ Timeout waiting for confirmation page. Proceeding anyway...")
+            await take_screenshot(page, "13_confirmation_page")
+
+            # ---------------- STEP 9: EXTRACT CONFIRMATION ----------------
+            log_step(9, "Extracting Order Confirmation")
+            delivery_date = None
+            order_id = None
+
+            # Delivery date
+            date_selectors = [
+                '.delivery-date', '.estimated-delivery', '.shipping-date',
+                'p:has-text("delivery")', 'span:has-text("delivery")',
+                '.order-confirmation p', '.order-details'
+            ]
+            for selector in date_selectors:
+                try:
+                    elem = await page.query_selector(selector)
+                    if elem:
+                        text = await elem.text_content()
+                        date_match = re.search(r'\d{1,2}[/-]\d{1,2}[/-]\d{2,4}', text)
+                        if date_match:
+                            delivery_date = date_match.group(0)
+                            break
+                except:
+                    continue
+
+            # Order ID
+            id_selectors = [
+                '.order-id', '.order-number', 'strong:has-text("Order")',
+                'p:has-text("Order #")', 'span:has-text("Order")'
+            ]
+            for selector in id_selectors:
+                try:
+                    elem = await page.query_selector(selector)
+                    if elem:
+                        text = await elem.text_content()
+                        order_match = re.search(r'[#]?(\d+)', text)
+                        if order_match:
+                            order_id = order_match.group(1)
+                            break
+                except:
+                    continue
+
+            if not delivery_date:
+                delivery_date = (datetime.now() + timedelta(days=4)).strftime("%Y-%m-%d")
+            if order_id in (None, "N/A"):
+                order_id = None
+
+            print(f" Extracted: Delivery Date = {delivery_date}" + (f", Order ID = {order_id}" if order_id else ""))
+
+            # ---------------- STEP 10: SEND CONFIRMATION ----------------
+            log_step(10, "Sending Confirmation to Backend")
+            try:
+                async with httpx.AsyncClient() as client:
+                    payload = {
+                        "email": user_info["email"],
+                        "product_name": product_name,
+                        "delivery_date": delivery_date,
+                    }
+                    if order_id:
+                        payload["order_id"] = order_id
+
+                    response = await client.post(
+                        "http://localhost:8000/order-confirm",
+                        json=payload,
+                        timeout=10.0
+                    )
+                    if response.status_code == 200:
+                        print("✅ Order confirmation sent to backend")
+                    else:
+                        print(f"⚠️ Failed to send confirmation: {response.text}")
+            except Exception as e:
+                print(f"❌ Error sending confirmation: {e}")
+
+            # ---------------- FINAL ----------------
             print("\n" + "="*50)
-            print("💰 MANUAL PAYMENT REQUIRED")
+            print(" ORDER COMPLETED SUCCESSFULLY")
             print("="*50)
-            print("\nPlease complete payment manually in the browser.")
-            print("The browser will stay open until you press Enter.\n")
-            input("Press Enter after completing payment to close browser...")
+            await notify("✅ Order bot has stopped.")
+            print("\nClosing browser in 5 seconds...")
+            await page.wait_for_timeout(5000)
 
         except Exception as e:
             print(f"\n❌ Error in order bot: {e}")
             import traceback
             traceback.print_exc()
+            await notify(f"❌ Order bot encountered an error: {str(e)[:100]}...")
             try:
-                await page.screenshot(path=f"{screenshots_dir}/error.png")
-                print(f"\n📸 Error screenshot saved")
+                await page.screenshot(path=f"{screenshots_dir}/error.png", timeout=5000)
+                print(f"\n Error screenshot saved")
             except:
                 pass
-            input("\nPress Enter to close browser...")
+            print("\nClosing browser in 10 seconds...")
+            await page.wait_for_timeout(10000)
         finally:
             try:
                 await browser.close()

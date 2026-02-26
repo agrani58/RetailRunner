@@ -2,7 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import useTheme from "../hooks/useTheme";
-import "../styles/layout.css";
+import "../styles/Layout.css";
 
 export default function AuthenticatedLayout() {
   const { theme, toggle } = useTheme();

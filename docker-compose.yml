@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  # ---------- PostgreSQL ----------
+  db:
+    image: postgres:15
+    container_name: retailrunner-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+      POSTGRES_DB: ${DB_NAME:-retailrunner}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    # Optional: Remove the external port mapping if DB should not be exposed outside
+    ports:
+      - "5432:5432"
+
+  # ---------- Backend ----------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: retailrunner-backend
+    restart: always
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_NAME: ${DB_NAME:-retailrunner}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-admin}
+      DB_PORT: 5432
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"   # Accessible via Elastic IP:32.192.102.17:8000
+
+  # ---------- Frontend ----------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: retailrunner-frontend
+    restart: always
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - backend
+    ports:
+      - "80:5173"   # Map port 80 to frontend for normal web access (Elastic IP)
+
+volumes:
+  db_data:

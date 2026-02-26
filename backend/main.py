@@ -7,9 +7,9 @@ from contextlib import asynccontextmanager
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 import database
 import auth
@@ -67,6 +67,41 @@ PRODUCT_TERMS_FOR_OVERRIDE = {
     "cream", "moisturizer", "sunscreen", "facewash", "face wash", "body lotion",
     "lotion", "serum", "mask", "cleanser", "toner"
 }
+
+# ---------- WebSocket connection manager ----------
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: Dict[int, WebSocket] = {}
+
+    async def connect(self, user_id: int, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections[user_id] = websocket
+        logger.info(f"WebSocket connected for user {user_id}")
+
+    def disconnect(self, user_id: int):
+        if user_id in self.active_connections:
+            del self.active_connections[user_id]
+            logger.info(f"WebSocket disconnected for user {user_id}")
+
+    async def send_personal_message(self, user_id: int, message: dict):
+        if user_id in self.active_connections:
+            try:
+                await self.active_connections[user_id].send_json(message)
+                return True
+            except Exception as e:
+                logger.error(f"Error sending WebSocket message to user {user_id}: {e}")
+                self.disconnect(user_id)
+        return False
+
+manager = ConnectionManager()
+
+# Helper to send bot status updates via WebSocket
+async def notify_user(user_id: int, message: str):
+    """Send a WebSocket notification to a specific user."""
+    await manager.send_personal_message(user_id, {
+        "type": "bot_status",
+        "message": message
+    })
 
 # ---------- Lifespan: init DB and all models ----------
 @asynccontextmanager
@@ -146,7 +181,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------- Auth routes (unchanged) ----------
+# ---------- Auth routes ----------
 @app.post("/signup", response_model=SimpleResponse)
 def signup(user_data: UserCreate):
     try:
@@ -234,6 +269,29 @@ def auth_health():
         return {"status": "healthy", "timestamp": datetime.now().isoformat()}
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
+
+# ---------- WebSocket endpoint ----------
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=1008, reason="Missing token")
+        return
+
+    user = await auth.get_user_from_token(token)
+    if not user:
+        await websocket.close(code=1008, reason="Invalid token")
+        return
+
+    user_id = user['user_id']
+    await manager.connect(user_id, websocket)
+    try:
+        while True:
+            # Keep connection alive; client may send pings or we just wait for disconnection
+            data = await websocket.receive_text()
+            # Optionally handle client messages (e.g., pong)
+    except WebSocketDisconnect:
+        manager.disconnect(user_id)
 
 # ---------- Chatbot routes ----------
 class ChatRequest(BaseModel):
@@ -343,7 +401,7 @@ def generate_response(query: str, products: list, search_category: str = None) -
 
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, current_user: dict = Depends(auth.get_current_user_optional)):
     try:
         query = request.query.strip()
         if not query:
@@ -402,9 +460,21 @@ async def chat(request: ChatRequest):
         formatted = format_products(results)
         response_text = generate_response(query, formatted, search_category)
 
+        # Check for undelivered order confirmations (fallback for offline users)
+        full_response = response_text
+        if current_user:
+            confirmations = database.get_undelivered_confirmations(current_user['user_id'])
+            if confirmations:
+                # Prepend confirmation messages to response
+                confirmation_texts = [c['message'] for c in confirmations]
+                full_response = "\n\n".join(confirmation_texts) + "\n\n" + response_text
+                # Mark as delivered
+                database.mark_confirmations_delivered(current_user['user_id'], [c['id'] for c in confirmations])
+                logger.info(f"📨 Delivered {len(confirmations)} order confirmations to user {current_user['email']} (fallback)")
+
         logger.info(f"✅ Returning {len(formatted)} products")
         return ChatResponse(
-            response=response_text,
+            response=full_response,
             intent_label="product_search",
             intent_confidence=intent["confidence"],
             products=formatted,
@@ -416,7 +486,7 @@ async def chat(request: ChatRequest):
 
 
 @app.post("/place-order")
-async def place_order(request: PlaceOrderRequest):
+async def place_order(request: PlaceOrderRequest, current_user: dict = Depends(auth.get_current_user)):
     """
     Starts a Playwright bot to place an order for the given product using user profile data.
     """
@@ -468,17 +538,81 @@ async def place_order(request: PlaceOrderRequest):
 
         logger.info(f"✅ Found frontend URL: {frontend_url}")
 
-        asyncio.create_task(place_order_bot(frontend_url, user_info, product_name))
+        # Create a notification callback bound to this user
+        async def notify(msg):
+            await notify_user(current_user['user_id'], msg)
+
+        # Send immediate "started" notification
+        await notify("🤖 Order bot starting – browser will open shortly.")
+
+        asyncio.create_task(place_order_bot(
+            frontend_url,
+            user_info,
+            product_name,
+            user_id=current_user['user_id'],
+            notify_callback=notify   # ← this function takes ONE argument (msg)
+        ))
         logger.info(f"✅ Order bot started for '{product_name}' on {frontend_url}")
 
         return {
-            "message": f"🤖 Order bot started for '{product_name}'. A browser window should open shortly.",
+            "message": f"🤖 Order bot started for '{product_name}'. A browser window should open shortly. You will be notified of progress.",
             "frontend_url": frontend_url
         }
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"❌ Unexpected error in /place-order: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------- Order confirmation endpoint (called by bot) ----------
+class OrderConfirmRequest(BaseModel):
+    email: EmailStr
+    product_name: str
+    delivery_date: str
+    order_id: Optional[str] = None
+
+@app.post("/order-confirm")
+async def order_confirm(request: OrderConfirmRequest):
+    """Receive order confirmation from the bot and push to user if online."""
+    try:
+        # Find user by email
+        user = database.get_user_by_email(request.email)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Prepare message
+        message = f"✅ Order confirmed for '{request.product_name}'. Expected delivery: {request.delivery_date}." + (f" Order ID: {request.order_id}" if request.order_id else "")
+        
+        # Try to send via WebSocket
+        sent = await manager.send_personal_message(user['user_id'], {
+            "type": "order_confirmation",
+            "message": message,
+            "product_name": request.product_name,
+            "delivery_date": request.delivery_date,
+            "order_id": request.order_id
+        })
+        
+        if sent:
+            logger.info(f"📨 Order confirmation pushed via WebSocket to user {user['email']}")
+            return {"status": "ok", "message": "Confirmation delivered via WebSocket"}
+        else:
+            # Store in database for later delivery
+            success = database.store_order_confirmation(
+                user_id=user['user_id'],
+                product_name=request.product_name,
+                delivery_date=request.delivery_date,
+                order_id=request.order_id
+            )
+            if success:
+                logger.info(f"💾 Order confirmation stored for user {user['email']} (offline)")
+                return {"status": "ok", "message": "Confirmation stored for later delivery"}
+            else:
+                raise HTTPException(status_code=500, detail="Failed to store confirmation")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in /order-confirm: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

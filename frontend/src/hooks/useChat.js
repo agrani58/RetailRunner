@@ -1,16 +1,47 @@
-import { useState } from 'react'
-import { sendMessageToAPI } from '../api/chat'
-import { getAccessToken } from '../utils/storage'
+// hooks/useChat.js – updated
+import { useState, useEffect } from 'react';
+import { sendMessageToAPI } from '../api/chat';
+import { getAccessToken } from '../utils/storage';
+import { useWebSocket } from './useWebSockets';
 
 export default function useChat(user, onPlaceOrder) {
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState([]);
+
+  // WebSocket message handler
+  const handleWsMessage = (data) => {
+    if (data.type === 'order_confirmation') {
+      // Add order confirmation without badge
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          text: data.message,  // already contains ✅
+        }
+      ]);
+    } else if (data.type === 'bot_status') {
+      // Status updates from the order bot
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          text: data.message,
+        }
+      ]);
+    }
+  };
+
+  const { isConnected } = useWebSocket(handleWsMessage);
+
+  useEffect(() => {
+    console.log('WebSocket connected:', isConnected);
+  }, [isConnected]);
 
   const sendMessage = async (text) => {
-    setMessages(prev => [...prev, { role: 'user', text }])
+    setMessages(prev => [...prev, { role: 'user', text }]);
 
     try {
-      const token = getAccessToken()
-      const data = await sendMessageToAPI(text, token)
+      const token = getAccessToken();
+      const data = await sendMessageToAPI(text, token);
 
       setMessages(prev => [
         ...prev,
@@ -26,30 +57,9 @@ export default function useChat(user, onPlaceOrder) {
         ...(data.products && data.products.length > 0
           ? [{ role: 'products', products: data.products }]
           : []),
-      ])
-
-      // ❌ Auto‑order disabled – user must click "Buy Now"
-      // if (data.products && data.products.length > 0) {
-      //   const buyMatch = text.match(/\b(buy|purchase|order)\s+(.+)/i);
-      //   if (buyMatch) {
-      //     const productQuery = buyMatch[2].trim().toLowerCase();
-      //     const matchedProduct = data.products.find(p =>
-      //       p.name.toLowerCase().includes(productQuery) ||
-      //       productQuery.includes(p.name.toLowerCase())
-      //     );
-      //     if (matchedProduct && user) {
-      //       onPlaceOrder(matchedProduct.name, {
-      //         name: user.name || '',
-      //         email: user.email,
-      //         password: '',
-      //         phone: user.phone || '',
-      //         address: user.address || ''
-      //       });
-      //     }
-      //   }
-      // }
+      ]);
     } catch (error) {
-      console.error('Error sending message:', error)
+      console.error('Error sending message:', error);
       setMessages(prev => [
         ...prev,
         {
@@ -57,9 +67,9 @@ export default function useChat(user, onPlaceOrder) {
           text: 'Sorry, I encountered an error. Please try again.',
           intent_badge: { intent: 'error', confidence: 0, level: 'low' },
         },
-      ])
+      ]);
     }
-  }
+  };
 
-  return { messages, sendMessage, isEmpty: messages.length === 0 }
+  return { messages, sendMessage, isEmpty: messages.length === 0, isConnected };
 }
