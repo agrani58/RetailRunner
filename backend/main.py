@@ -1,4 +1,5 @@
 import os
+import json
 import random
 import logging
 import traceback
@@ -16,7 +17,6 @@ import auth
 from schemas import UserCreate, LoginRequest, TokenResponse, SimpleResponse, UserResponse, RefreshTokenRequest
 from config import JWT_CONFIG, DB_CONFIG, config as app_config
 
-# Import chatbot modules
 from catalog_loader import load_products, refresh_catalog_periodically
 from intent_model import get_intent_model
 from ner_model import MLNERModel
@@ -26,6 +26,7 @@ from search_engine import SearchEngine
 from order_bot import place_order_bot
 from config import config, STORE_FRONTEND_MAP, STORE_NAMES
 from recommendation_model import RecommendationModel
+from review_bot import submit_review_bot
 
 import logging
 logging.basicConfig(
@@ -38,7 +39,7 @@ logging.getLogger("httpcore").setLevel(logging.WARNING)
 logging.getLogger("transformers").setLevel(logging.ERROR)
 logger = logging.getLogger("main")
 
-# ---------- Chatbot app state ----------
+# ---------- App state ----------
 app_state = {
     "products_data": [],
     "search_engine": None,
@@ -49,14 +50,24 @@ app_state = {
     "recommendation_model": None,
 }
 
-# Chitchat responses
+def enrich_with_catalog(items: list, key_field: str = "product_id") -> list:
+    products = {p["id"]: p for p in app_state.get("products_data", []) if p.get("id")}
+    enriched = []
+    for item in items:
+        pid = item.get(key_field)
+        product = products.get(pid, {})
+        combined = {**product, **item}
+        if "store" not in combined and product.get("source"):
+            combined["store"] = STORE_NAMES.get(product["source"], product["source"])
+        enriched.append(combined)
+    return enriched
+
 CHITCHAT_RESPONSES = [
     "Hi there! How can I help you find the perfect product today?",
     "Hello! I'm here to assist with your shopping needs. What are you looking for?",
     "Hey! Ready to explore some amazing products? Just tell me what you're interested in.",
 ]
 
-# Known product terms to override low‑confidence chitchat
 PRODUCT_TERMS_FOR_OVERRIDE = {
     "laptop", "laptops", "phone", "phones", "smartphone", "smartphones",
     "tv", "television", "televisions", "shoes", "footwear", "headphones",
@@ -65,20 +76,18 @@ PRODUCT_TERMS_FOR_OVERRIDE = {
     "jackets", "tshirt", "t-shirt", "t-shirts", "tees", "shirt", "shirts",
     "kurta", "ethnic", "gown", "gowns", "makeup", "foundation", "lipstick",
     "cream", "moisturizer", "sunscreen", "facewash", "face wash", "body lotion",
-    "lotion", "serum", "mask", "cleanser", "toner"
+    "lotion", "serum", "mask", "cleanser", "toner",
     "hair", "oil", "oils", "shampoo", "shampoos", "conditioner", "conditioners",
-    "serum", "serums", "mask", "masks", "spray", "gel", "wax", "cream", "creams",
-    # Skin care
-    "moisturizer", "moisturisers", "toner", "toners", "cleanser", "cleansers",
-    "facewash", "face wash", "sunscreen", "lip balm", "body lotion", "lotion",
-    # Clothing
-    "sweater", "sweaters", "hoodie", "jeans", "dress", "dresses", "kurta",
+    "sweater", "sweaters", "hoodie",
 }
+
 
 # ---------- WebSocket connection manager ----------
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[int, WebSocket] = {}
+        # payment_confirm_events[user_id] = asyncio.Event
+        self.payment_confirm_events: Dict[int, asyncio.Event] = {}
 
     async def connect(self, user_id: int, websocket: WebSocket):
         await websocket.accept()
@@ -96,24 +105,40 @@ class ConnectionManager:
                 await self.active_connections[user_id].send_json(message)
                 return True
             except Exception as e:
-                logger.error(f"Error sending WebSocket message to user {user_id}: {e}")
+                logger.error(f"Error sending WS message to user {user_id}: {e}")
                 self.disconnect(user_id)
         return False
 
+    def create_payment_event(self, user_id: int) -> asyncio.Event:
+        """Create (or reset) a payment confirmation event for a user's active order."""
+        event = asyncio.Event()
+        self.payment_confirm_events[user_id] = event
+        return event
+
+    def confirm_payment(self, user_id: int):
+        """Called when the user clicks Confirm Payment in the chat UI."""
+        event = self.payment_confirm_events.get(user_id)
+        if event:
+            event.set()
+            logger.info(f"✅ Payment confirmed by user {user_id}")
+
+    def clear_payment_event(self, user_id: int):
+        self.payment_confirm_events.pop(user_id, None)
+
+
 manager = ConnectionManager()
 
-# Helper to send bot status updates via WebSocket
-async def notify_user(user_id: int, message: str):
-    """Send a WebSocket notification to a specific user."""
-    await manager.send_personal_message(user_id, {
-        "type": "bot_status",
-        "message": message
-    })
 
-# ---------- Lifespan: init DB and all models ----------
+async def notify_user(user_id: int, message: str, msg_type: str = "bot_status"):
+    """Send a typed WebSocket notification to a specific user."""
+    payload = {"type": msg_type, "message": message}
+    sent = await manager.send_personal_message(user_id, payload)
+    return sent
+
+
+# ---------- Lifespan ----------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 1. Initialize database
     try:
         database.init_db()
         logger.info("✅ Database initialized")
@@ -121,49 +146,40 @@ async def lifespan(app: FastAPI):
         logger.error(f"❌ Database initialization failed: {e}")
         raise
 
-    # 2. Load products from APIs
     logger.info("🔄 Loading products from APIs...")
     products_data = await load_products()
     app_state["products_data"] = products_data
     logger.info(f"✅ Loaded {len(products_data)} products")
 
-    # 3. Load intent model
     logger.info("🧠 Loading intent model...")
     intent_model = get_intent_model()
     if intent_model is None:
-        raise RuntimeError("❌ Intent model failed to load – aborting")
+        raise RuntimeError("❌ Intent model failed to load")
     app_state["intent_model"] = intent_model
 
-    # 4. Load NER model
     logger.info("🔍 Loading NER model...")
     try:
         ner_model = MLNERModel(app_config.NER_MODEL_PATH)
         app_state["ner_model"] = ner_model
         logger.info("✅ NER model ready")
     except Exception as e:
-        logger.error(f"❌ NER model failed: {e}")
-        raise
+        logger.error(f"❌ NER model failed: {e}"); raise
 
-    # 5. Load recommendation model
-    logger.info("💰 Loading recommendation model (price/rating)...")
+    logger.info("💰 Loading recommendation model...")
     try:
         rec_model = RecommendationModel(app_config.PRICE_RATING_MODEL_PATH, device=app_config.DEVICE)
         app_state["recommendation_model"] = rec_model
         logger.info("✅ Recommendation model ready")
     except Exception as e:
-        logger.error(f"❌ Recommendation model failed: {e}")
-        raise
+        logger.error(f"❌ Recommendation model failed: {e}"); raise
 
-    # 6. Initialise search engine
     logger.info("🔧 Initialising search engine...")
     search_engine = SearchEngine(products_data)
     app_state["search_engine"] = search_engine
 
-    # 7. Initialise query processor
     query_processor = QueryProcessor(ner_model, products_data, rec_model)
     app_state["query_processor"] = query_processor
 
-    # 8. Start background catalog refresh if APIs configured
     if app_config.ECOMMERCE_API_URLS:
         refresh_task = asyncio.create_task(
             refresh_catalog_periodically(app_state, app_config.REFRESH_INTERVAL)
@@ -176,10 +192,10 @@ async def lifespan(app: FastAPI):
 
     logger.info("🛑 Shutting down.")
 
+
 # ---------- FastAPI app ----------
 app = FastAPI(title="Conversational Commerce + Auth API", lifespan=lifespan)
 
-# CORS – allow frontend origins (adjust for production)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://localhost:3000"],
@@ -187,6 +203,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # ---------- Auth routes ----------
 @app.post("/signup", response_model=SimpleResponse)
@@ -212,12 +229,11 @@ def login(login_data: LoginRequest):
     refresh_token, _ = auth.create_refresh_token(user['user_id'])
     if not refresh_token:
         raise HTTPException(status_code=500, detail="Failed to create token")
-    user_data = {"id": user['user_id'], "email": user['email']}
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
         token_type="bearer",
-        user_data=user_data,
+        user_data={"id": user['user_id'], "email": user['email']},
         expires_in=JWT_CONFIG["access_token_expire_minutes"] * 60
     )
 
@@ -231,12 +247,11 @@ def refresh_token(refresh_data: RefreshTokenRequest):
     new_refresh_token, _ = auth.create_refresh_token(user['user_id'])
     if not new_refresh_token:
         raise HTTPException(status_code=500, detail="Failed to create token")
-    user_data = {"id": user['user_id'], "email": user['email']}
     return TokenResponse(
         access_token=access_token,
         refresh_token=new_refresh_token,
         token_type="bearer",
-        user_data=user_data,
+        user_data={"id": user['user_id'], "email": user['email']},
         expires_in=JWT_CONFIG["access_token_expire_minutes"] * 60
     )
 
@@ -256,7 +271,7 @@ def logout_all(current_user: dict = Depends(auth.get_current_user)):
 
 @app.get("/protected")
 def protected_route(current_user: dict = Depends(auth.get_current_user)):
-    return {"message": f"Hello {current_user['email']}!", "email": current_user['email'], "user_id": current_user['user_id']}
+    return {"message": f"Hello {current_user['email']}!", "user_id": current_user['user_id']}
 
 @app.get("/me", response_model=UserResponse)
 def get_current_user_info(current_user: dict = Depends(auth.get_current_user)):
@@ -271,11 +286,11 @@ def auth_health():
         conn = database.get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT 1")
-        cur.close()
-        conn.close()
+        cur.close(); conn.close()
         return {"status": "healthy", "timestamp": datetime.now().isoformat()}
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
+
 
 # ---------- WebSocket endpoint ----------
 @app.websocket("/ws")
@@ -294,11 +309,21 @@ async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(user_id, websocket)
     try:
         while True:
-            # Keep connection alive; client may send pings or we just wait for disconnection
-            data = await websocket.receive_text()
-            # Optionally handle client messages (e.g., pong)
+            raw = await websocket.receive_text()
+            try:
+                data = json.loads(raw)
+                # Handle payment confirmation signal from chat UI
+                if data.get("type") == "payment_confirmed":
+                    manager.confirm_payment(user_id)
+                    await manager.send_personal_message(user_id, {
+                        "type": "bot_status",
+                        "message": "✅ Payment confirmation received — completing your order…"
+                    })
+            except Exception:
+                pass  # ignore malformed messages
     except WebSocketDisconnect:
         manager.disconnect(user_id)
+
 
 # ---------- Chatbot routes ----------
 class ChatRequest(BaseModel):
@@ -306,7 +331,7 @@ class ChatRequest(BaseModel):
 
 class PlaceOrderRequest(BaseModel):
     product_name: str
-    user_info: Dict[str, str]   # name, email, password, phone, address
+    user_info: Dict[str, str]
 
 class ProductResponse(BaseModel):
     id: str
@@ -329,27 +354,18 @@ class ChatResponse(BaseModel):
 
 
 def get_intent(query: str) -> dict:
-    """
-    Determine intent using ML model, with rule‑based override for low‑confidence product terms.
-    """
     intent_model = app_state.get("intent_model")
     if not intent_model:
         raise HTTPException(status_code=503, detail="Intent model not loaded")
-
     try:
         result = intent_model.predict(query)
-        logger.info(f"🤖 Intent model used – result: {result}")
         intent = result["intent"]
         confidence = result["confidence"]
-
-        # Rule‑based override: if confidence < 0.8 and query contains a known product term, force product_search
         if confidence < 0.8 and intent == "chitchat":
             query_lower = query.lower()
             if any(term in query_lower for term in PRODUCT_TERMS_FOR_OVERRIDE):
-                logger.info(f"⚡ Overriding chitchat (conf={confidence:.2f}) to product_search because query contains product term")
                 intent = "product_search"
-                confidence = 1.0  # set high confidence for product search
-
+                confidence = 1.0
         return {"label": intent, "confidence": confidence}
     except Exception as e:
         logger.error(f"Intent model error: {e}")
@@ -357,7 +373,6 @@ def get_intent(query: str) -> dict:
 
 
 def format_products(products: list) -> List[ProductResponse]:
-    """Deduplicate and format products, set store name from mapping."""
     seen = set()
     unique_products = []
     for p in products:
@@ -369,19 +384,14 @@ def format_products(products: list) -> List[ProductResponse]:
     formatted = []
     for p in unique_products[:8]:
         price = p.get("price", 0)
-
-        # Determine store name
-        store = p.get("store")  # if already present (e.g., from static)
+        store = p.get("store")
         if not store:
             source = p.get("source", "")
-            # Look up friendly name using full source URL
             store = STORE_NAMES.get(source)
             if not store and source:
-                # Fallback: extract host
                 if "://" in source:
                     source = source.split("://")[1].split("/")[0]
                 store = source or "Unknown Store"
-
         formatted.append(ProductResponse(
             id=str(p.get("id", "")),
             name=p.get("name", "Unknown"),
@@ -400,7 +410,7 @@ def format_products(products: list) -> List[ProductResponse]:
 def generate_response(query: str, products: list, search_category: str = None) -> str:
     if not products:
         if search_category:
-            return f"Sorry, we currently don't have any {search_category} in our catalog. Try a different category or check back later."
+            return f"Sorry, we currently don't have any {search_category} in our catalog."
         return f"Sorry, I couldn't find anything for '{query}'. Try different words?"
     if len(products) == 1:
         return f"I found the perfect match: {products[0].name}"
@@ -413,10 +423,8 @@ async def chat(request: ChatRequest, current_user: dict = Depends(auth.get_curre
         query = request.query.strip()
         if not query:
             raise HTTPException(status_code=400, detail="Empty query")
-        logger.info(f"💬 Query: '{query}'")
 
         intent = get_intent(query)
-        logger.info(f"🎯 Intent: {intent['label']} ({intent['confidence']:.2f})")
 
         if intent["label"] == "chitchat":
             return ChatResponse(
@@ -432,56 +440,27 @@ async def chat(request: ChatRequest, current_user: dict = Depends(auth.get_curre
             raise HTTPException(status_code=503, detail="Query processor not ready")
 
         analysis = qp.process(query)
-        logger.info(f"🔍 Query analysis: {analysis}")
-
-        skip_entity_filter = analysis.get('skip_entity_filter', False)
-
-        search_query = query
-        brand = analysis.get('brand')
-        search_category = analysis.get('search_category')
-        subcategory_keywords = analysis.get('subcategory_keywords', [])
-        constraints = analysis.get('constraints', {})
-        product_entities = analysis.get('product_entities', [])
-
-        logger.info(f"🔍 Search params: brand={brand}, category={search_category}, "
-                    f"subcategory={subcategory_keywords}, constraints={constraints}, "
-                    f"entities={product_entities}, skip_entity_filter={skip_entity_filter}")
-
         search_engine = app_state.get("search_engine")
         if not search_engine:
             raise HTTPException(status_code=503, detail="Search engine not ready")
 
         results = search_engine.search(
-            query=search_query,
-            product_entities=product_entities,
-            brand=brand,
-            constraints=constraints,
-            search_category=search_category,
-            subcategory_keywords=subcategory_keywords,
+            query=query,
+            product_entities=analysis.get('product_entities', []),
+            brand=analysis.get('brand'),
+            constraints=analysis.get('constraints', {}),
+            search_category=analysis.get('search_category'),
+            subcategory_keywords=analysis.get('subcategory_keywords', []),
             exclude_terms=analysis.get('exclude_terms', []),
-            skip_entity_filter=skip_entity_filter,
+            skip_entity_filter=analysis.get('skip_entity_filter', False),
             top_k=10,
         )
-        logger.info(f"🔎 Search engine returned {len(results)} raw results")
 
         formatted = format_products(results)
-        response_text = generate_response(query, formatted, search_category)
+        response_text = generate_response(query, formatted, analysis.get('search_category'))
 
-        # Check for undelivered order confirmations (fallback for offline users)
-        full_response = response_text
-        if current_user:
-            confirmations = database.get_undelivered_confirmations(current_user['user_id'])
-            if confirmations:
-                # Prepend confirmation messages to response
-                confirmation_texts = [c['message'] for c in confirmations]
-                full_response = "\n\n".join(confirmation_texts) + "\n\n" + response_text
-                # Mark as delivered
-                database.mark_confirmations_delivered(current_user['user_id'], [c['id'] for c in confirmations])
-                logger.info(f"📨 Delivered {len(confirmations)} order confirmations to user {current_user['email']} (fallback)")
-
-        logger.info(f"✅ Returning {len(formatted)} products")
         return ChatResponse(
-            response=full_response,
+            response=response_text,
             intent_label="product_search",
             intent_confidence=intent["confidence"],
             products=formatted,
@@ -494,75 +473,66 @@ async def chat(request: ChatRequest, current_user: dict = Depends(auth.get_curre
 
 @app.post("/place-order")
 async def place_order(request: PlaceOrderRequest, current_user: dict = Depends(auth.get_current_user)):
-    """
-    Starts a Playwright bot to place an order for the given product using user profile data.
-    """
     try:
         product_name = request.product_name
-        user_info = request.user_info
+        user_info    = request.user_info
 
-        logger.info(f"📦 Place-order request: product='{product_name}', user_info={user_info}")
+        logger.info(f"📦 Place-order request: product='{product_name}'")
 
-        products = app_state.get("products_data", [])
+        products      = app_state.get("products_data", [])
         found_product = None
         for p in products:
-            p_name = p.get("name", "")
-            if p_name.lower() == product_name.lower():
-                found_product = p
-                logger.info(f"✅ Exact match: '{p_name}'")
-                break
-
+            if p.get("name", "").lower() == product_name.lower():
+                found_product = p; break
         if not found_product:
             for p in products:
-                p_name = p.get("name", "")
-                if product_name.lower() in p_name.lower() or p_name.lower() in product_name.lower():
-                    found_product = p
-                    logger.info(f"✅ Partial match: '{p_name}'")
-                    break
+                pname = p.get("name", "")
+                if product_name.lower() in pname.lower() or pname.lower() in product_name.lower():
+                    found_product = p; break
 
         if not found_product:
-            logger.error(f"Product '{product_name}' not found in catalog")
             raise HTTPException(status_code=404, detail=f"Product '{product_name}' not found in catalog")
 
         source_api = found_product.get("source")
-        logger.info(f"🔍 Product source: '{source_api}'")
-
         if not source_api:
             raise HTTPException(status_code=400, detail="Product has no source information")
 
-        # Handle products from static file
         if source_api == "static":
-            logger.warning("Product from static file cannot be ordered via bot.")
-            return {
-                "message": "This product is from a static catalog and cannot be ordered automatically. Please visit the store website.",
-                "product_name": product_name
-            }
+            return {"message": "This product is from a static catalog and cannot be ordered automatically.", "product_name": product_name}
 
         frontend_url = STORE_FRONTEND_MAP.get(source_api)
         if not frontend_url:
-            logger.error(f"No frontend mapping for source: {source_api}")
             raise HTTPException(status_code=400, detail=f"No frontend mapping for source: {source_api}")
 
-        logger.info(f"✅ Found frontend URL: {frontend_url}")
+        user_id = current_user['user_id']
 
-        # Create a notification callback bound to this user
-        async def notify(msg):
-            await notify_user(current_user['user_id'], msg)
+        # Create payment confirmation event — bot will wait on this
+        payment_event = manager.create_payment_event(user_id)
 
-        # Send immediate "started" notification
-        await notify("🤖 Order bot starting – browser will open shortly.")
+        async def notify(msg: str, msg_type: str = "bot_status"):
+            sent = await notify_user(user_id, msg, msg_type)
+            if not sent and msg_type == "order_confirmation":
+                # Fallback: queue in DB if WS not connected
+                database.store_order_confirmation(
+                    user_id=user_id,
+                    product_name=product_name,
+                    delivery_date="",
+                    order_id=None,
+                )
+
+        await notify("🤖 Order bot starting — browser will open shortly.")
 
         asyncio.create_task(place_order_bot(
             frontend_url,
             user_info,
             product_name,
-            user_id=current_user['user_id'],
-            notify_callback=notify   # ← this function takes ONE argument (msg)
+            user_id=user_id,
+            notify_callback=notify,
+            payment_confirm_event=payment_event,
         ))
-        logger.info(f"✅ Order bot started for '{product_name}' on {frontend_url}")
 
         return {
-            "message": f"🤖 Order bot started for '{product_name}'. A browser window should open shortly. You will be notified of progress.",
+            "message": f"🤖 Order bot started for '{product_name}'. Watch the chat for live updates.",
             "frontend_url": frontend_url
         }
     except HTTPException:
@@ -581,48 +551,195 @@ class OrderConfirmRequest(BaseModel):
 
 @app.post("/order-confirm")
 async def order_confirm(request: OrderConfirmRequest):
-    """Receive order confirmation from the bot and push to user if online."""
     try:
-        # Find user by email
         user = database.get_user_by_email(request.email)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        
-        # Prepare message
-        message = f"✅ Order confirmed for '{request.product_name}'. Expected delivery: {request.delivery_date}." + (f" Order ID: {request.order_id}" if request.order_id else "")
-        
-        # Try to send via WebSocket
+
+        confirmation_msg = (
+            f"✅ Order confirmed for '{request.product_name}'. "
+            f"Expected delivery: {request.delivery_date}."
+            + (f" Order ID: {request.order_id}" if request.order_id else "")
+        )
+
         sent = await manager.send_personal_message(user['user_id'], {
             "type": "order_confirmation",
-            "message": message,
+            "message": confirmation_msg,
             "product_name": request.product_name,
             "delivery_date": request.delivery_date,
-            "order_id": request.order_id
+            "order_id": request.order_id,
         })
-        
-        if sent:
-            logger.info(f"📨 Order confirmation pushed via WebSocket to user {user['email']}")
-            return {"status": "ok", "message": "Confirmation delivered via WebSocket"}
-        else:
-            # Store in database for later delivery
-            success = database.store_order_confirmation(
+        if not sent:
+            database.store_order_confirmation(
                 user_id=user['user_id'],
                 product_name=request.product_name,
                 delivery_date=request.delivery_date,
-                order_id=request.order_id
+                order_id=request.order_id,
             )
-            if success:
-                logger.info(f"💾 Order confirmation stored for user {user['email']} (offline)")
-                return {"status": "ok", "message": "Confirmation stored for later delivery"}
-            else:
-                raise HTTPException(status_code=500, detail="Failed to store confirmation")
-    except HTTPException:
-        raise
+
+        # Persist to user_orders
+        products_list = app_state.get("products_data", [])
+        product = next(
+            (p for p in products_list if p.get("name", "").strip().lower() == request.product_name.strip().lower()),
+            None
+        )
+        if not product:
+            product = next(
+                (p for p in products_list if request.product_name.strip().lower() in p.get("name", "").strip().lower()),
+                None
+            )
+
+        if product:
+            product_id = product.get("id")
+            product_source = product.get("source", "unknown")
+            store_frontend_url = STORE_FRONTEND_MAP.get(product_source)
+            if product_id is not None:
+                try:
+                    product_id = int(product_id) % 2_147_483_647
+                    if product_id == 0: product_id = 1
+                except (ValueError, TypeError):
+                    product_id = None
+            if product_id is not None:
+                database.add_user_order(
+                    user_id=user['user_id'], product_id=product_id,
+                    product_name=request.product_name, product_source=product_source,
+                    store_frontend_url=store_frontend_url,
+                    delivery_date=request.delivery_date, order_reference=request.order_id,
+                )
+        else:
+            database.add_user_order(
+                user_id=user['user_id'], product_id=0,
+                product_name=request.product_name, product_source="unknown",
+                store_frontend_url=None, delivery_date=request.delivery_date,
+                order_reference=request.order_id,
+            )
+
+        # Clear the payment event now that order is done
+        manager.clear_payment_event(user['user_id'])
+
+        return {"status": "ok", "message": "Confirmation recorded"}
     except Exception as e:
-        logger.error(f"Error in /order-confirm: {e}")
+        logger.error(f"Error in /order-confirm: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ---------- Review routes ----------
+class SubmitReviewRequest(BaseModel):
+    order_id: int = 0
+    product_name: str = ""
+    store_url: str = ""
+    rating: int = 5
+    review_text: Optional[str] = ""
+    store_credentials: Dict[str, str] = {}
+
+class MarkReviewedRequest(BaseModel):
+    order_id: int = 0
+# ── REPLACE the existing /submit-review endpoint in main.py with this ──
+# (Everything else in main.py stays the same)
+
+@app.post("/submit-review")
+async def submit_review(request: SubmitReviewRequest, current_user: dict = Depends(auth.get_current_user)):
+    try:
+        if not 1 <= request.rating <= 5:
+            raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+        if not request.store_url:
+            raise HTTPException(status_code=400, detail="No store URL available for this order")
+
+        user_info = {
+            "email":        request.store_credentials.get("email", ""),
+            "password":     request.store_credentials.get("password", ""),
+            "display_name": request.store_credentials.get("display_name", ""),
+        }
+        if not user_info["email"] or not user_info["password"]:
+            raise HTTPException(status_code=400, detail="Store email and password are required")
+
+        user_id = current_user["user_id"]
+
+        # ── Fetch the store's own order reference (e.g. "21") from the DB ──
+        order_reference = None
+        if request.order_id:
+            orders = database.get_user_orders(user_id)
+            for order in orders:
+                if order.get("id") == request.order_id or order.get("order_id") == request.order_id:
+                    order_reference = order.get("order_reference")
+                    break
+        logger.info("📝 Review bot: order_id=%s, order_reference=%s", request.order_id, order_reference)
+
+        async def notify(msg: str):
+            await manager.send_personal_message(user_id, {"type": "review_status", "message": msg})
+
+        asyncio.create_task(submit_review_bot(
+            frontend_url=request.store_url,
+            product_name=request.product_name,
+            user_info=user_info,
+            rating=request.rating,
+            review_text=request.review_text or "",
+            user_id=user_id,
+            order_id=request.order_id,
+            notify_callback=notify,
+            order_reference=order_reference,
+        ))
+
+        return {"message": "Review bot started. You'll be notified when it completes.", "order_id": request.order_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Error in /submit-review: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/mark-reviewed")
+async def mark_reviewed(request: MarkReviewedRequest):
+    try:
+        ok = database.mark_order_reviewed(request.order_id)
+        if not ok:
+            raise HTTPException(status_code=404, detail="Order not found")
+        return {"status": "ok", "order_id": request.order_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------- Wishlist endpoints ----------
+class WishlistItemRequest(BaseModel):
+    product_id: int
+    product_name: str
+    product_source: str
+    store_name: Optional[str] = None
+
+@app.get("/wishlist", response_model=List[Dict])
+def get_wishlist(current_user: dict = Depends(auth.get_current_user)):
+    items = database.get_wishlist(current_user['user_id'])
+    return enrich_with_catalog(items, key_field="product_id")
+
+@app.post("/wishlist")
+def add_to_wishlist(item: WishlistItemRequest, current_user: dict = Depends(auth.get_current_user)):
+    success = database.add_to_wishlist(
+        user_id=current_user['user_id'], product_id=item.product_id,
+        product_name=item.product_name, product_source=item.product_source,
+        store_name=item.store_name
+    )
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to add to wishlist")
+    return {"message": "Added to wishlist"}
+
+@app.delete("/wishlist/{product_id}")
+def remove_from_wishlist(product_id: int, current_user: dict = Depends(auth.get_current_user)):
+    success = database.remove_from_wishlist(current_user['user_id'], product_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Item not found in wishlist")
+    return {"message": "Removed from wishlist"}
+
+
+# ---------- Orders endpoint ----------
+@app.get("/orders")
+def get_orders(current_user: dict = Depends(auth.get_current_user)):
+    orders = database.get_user_orders(current_user['user_id'])
+    return enrich_with_catalog(orders, key_field="product_id")
+
+
+# ---------- Health ----------
 @app.get("/health")
 def health():
     return {
@@ -634,13 +751,9 @@ def health():
         "search_engine": app_state.get("search_engine") is not None,
     }
 
-
 @app.get("/")
 def root():
-    return {
-        "message": "Conversational Commerce + Auth API",
-        "catalog_source": "APIs" if app_config.ECOMMERCE_API_URLS else "static file",
-    }
+    return {"message": "Conversational Commerce + Auth API"}
 
 
 if __name__ == "__main__":

@@ -1,75 +1,123 @@
-// hooks/useChat.js – updated
-import { useState, useEffect } from 'react';
+// hooks/useChat.js
+// WebSocket is used ONLY for order bot status messages in the chat UI.
+// All authentication is HTTP-only (handled by useAuth.js).
+
+import { useState, useCallback } from 'react';
 import { sendMessageToAPI } from '../api/chat';
 import { getAccessToken } from '../utils/storage';
-import { useWebSocket } from './useWebSockets';
+import useWebSocketHook from './useWebSockets';
 
-export default function useChat(user, onPlaceOrder) {
-  const [messages, setMessages] = useState([]);
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-  // WebSocket message handler
-  const handleWsMessage = (data) => {
-    if (data.type === 'order_confirmation') {
-      // Add order confirmation without badge
-      setMessages(prev => [
+export default function useChat(user, onPlaceOrder, initialMessages = []) {
+  const [messages, setMessages] = useState(initialMessages);
+  // Track whether the bot is waiting for user to confirm payment
+  const [awaitingPaymentConfirm, setAwaitingPaymentConfirm] = useState(false);
+
+  // ── WebSocket handler — bot status logs only ─────────────────────────
+  const handleWsMessage = useCallback((data) => {
+    if (!data?.type) return;
+
+    if (data.type === 'bot_status') {
+      setMessages((prev) => [
         ...prev,
-        {
-          role: 'assistant',
-          text: data.message,  // already contains ✅
-        }
+        { role: 'bot_status', text: data.message },
       ]);
-    } else if (data.type === 'bot_status') {
-      // Status updates from the order bot
-      setMessages(prev => [
+
+      // Bot is asking the user to fill in address + payment
+      if (
+        data.message?.toLowerCase().includes('shipping address') ||
+        data.message?.toLowerCase().includes('fill in your') ||
+        data.message?.toLowerCase().includes('payment')
+      ) {
+        setAwaitingPaymentConfirm(true);
+      }
+
+      // Bot finished — clear the confirm state
+      if (
+        data.message?.toLowerCase().includes('order placed') ||
+        data.message?.toLowerCase().includes('successfully') ||
+        data.message?.toLowerCase().includes('error') ||
+        data.message?.toLowerCase().includes('failed')
+      ) {
+        setAwaitingPaymentConfirm(false);
+      }
+    }
+
+    if (data.type === 'order_confirmation') {
+      setMessages((prev) => [
         ...prev,
-        {
-          role: 'assistant',
-          text: data.message,
-        }
+        { role: 'order_confirmation', text: data.message },
+      ]);
+      setAwaitingPaymentConfirm(false);
+    }
+
+    // Bot explicitly asking for payment confirmation
+    if (data.type === 'await_payment_confirm') {
+      setAwaitingPaymentConfirm(true);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'bot_status', text: data.message, awaitPayment: true },
       ]);
     }
-  };
+  }, []);
 
-  const { isConnected } = useWebSocket(handleWsMessage);
+  const { isConnected, sendMessage: wsSend } = useWebSocketHook(handleWsMessage);
 
-  useEffect(() => {
-    console.log('WebSocket connected:', isConnected);
-  }, [isConnected]);
+  // ── Send payment confirmed signal to backend via WS ──────────────────
+  const confirmPayment = useCallback(() => {
+    wsSend({ type: 'payment_confirmed' });
+    setAwaitingPaymentConfirm(false);
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', text: '✅ Payment confirmed — completing order…' },
+    ]);
+  }, [wsSend]);
 
-  const sendMessage = async (text) => {
-    setMessages(prev => [...prev, { role: 'user', text }]);
+  // ── Chat message send (HTTP) ─────────────────────────────────────────
+  const sendMessage = useCallback(async (text) => {
+    setMessages((prev) => [...prev, { role: 'user', text }]);
 
     try {
       const token = getAccessToken();
-      const data = await sendMessageToAPI(text, token);
+      const data  = await sendMessageToAPI(text, token);
 
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
           text: data.response,
           intent_badge: {
-            intent: data.intent_label,
+            intent:     data.intent_label,
             confidence: Math.round(data.intent_confidence * 100),
-            level: data.intent_confidence > 0.7 ? 'high' : data.intent_confidence > 0.5 ? 'medium' : 'low',
+            level:
+              data.intent_confidence > 0.7 ? 'high'
+              : data.intent_confidence > 0.5 ? 'medium'
+              : 'low',
           },
         },
-        ...(data.products && data.products.length > 0
+        ...(data.products?.length > 0
           ? [{ role: 'products', products: data.products }]
           : []),
       ]);
     } catch (error) {
-      console.error('Error sending message:', error);
-      setMessages(prev => [
+      console.error('Chat error:', error);
+      setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
           text: 'Sorry, I encountered an error. Please try again.',
-          intent_badge: { intent: 'error', confidence: 0, level: 'low' },
         },
       ]);
     }
-  };
+  }, []);
 
-  return { messages, sendMessage, isEmpty: messages.length === 0, isConnected };
+  return {
+    messages,
+    sendMessage,
+    isEmpty: messages.length === 0,
+    isConnected,
+    awaitingPaymentConfirm,
+    confirmPayment,
+  };
 }

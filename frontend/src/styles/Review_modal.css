@@ -1,0 +1,7 @@
+/* ReviewModal.css — now uses .modal-card styles from OrderPasswordModal.css */
+/* Just the star row helper */
+.rm-star-row {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}

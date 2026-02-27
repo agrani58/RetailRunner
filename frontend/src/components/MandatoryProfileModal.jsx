@@ -1,59 +1,57 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import '../styles/ProfilePage.css'; // reuse same styles
+import '../styles/ProfilePage.css';
 
 export default function MandatoryProfileModal() {
   const { user, updateProfile } = useAuth();
 
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    phone: user?.phone || '',
-    address: user?.address || '',
-    city: user?.city || '',
+    name:       user?.name       || '',
+    phone:      user?.phone      || '',
+    address:    user?.address    || '',
+    city:       user?.city       || '',
     postalCode: user?.postalCode || '',
-    country: user?.country || '',
+    country:    user?.country    || '',
   });
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error,    setError]    = useState('');
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Basic validation – all fields required
-    if (!formData.name || !formData.phone || !formData.address || !formData.city || !formData.postalCode || !formData.country) {
+
+    const { name, phone, address, city, postalCode, country } = formData;
+    if (!name || !phone || !address || !city || !postalCode || !country) {
       setError('All fields are required.');
       return;
     }
-    setIsSaving(true);
-    setError('');
 
-    // Simulate async save (but updateProfile is synchronous)
+    setError('');
+    setIsSaving(true);
+
+    // updateProfile persists to localStorage and sets showProfileModal=false
+    // It never clears tokens, so the user stays logged in.
     setTimeout(() => {
       updateProfile(formData);
       setIsSaving(false);
-      // Modal will close automatically because updateProfile sets showProfileModal to false
-    }, 500);
+    }, 300);
   };
 
   return (
     <div className="modal-overlay mandatory-modal">
       <div className="profile-card mandatory-modal-card">
         <h1>Complete Your Profile</h1>
-        <p>Please fill in your details to continue. This is required only once.</p>
+        <p>Please fill in your details to continue. You can edit them later from your profile.</p>
 
         {error && <div className="profile-error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email (read-only)</label>
-            <input
-              type="email"
-              value={user?.email || ''}
-              disabled
-            />
+            <input type="email" value={user?.email || ''} disabled />
           </div>
 
           <div className="form-group">
@@ -63,7 +61,7 @@ export default function MandatoryProfileModal() {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Your name"
+              placeholder="Your full name"
               required
             />
           </div>
@@ -81,7 +79,7 @@ export default function MandatoryProfileModal() {
           </div>
 
           <div className="form-group">
-            <label>Address *</label>
+            <label>Street Address *</label>
             <input
               type="text"
               name="address"
@@ -131,9 +129,8 @@ export default function MandatoryProfileModal() {
           </div>
 
           <div className="profile-actions">
-            {/* No cancel button – mandatory */}
             <button type="submit" disabled={isSaving} className="save-btn">
-              {isSaving ? 'Saving...' : 'Save & Continue'}
+              {isSaving ? 'Saving…' : 'Save & Continue'}
             </button>
           </div>
         </form>

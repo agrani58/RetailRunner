@@ -1,86 +1,132 @@
-// src/hooks/useWebSockets.js
-import { useEffect, useRef, useState } from 'react';
-import { getAccessToken, isTokenExpired, refreshToken } from '../utils/storage';
+// useWebSockets.js
+// WebSocket is used ONLY for order bot status logs in the chat interface.
+// It NEVER clears auth storage or redirects on failure — auth is handled
+// entirely by HTTP tokens in useAuth.js.
 
-export function useWebSocket(onMessage) {
+import { useEffect, useRef, useCallback, useState } from 'react';
+import { getAccessToken, isTokenExpired } from '../utils/storage';
+
+const WS_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000')
+  .replace(/^http/, 'ws');
+
+const INITIAL_DELAY = 2_000;
+const MAX_DELAY     = 60_000;
+const MAX_RETRIES   = 10;
+
+function useWebSocketHook(onMessage) {
   const [isConnected, setIsConnected] = useState(false);
-  const wsRef = useRef(null);
-  const reconnectTimeoutRef = useRef(null);
-  const reconnectAttemptsRef = useRef(0);
-  const maxReconnectAttempts = 10;
-  const baseDelay = 1000; // 1 second
+  const wsRef        = useRef(null);
+  const retryTimer   = useRef(null);
+  const retryCount   = useRef(0);
+  const isMounted    = useRef(true);
+  const onMessageRef = useRef(onMessage);
 
-  const connect = async () => {
-    // Stop if we've exceeded max attempts
-    if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
-      console.log('WebSocket: Max reconnection attempts reached, giving up.');
-      return;
+  useEffect(() => { onMessageRef.current = onMessage; }, [onMessage]);
+
+  const clearRetryTimer = () => {
+    if (retryTimer.current) {
+      clearTimeout(retryTimer.current);
+      retryTimer.current = null;
     }
+  };
 
-    // Get a valid token (refresh if needed)
-    let token = getAccessToken();
-    if (!token) {
-      console.log('WebSocket: No token, cannot connect.');
-      return;
-    }
-
-    if (isTokenExpired(token)) {
-      try {
-        console.log('WebSocket: Token expired, refreshing...');
-        const newTokens = await refreshToken();
-        token = newTokens.access_token;
-      } catch (error) {
-        console.error('WebSocket: Token refresh failed, cannot connect.', error);
-        return;
+  const closeSocket = useCallback(() => {
+    if (wsRef.current) {
+      wsRef.current.onopen    = null;
+      wsRef.current.onmessage = null;
+      wsRef.current.onerror   = null;
+      wsRef.current.onclose   = null;
+      if (wsRef.current.readyState < WebSocket.CLOSING) {
+        wsRef.current.close(1000, 'cleanup');
       }
+      wsRef.current = null;
+    }
+    setIsConnected(false);
+  }, []);
+
+  const connect = useCallback(() => {
+    if (!isMounted.current) return;
+
+    const token = getAccessToken();
+
+    // If no token or token is expired, don't attempt WS — just retry later.
+    // We do NOT clear storage or redirect. Auth is HTTP's responsibility.
+    if (!token || isTokenExpired(token)) {
+      retryCount.current += 1;
+      if (retryCount.current <= MAX_RETRIES) {
+        const delay = Math.min(INITIAL_DELAY * 2 ** retryCount.current, MAX_DELAY);
+        retryTimer.current = setTimeout(connect, delay);
+      }
+      return;
     }
 
-    const ws = new WebSocket(`ws://localhost:8000/ws?token=${token}`);
+    closeSocket();
+
+    let ws;
+    try {
+      ws = new WebSocket(`${WS_BASE}/ws?token=${token}`);
+    } catch (err) {
+      // WebSocket construction failed (bad URL etc.) — retry silently
+      retryCount.current += 1;
+      if (retryCount.current <= MAX_RETRIES) {
+        const delay = Math.min(INITIAL_DELAY * 2 ** retryCount.current, MAX_DELAY);
+        retryTimer.current = setTimeout(connect, delay);
+      }
+      return;
+    }
+
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log('WebSocket connected');
+      if (!isMounted.current) { ws.close(); return; }
       setIsConnected(true);
-      reconnectAttemptsRef.current = 0; // reset on successful connection
+      retryCount.current = 0;
     };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (onMessage) onMessage(data);
-      } catch (err) {
-        console.error('Failed to parse WebSocket message', err);
+        onMessageRef.current?.(data);
+      } catch {
+        // Ignore malformed frames
       }
+    };
+
+    ws.onerror = () => {
+      // Handled in onclose — no action needed here
     };
 
     ws.onclose = (event) => {
-      console.log(`WebSocket disconnected (code ${event.code}), reconnecting...`);
+      if (!isMounted.current) return;
       setIsConnected(false);
-      wsRef.current = null;
 
-      // If closed abnormally (not 1000 = normal), attempt reconnect
-      if (event.code !== 1000) {
-        const delay = baseDelay * Math.pow(2, reconnectAttemptsRef.current);
-        reconnectTimeoutRef.current = setTimeout(() => {
-          reconnectAttemptsRef.current += 1;
-          connect();
-        }, delay);
-      }
-    };
+      // Never clear storage, never redirect — just retry with backoff
+      retryCount.current += 1;
+      if (retryCount.current > MAX_RETRIES) return;
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error', error);
-      ws.close(); // will trigger onclose
+      const delay = Math.min(INITIAL_DELAY * 2 ** (retryCount.current - 1), MAX_DELAY);
+      retryTimer.current = setTimeout(connect, delay);
     };
-  };
+  }, [closeSocket]);
 
   useEffect(() => {
+    isMounted.current = true;
     connect();
     return () => {
-      if (wsRef.current) wsRef.current.close(1000, 'Component unmount');
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+      isMounted.current = false;
+      clearRetryTimer();
+      closeSocket();
     };
+  }, [connect, closeSocket]);
+
+  const sendMessage = useCallback((data) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify(data));
+    }
   }, []);
 
-  return { isConnected };
+  return { isConnected, sendMessage };
 }
+
+export const useWebSocket = useWebSocketHook;
+export default useWebSocketHook;

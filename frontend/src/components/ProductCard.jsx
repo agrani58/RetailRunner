@@ -1,91 +1,137 @@
-// frontend/src/components/ProductCard.jsx
-import React, { useState } from "react";
+// ProductCard.jsx
+import React, { useState, useEffect } from "react";
+import {
+  addToWishlist,
+  removeFromWishlist,
+  getWishlist,
+} from "../api/wishlist";
 import "../styles/ProductCard.css";
 
-const ProductCard = ({ product, onBuyNow }) => {  // ← add onBuyNow prop
+const ProductCard = ({ product, onBuyNow, hideHeart }) => {
+  // Guard against undefined product (e.g., from ProfilePage)
+  if (!product) {
+    return null; // or return a placeholder, but null prevents rendering
+  }
+
   const [imageError, setImageError] = useState(false);
-  
-  if (!product) return null;
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
-  // Get the best possible image URL from product data
-  const getImageUrl = () => {
-    const possibleUrls = [
-      product.image_url,
-      product.image,
-      product.img,
-      product.thumbnail,
-      product.photo
-    ].filter(url => url && typeof url === "string" && url.trim() !== "");
-    
-    return possibleUrls.length > 0 ? possibleUrls[0] : null;
+  useEffect(() => {
+    if (hideHeart) return; // skip wishlist check if heart is hidden
+
+    // Ensure product.id exists before checking wishlist
+    if (!product.id) return;
+
+    const checkWishlist = async () => {
+      try {
+        const wishlist = await getWishlist();
+        const found = wishlist.find(
+          (item) => String(item.product_id) === String(product.id)
+        );
+        setIsWishlisted(!!found);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    checkWishlist();
+  }, [product.id, hideHeart]); // product.id is now safe because of early return
+
+  const toggleWishlist = async (e) => {
+    e.stopPropagation();
+    try {
+      if (isWishlisted) {
+        await removeFromWishlist(product.id);
+        setIsWishlisted(false);
+      } else {
+        await addToWishlist({
+          id: Number(product.id),
+          name: product.name,
+          store: product.store,
+        });
+        setIsWishlisted(true);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const imageUrl = getImageUrl();
-
-  const handleBuyClick = (e) => {
-    e.stopPropagation(); // prevent card click if you have one
-    onBuyNow(product);
-  };
+  const imageUrl =
+    product.image_url ||
+    product.image ||
+    product.thumbnail ||
+    product.photo ||
+    null;
 
   return (
-    <div className="product-card-simple">
-      {/* IMAGE CONTAINER */}
-      <div className="product-image-container-simple">
-        {imageUrl ? (
-          <>
-            <img
-              src={imageUrl}
-              alt={product.name || "Product image"}
-              className={`product-image-simple ${imageError ? 'image-error' : ''}`}
-              loading="lazy"
-              onError={() => setImageError(true)}
-              onLoad={() => setImageError(false)}
+    <div className="product-card">
+      {/* Wishlist button (hidden if hideHeart is true) */}
+      {!hideHeart && (
+        <button
+          className={`wishlist-btn ${isWishlisted ? "filled" : ""}`}
+          onClick={toggleWishlist}
+        >
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+                 2 5.42 4.42 3 7.5 3
+                 c1.74 0 3.41.81 4.5 2.09
+                 C13.09 3.81 14.76 3 16.5 3
+                 19.58 3 22 5.42 22 8.5
+                 c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              fill={isWishlisted ? "currentColor" : "none"}
+              stroke="currentColor"
+              strokeWidth="1.5"
             />
-            <div className="store-badge-simple">
-              {product.store || "Store"}
-            </div>
-          </>
+          </svg>
+        </button>
+      )}
+
+      {/* Image */}
+      <div className="product-image-wrapper">
+        {imageUrl && !imageError ? (
+          <img
+            src={imageUrl}
+            alt={product.name}
+            className="product-image"
+            loading="lazy"
+            onError={() => setImageError(true)}
+          />
         ) : (
-          <div className="no-image-placeholder">
-            <div className="no-image-icon">🖼️</div>
-            <div className="no-image-text">No Image</div>
-            <div className="no-image-store">{product.store || "Store"}</div>
-          </div>
+          <div className="image-placeholder">🖼️</div>
         )}
+
+        <div className="store-badge">
+          {product.store || "Store"}
+        </div>
       </div>
 
-      {/* PRODUCT INFO */}
-      <div className="product-info-simple">
-        <h3 className="product-name-simple">
+      {/* Content */}
+      <div className="product-content">
+        <div className="product-title">
           {product.name || "Unnamed Product"}
-        </h3>
-        
-        <div className="product-category-simple">
-          {product.category || "Uncategorized"}
-        </div>
-        
-        <div className="product-description-simple">
-          {product.description ? 
-            (product.description.length > 80 ? 
-              `${product.description.substring(0, 80)}...` : 
-              product.description) : 
-            "No description available"}
         </div>
 
-        <div className="product-footer-simple">
-          <div className="product-price-simple">
-            ${product.price ? Number(product.price).toFixed(2) : "0.00"}
+        <div className="product-category">
+          {product.category || "Uncategorized"}
+        </div>
+
+        <div className="product-description">
+          {product.description || "No description available"}
+        </div>
+
+        <div className="product-footer">
+          <div className="product-price">
+            ${Number(product.price || 0).toFixed(2)}
           </div>
-          
-          <div className="product-rating-simple">
+
+          <div className="product-rating">
             ⭐ {product.rating || "0.0"} ({product.reviews || 0})
           </div>
         </div>
 
-        {/* NEW: BUY NOW BUTTON */}
-        <button 
-          className="buy-now-btn"
-          onClick={handleBuyClick}
+        <button
+          className="buy-btn"
+          onClick={() => onBuyNow(product)}
         >
           Buy Now
         </button>

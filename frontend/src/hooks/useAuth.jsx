@@ -1,188 +1,229 @@
-import { useState, useEffect, useContext, createContext } from "react";
-import { useNavigate } from "react-router-dom";
+// frontend/src/hooks/useAuth.js
 import {
-  login as apiLogin,
-  signup as apiSignup,
-  logout as apiLogout,
-  refreshAccessToken,
-  getCurrentUser,
-} from "../api/auth";
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from 'react';
 import {
-  setTokens,
-  clearTokens,
   getAccessToken,
   getRefreshToken,
-  setUser,
-  getUser,
-  clearUser,
-} from "../utils/storage";
+  getStoredUser,
+  setAccessToken,
+  setRefreshToken,
+  setStoredUser,
+  clearStorage,
+  refreshToken as doRefreshToken,
+  isTokenExpired,
+} from '../utils/storage';
+import { clearMessages } from '../utils/chatCache';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUserState] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [showProfileModal, setShowProfileModal] = useState(false); // <-- new
-  const navigate = useNavigate();
+export function AuthProvider({ children }) {
+  const [user,             setUser]             = useState(null);
+  const [isAuthenticated,  setIsAuthenticated]  = useState(false);
+  const [loading,          setLoading]          = useState(true);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const refreshTimerRef = useRef(null);
 
-  // Helper to load profile from localStorage for a given email
-  const loadProfile = (email) => {
-    if (!email) return {};
-    const saved = localStorage.getItem(`user_profile_${email}`);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Failed to parse profile", e);
-      }
-    }
-    return {};
-  };
-
-  // Helper to check if profile exists for current user
-  const profileExists = (email) => {
-    if (!email) return false;
-    const saved = localStorage.getItem(`user_profile_${email}`);
-    if (!saved) return false;
+  // ── Proactive token refresh ─────────────────────────────────────────
+  const scheduleRefresh = useCallback((accessToken) => {
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     try {
-      JSON.parse(saved);
-      return true;
+      const payload = JSON.parse(atob(accessToken.split('.')[1]));
+      const expiresIn = payload.exp * 1000 - Date.now();
+      const delay = Math.max(expiresIn - 60_000, 5_000);
+      refreshTimerRef.current = setTimeout(async () => {
+        try {
+          const newToken = await doRefreshToken();
+          if (newToken) scheduleRefresh(newToken);
+        } catch {
+          // silent
+        }
+      }, delay);
     } catch {
-      return false;
+      // ignore
     }
-  };
+  }, []);
 
-  // Merge user data with profile from localStorage
-  const mergeWithProfile = (userData) => {
-    if (!userData || !userData.email) return userData;
-    const profile = loadProfile(userData.email);
-    return { ...userData, ...profile };
-  };
-
-  // Restore session on app start
+  // ── Restore session on mount ────────────────────────────────────────
   useEffect(() => {
-    const restoreSession = async () => {
-      const accessToken = getAccessToken();
-      const refreshToken = getRefreshToken();
-      const storedUser = getUser();
+    const restore = async () => {
+      const storedToken = getAccessToken();
+      const storedUser  = getStoredUser();
 
-      if (!accessToken || !refreshToken || !storedUser) {
+      if (!storedToken || !storedUser) {
+        setLoading(false);
+        return;
+      }
+
+      if (!isTokenExpired(storedToken)) {
+        setUser(storedUser);
+        setIsAuthenticated(true);
+        scheduleRefresh(storedToken);
+        setLoading(false);
+        return;
+      }
+
+      const rt = getRefreshToken();
+      if (!rt) {
+        clearStorage();
         setLoading(false);
         return;
       }
 
       try {
-        const userData = await getCurrentUser(accessToken);
-        const mergedUser = mergeWithProfile(userData);
-        setUserState(mergedUser);
-        setUser(mergedUser);
-      } catch {
-        try {
-          const refreshData = await refreshAccessToken(refreshToken);
-          const { access_token, refresh_token, user_data } = refreshData;
-          setTokens(access_token, refresh_token);
-          const mergedUser = mergeWithProfile(user_data);
-          setUser(mergedUser);
-          setUserState(mergedUser);
-        } catch {
-          clearTokens();
-          clearUser();
-          setUserState(null);
+        const newToken = await doRefreshToken();
+        if (newToken) {
+          setUser(storedUser);
+          setIsAuthenticated(true);
+          scheduleRefresh(newToken);
+        } else {
+          clearStorage();
         }
+      } catch {
+        clearStorage();
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
-    restoreSession();
-  }, []);
+    restore();
 
-  // ✅ Login with mandatory profile check
-  const login = async (email, password, rememberMe) => {
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    };
+  }, [scheduleRefresh]);
+
+  // ── Login ───────────────────────────────────────────────────────────
+  const login = useCallback(async (email, password) => {
     try {
-      const data = await apiLogin(email, password);
-      const { access_token, refresh_token, user_data } = data;
+      const response = await fetch(`${API_URL}/login`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password }),
+      });
 
-      const mergedUser = mergeWithProfile(user_data);
-
-      setTokens(access_token, refresh_token);
-      setUser(mergedUser);
-      setUserState(mergedUser);
-
-      if (rememberMe) localStorage.setItem("last_used_email", email);
-      else localStorage.removeItem("last_used_email");
-
-      navigate("/");
-
-      // If profile does not exist, force the modal
-      if (!profileExists(user_data.email)) {
-        setShowProfileModal(true);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        return { success: false, error: err.detail || 'Invalid email or password' };
       }
 
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.detail || "Login failed",
+      const data = await response.json();
+      const { access_token, refresh_token, user_data } = data;
+
+      setAccessToken(access_token);
+      if (refresh_token) setRefreshToken(refresh_token);
+
+      const existing = getStoredUser() || {};
+      const userData = {
+        id:         user_data?.id        ?? user_data?.user_id,
+        email:      user_data?.email     ?? email,
+        name:       existing.name        || user_data?.name        || '',
+        phone:      existing.phone       || user_data?.phone       || '',
+        address:    existing.address     || user_data?.address     || '',
+        city:       existing.city        || user_data?.city        || '',
+        postalCode: existing.postalCode  || user_data?.postalCode  || '',
+        country:    existing.country     || user_data?.country     || '',
       };
-    }
-  };
 
-  const signup = async (email, password) => {
-    try {
-      await apiSignup(email, password);
-      navigate("/login", { state: { email } });
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.response?.data?.detail || "Signup failed" };
-    }
-  };
+      setStoredUser(userData);
+      setUser(userData);
+      setIsAuthenticated(true);
+      scheduleRefresh(access_token);
+      localStorage.setItem('last_used_email', email);
 
-  const logout = async () => {
-    const accessToken = getAccessToken();
-    const refreshToken = getRefreshToken();
-    try {
-      if (refreshToken && accessToken) await apiLogout(refreshToken, accessToken);
-    } catch (e) {
-      console.error("Logout API error", e);
+      const profileComplete = !!(userData.name && userData.phone && userData.address);
+      if (!profileComplete) setShowProfileModal(true);
+
+      return { success: true, user: userData };
+    } catch (err) {
+      return { success: false, error: err.message || 'Login failed' };
+    }
+  }, [scheduleRefresh]);
+
+  // ── Logout ──────────────────────────────────────────────────────────
+  const logout = useCallback(async () => {
+    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+
+    const currentUserId = getStoredUser()?.id;
+    console.log('useAuth: logout called, currentUserId =', currentUserId);
+
+    const rt = getRefreshToken();
+    const at = getAccessToken();
+
+    if (rt && at) {
+      try {
+        await fetch(`${API_URL}/logout`, {
+          method:  'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${at}`,
+          },
+          body: JSON.stringify({ refresh_token: rt }),
+        });
+      } catch { /* ignore */ }
     }
 
-    clearTokens();
-    clearUser();
-    setUserState(null);
-    setShowProfileModal(false); // close modal on logout
-    navigate("/login");
-  };
-
-  // ✅ Update profile and close modal
-  const updateProfile = (profileData) => {
-    const updatedUser = { ...user, ...profileData };
-    setUserState(updatedUser);
-    setUser(updatedUser);
-    if (user?.email) {
-      localStorage.setItem(`user_profile_${user.email}`, JSON.stringify(profileData));
-    }
-    // Close the mandatory modal if it was open
+    clearStorage();
+    setUser(null);
+    setIsAuthenticated(false);
     setShowProfileModal(false);
-  };
 
-  const value = {
-    user,
-    login,
-    signup,
-    logout,
-    updateProfile,
-    isAuthenticated: !!user,
-    loading,
-    showProfileModal,      // <-- expose
-    setShowProfileModal,   // <-- expose (optional, for manual close after save)
-  };
+    // Clear chat message cache for this user
+    if (currentUserId != null) {
+      console.log('useAuth: clearing messages for user', currentUserId);
+      clearMessages(currentUserId);
+    } else {
+      console.log('useAuth: currentUserId is null, not clearing chat cache');
+    }
+  }, []);
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+  // ── updateUser — merge any fields into user state ───────────────────
+  const updateUser = useCallback((updates) => {
+    setUser((prev) => {
+      const updated = { ...prev, ...updates };
+      setStoredUser(updated);
+      return updated;
+    });
+  }, []);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within AuthProvider");
-  return context;
-};
+  // ── updateProfile — used by MandatoryProfileModal & ProfilePage ─────
+  const updateProfile = useCallback((profileData) => {
+    setUser((prev) => {
+      const updated = { ...prev, ...profileData };
+      setStoredUser(updated);
+      return updated;
+    });
+    setShowProfileModal(false);
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated,
+      loading,
+      showProfileModal,
+      setShowProfileModal,
+      login,
+      logout,
+      updateUser,
+      updateProfile,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
+  return ctx;
+}
+
+export default useAuth;

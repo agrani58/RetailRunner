@@ -9,6 +9,9 @@ from config import config
 
 logger = logging.getLogger(__name__)
 
+# PostgreSQL INTEGER max value
+_PG_INT_MAX = 2_147_483_647
+
 
 # ------------------------------------------------------------
 # Fetch from a single API with API key header
@@ -45,14 +48,20 @@ async def fetch_products_from_api(
 # Stable ID assignment
 # ------------------------------------------------------------
 def assign_product_id(product: Dict[str, Any], index: int) -> Dict[str, Any]:
-    """Ensure each product has a consistent unique ID based on name + source."""
+    """
+    Ensure each product has a consistent unique ID based on name + source.
+    Result is always within PostgreSQL INTEGER range (1 to 2,147,483,647).
+    """
     p = product.copy()
     name = p.get("name", "")
     source = p.get("source", "unknown")
     unique_str = f"{name}_{source}_{index}"
-    hash_val = hashlib.md5(unique_str.encode()).hexdigest()[:12]
+    hash_bytes = hashlib.md5(unique_str.encode()).digest()
+    # Take first 4 bytes as unsigned int, then mod to stay within pg INTEGER range
+    raw = int.from_bytes(hash_bytes[:4], "big")
+    safe_id = (raw % _PG_INT_MAX) + 1  # keep in [1, PG_INT_MAX]
 
-    p["id"] = int(hash_val, 16)
+    p["id"] = safe_id
     p["original_id"] = product.get("id", index + 1)
     return p
 

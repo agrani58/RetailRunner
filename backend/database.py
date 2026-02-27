@@ -62,11 +62,45 @@ def init_db():
             )
         """)
         
+        # NEW: User orders table (permanent order history)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS user_orders (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+                product_id INTEGER NOT NULL,
+                product_name VARCHAR(255) NOT NULL,
+                product_source VARCHAR(255) NOT NULL,
+                store_frontend_url VARCHAR(255),
+                order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                delivery_date VARCHAR(100),
+                order_reference VARCHAR(100),
+                reviewed BOOLEAN DEFAULT FALSE
+            )
+        """)
+        
+        # NEW: Wishlist table
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS wishlist (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+                product_id INTEGER NOT NULL,
+                product_name VARCHAR(255) NOT NULL,
+                product_source VARCHAR(255) NOT NULL,
+                store_name VARCHAR(255),
+                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, product_id)
+            )
+        """)
+        
         # Indexes
         cur.execute("CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires ON refresh_tokens(expires_at)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_order_confirmations_user ON order_confirmations(user_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_order_confirmations_delivered ON order_confirmations(delivered)")
+        
+        # NEW: Indexes for user_orders and wishlist
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_user_orders_user ON user_orders(user_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist(user_id)")
         
         conn.commit()
         print("Database tables initialized successfully")
@@ -315,6 +349,141 @@ def revoke_refresh_token(user_id: int):
     except Exception as e:
         conn.rollback()
         print(f"Revoke refresh token error: {e}")
+        return False
+    finally:
+        cur.close()
+        conn.close()
+
+# ---------- NEW FUNCTIONS FOR USER ORDERS ----------
+def add_user_order(user_id: int, product_id: int, product_name: str, product_source: str,
+                   store_frontend_url: str = None, delivery_date: str = None,
+                   order_reference: str = None) -> bool:
+    """Add a product to the user's permanent order history."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO user_orders (user_id, product_id, product_name, product_source,
+                                     store_frontend_url, delivery_date, order_reference)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (user_id, product_id, product_name, product_source, store_frontend_url,
+              delivery_date, order_reference))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Error adding user order: {e}")
+        return False
+    finally:
+        cur.close()
+        conn.close()
+
+def get_user_orders(user_id: int) -> list:
+    """Retrieve all orders for a user."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT id, product_id, product_name, product_source, store_frontend_url,
+                   order_date, delivery_date, order_reference, reviewed
+            FROM user_orders
+            WHERE user_id = %s
+            ORDER BY order_date DESC
+        """, (user_id,))
+        rows = cur.fetchall()
+        return [dict(row) for row in rows] if rows else []
+    except Exception as e:
+        print(f"Error fetching user orders: {e}")
+        return []
+    finally:
+        cur.close()
+        conn.close()
+
+def mark_order_reviewed(order_id: int) -> bool:
+    """Mark a specific order as reviewed."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("UPDATE user_orders SET reviewed = TRUE WHERE id = %s", (order_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Error marking order reviewed: {e}")
+        return False
+    finally:
+        cur.close()
+        conn.close()
+
+# ---------- NEW FUNCTIONS FOR WISHLIST ----------
+def add_to_wishlist(user_id: int, product_id: int, product_name: str,
+                    product_source: str, store_name: str = None) -> bool:
+    """Add a product to the user's wishlist."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO wishlist (user_id, product_id, product_name, product_source, store_name)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (user_id, product_id) DO NOTHING
+        """, (user_id, product_id, product_name, product_source, store_name))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(f"Error adding to wishlist: {e}")
+        return False
+    finally:
+        cur.close()
+        conn.close()
+
+def remove_from_wishlist(user_id: int, product_id: int) -> bool:
+    """Remove a product from the user's wishlist."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM wishlist WHERE user_id = %s AND product_id = %s",
+                    (user_id, product_id))
+        conn.commit()
+        return cur.rowcount > 0
+    except Exception as e:
+        conn.rollback()
+        print(f"Error removing from wishlist: {e}")
+        return False
+    finally:
+        cur.close()
+        conn.close()
+
+def get_wishlist(user_id: int) -> list:
+    """Retrieve all items in the user's wishlist."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT id, product_id, product_name, product_source, store_name, added_at
+            FROM wishlist
+            WHERE user_id = %s
+            ORDER BY added_at DESC
+        """, (user_id,))
+        rows = cur.fetchall()
+        return [dict(row) for row in rows] if rows else []
+    except Exception as e:
+        print(f"Error fetching wishlist: {e}")
+        return []
+    finally:
+        cur.close()
+        conn.close()
+
+def is_in_wishlist(user_id: int, product_id: int) -> bool:
+    """Check if a product is already in the user's wishlist."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT 1 FROM wishlist WHERE user_id = %s AND product_id = %s",
+                    (user_id, product_id))
+        return cur.fetchone() is not None
+    except Exception as e:
+        print(f"Error checking wishlist: {e}")
         return False
     finally:
         cur.close()

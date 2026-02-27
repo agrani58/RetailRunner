@@ -1,71 +1,124 @@
-// frontend/src/components/Chat.jsx (inside the product list mapping)
+// frontend/src/components/Chat.jsx
 import React, { useState, useEffect, useRef } from "react";
-import Message from "./Message";
-import ProductCard from "./ProductCard";
 import "../styles/Chat.css";
+import ProductCard from "./ProductCard";
 
-export default function Chat({ messages, onSend, onBuyNow }) {  // ← add onBuyNow prop
-  const [input, setInput] = useState("");
-  const bottomRef = useRef(null);
+export default function Chat({
+  messages,
+  onSend,
+  onBuyNow,
+  awaitingPaymentConfirm = false,
+  onConfirmPayment,
+}) {
+  const [inputValue, setInputValue] = useState("");
+  const chatRef    = useRef(null);
   const textareaRef = useRef(null);
 
-  const send = () => {
-    if (!input.trim()) return;
-    onSend(input);
-    setInput("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
-  };
+  }, [messages, awaitingPaymentConfirm]);
 
+  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
     }
-  }, [input]);
+  }, [inputValue]);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages]);
+  const handleSend = () => {
+    if (inputValue.trim()) {
+      onSend(inputValue);
+      setInputValue("");
+      if (textareaRef.current) textareaRef.current.style.height = "auto";
+    }
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      send();
+      handleSend();
     }
   };
 
   return (
     <div className="chat-wrapper">
-      <div className="chat">
+      <div className="chat" ref={chatRef}>
         {messages.map((msg, i) => {
-          if (msg.role === "products" || msg.products) {
-            const productsToShow = msg.products || [];
+          /* ── Product grid ── */
+          if (msg.role === "products") {
             return (
               <div key={i} className="message-row product-row">
                 <div className="product-list">
-                  {productsToShow.map((p, j) => (
-                    <ProductCard 
-                      key={`${p.id}-${p.store}-${j}`} 
-                      product={p} 
-                      onBuyNow={onBuyNow}   // ← pass callback
+                  {msg.products.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onBuyNow={onBuyNow}
                     />
                   ))}
                 </div>
               </div>
             );
           }
+
+          /* ── Order confirmation ── */
+          if (msg.role === "order_confirmation") {
+            return (
+              <div key={i} className="message-row assistant">
+                <div className="bubble bubble--confirmation">
+                  {msg.text}
+                </div>
+              </div>
+            );
+          }
+
+          /* ── Bot status log ── */
+          if (msg.role === "bot_status") {
+            return (
+              <div key={i} className="message-row bot-status">
+                <div className="bubble bubble--status">
+                  <span className="bot-status-icon">🤖</span>
+                  {msg.text}
+                </div>
+              </div>
+            );
+          }
+
+          /* ── Regular assistant / user messages ── */
+          const cleanText = (msg.text || "")
+            .replace(/\.\s*Order ID:\s*\d+/gi, ".")
+            .trim();
+
           return (
-            <Message
-              key={i}
-              role={msg.role}
-              text={msg.text}
-              intentBadge={msg.intent_badge}
-            />
+            <div key={i} className={`message-row ${msg.role}`}>
+              <div className="bubble">{cleanText}</div>
+            </div>
           );
         })}
-        <div ref={bottomRef} />
+
+        {/* ── Confirm Payment button ── */}
+        {awaitingPaymentConfirm && (
+          <div className="message-row bot-status">
+            <div className="bubble bubble--status bubble--payment">
+              <span className="bot-status-icon">💳</span>
+              <span>
+                Please fill in your <strong>shipping address</strong> and{" "}
+                <strong>payment details</strong> in the browser window, then
+                click <em>Confirm Payment</em> below to complete your order.
+              </span>
+              <button
+                className="confirm-payment-btn"
+                onClick={onConfirmPayment}
+              >
+                ✅ Confirm Payment
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="chat-input-wrapper">
@@ -73,13 +126,15 @@ export default function Chat({ messages, onSend, onBuyNow }) {  // ← add onBuy
           <textarea
             ref={textareaRef}
             className="chat-input"
-            placeholder="Search products, brands, or deals…"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask about products…"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             rows={1}
           />
-          <button className="chat-send" onClick={send}>↑</button>
+          <button className="chat-send" onClick={handleSend}>
+            ↑
+          </button>
         </div>
       </div>
     </div>

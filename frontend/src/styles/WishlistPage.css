@@ -1,0 +1,176 @@
+.wl-page {
+  padding: 28px 24px 60px;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.wl-header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.wl-header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.wl-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-soft);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+/* ============================= */
+/* GRID – left-aligned           */
+/* ============================= */
+.wl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 240px));
+  gap: 18px;
+  justify-content: start;
+  align-items: start;
+}
+
+/* Card wrapper – position:relative so our trash overlays the card */
+.wl-card-wrapper {
+  position: relative;
+}
+
+/*
+  HIDE the heart / wishlist button that ProductCard renders internally.
+  It stacks under our trash button. We hide every variant of it:
+  - by common class names
+  - by aria-label
+  - by being any absolute-positioned button inside .product-card
+    that is NOT our .wl-remove-btn
+*/
+.wl-card-wrapper .product-card .wishlist-btn,
+.wl-card-wrapper .product-card .heart-btn,
+.wl-card-wrapper .product-card .pc-heart,
+.wl-card-wrapper .product-card .pc-wishlist,
+.wl-card-wrapper .product-card button[class*="wish"],
+.wl-card-wrapper .product-card button[class*="heart"],
+.wl-card-wrapper .product-card button[class*="Heart"],
+.wl-card-wrapper .product-card button[class*="favorite"],
+.wl-card-wrapper .product-card button[aria-label*="wishlist" i],
+.wl-card-wrapper .product-card button[aria-label*="heart" i],
+.wl-card-wrapper .product-card button[aria-label*="favorite" i],
+.wl-card-wrapper .product-card button[aria-label*="Add to" i] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/*
+  Nuclear option: hide every absolutely-positioned button inside the
+  product-card image area EXCEPT our own .wl-remove-btn.
+  This catches whatever class name ProductCard actually uses.
+*/
+.wl-card-wrapper .product-card-image button,
+.wl-card-wrapper .product-card .card-image button,
+.wl-card-wrapper .product-card .img-wrapper button,
+.wl-card-wrapper .product-card .image-container button {
+  display: none !important;
+}
+
+/*
+  Trash button – top-right corner, sits above the card image.
+  z-index 30 keeps it above any leftover card elements.
+*/
+.wl-remove-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  border: none;
+  color: white;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 30;
+  transition: background 0.2s, transform 0.15s;
+  backdrop-filter: blur(4px);
+}
+
+.wl-remove-btn:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.9);
+  transform: scale(1.08);
+}
+
+.wl-remove-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wl-mini-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: wl-spin 0.6s linear infinite;
+}
+
+@keyframes wl-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty state */
+.wl-empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.wl-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.wl-cta {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 24px;
+  background: var(--accent);
+  color: white;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Loading */
+.wl-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+}
+
+.wl-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: wl-spin 0.8s linear infinite;
+  margin-bottom: 16px;
+}
+
+/* Back link */
+.wl-back {
+  display: inline-block;
+  margin-top: 36px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
